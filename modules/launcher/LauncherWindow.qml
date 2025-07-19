@@ -81,4 +81,13 @@ PanelWindow {
             GlobalStates.launcherOpen = false;
         }
     }
+    
+    Connections {
+        target: GlobalStates
+        function onLauncherOpenChanged() {
+            if (GlobalStates.launcherOpen) {
+                launcher.clearSearch();
+            }
+        }
+    }
 }

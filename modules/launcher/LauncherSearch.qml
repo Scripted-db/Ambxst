@@ -11,6 +11,13 @@ Rectangle {
     property bool showResults: searchText.length > 0
     property int selectedIndex: -1
     signal itemSelected
+    
+    function clearSearch() {
+        searchInput.text = "";
+        searchText = "";
+        selectedIndex = -1;
+        searchInput.forceActiveFocus();
+    }
 
     implicitWidth: 500
     implicitHeight: mainLayout.implicitHeight + 32
@@ -240,6 +247,6 @@ Rectangle {
     }
 
     Component.onCompleted: {
-        searchInput.forceActiveFocus();
+        clearSearch();
     }
 }
