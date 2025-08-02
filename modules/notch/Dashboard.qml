@@ -29,7 +29,7 @@ Item {
         spacing: 8
 
         Repeater {
-            model: ["Widgets", "Pins", "Kanban"]
+            model: ["Widgets", "Pins", "Kanban", "Wallpapers"]
 
             Button {
                 required property int index
@@ -134,7 +134,7 @@ Item {
                 const threshold = (currentItem ? currentItem.implicitWidth : 400) / 2;
 
                 if (x > threshold)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, 2);
+                    root.state.currentTab = Math.min(root.state.currentTab + 1, 3);
                 else if (x < -threshold)
                     root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
             }
@@ -144,7 +144,7 @@ Item {
                 const threshold = (currentItem ? currentItem.implicitWidth : 400) / 10;
 
                 if (x > threshold)
-                    root.state.currentTab = Math.min(root.state.currentTab + 1, 2);
+                    root.state.currentTab = Math.min(root.state.currentTab + 1, 3);
                 else if (x < -threshold)
                     root.state.currentTab = Math.max(root.state.currentTab - 1, 0);
                 else
@@ -168,6 +168,11 @@ Item {
                 // Quick Settings Tab
                 DashboardPane {
                     sourceComponent: quickSettingsComponent
+                }
+
+                // Wallpapers Tab
+                DashboardPane {
+                    sourceComponent: wallpapersComponent
                 }
             }
 
@@ -210,6 +215,11 @@ Item {
     Component {
         id: quickSettingsComponent
         QuickSettingsTab {}
+    }
+
+    Component {
+        id: wallpapersComponent
+        WallpapersTab {}
     }
 
     component DashboardPane: Loader {
@@ -511,6 +521,114 @@ Item {
             NumberAnimation {
                 duration: 100
                 easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    component WallpapersTab: Rectangle {
+        color: "transparent"
+        implicitWidth: 400
+        implicitHeight: 300
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: 16
+            spacing: 12
+
+            Text {
+                text: "Wallpapers"
+                color: Colors.adapter.onSurface
+                font.family: Styling.defaultFont
+                font.pixelSize: 16
+                font.weight: Font.Bold
+            }
+
+            ScrollView {
+                width: parent.width
+                height: parent.height - parent.children[0].height - parent.spacing
+
+                GridView {
+                    id: wallpaperGrid
+                    cellWidth: 120
+                    cellHeight: 90
+                    model: GlobalStates.wallpaperManager ? GlobalStates.wallpaperManager.wallpaperPaths : []
+
+                    delegate: Rectangle {
+                        width: wallpaperGrid.cellWidth - 8
+                        height: wallpaperGrid.cellHeight - 8
+                        radius: 8
+                        color: Colors.adapter.surface
+                        border.color: isCurrentWallpaper ? Colors.adapter.primary : Colors.adapter.outline
+                        border.width: isCurrentWallpaper ? 2 : 1
+
+                        property bool isCurrentWallpaper: GlobalStates.wallpaperManager && 
+                            GlobalStates.wallpaperManager.currentIndex === index
+
+                        Behavior on border.color {
+                            ColorAnimation {
+                                duration: 200
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Image {
+                            anchors.fill: parent
+                            anchors.margins: 4
+                            source: "file://" + modelData
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            smooth: true
+                            clip: true
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: "transparent"
+                                radius: 4
+                                border.color: parent.parent.isCurrentWallpaper ? Colors.adapter.primary : "transparent"
+                                border.width: 1
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+
+                            onEntered: {
+                                if (!parent.isCurrentWallpaper) {
+                                    parent.color = Colors.adapter.surfaceContainerHigh;
+                                }
+                            }
+                            onExited: {
+                                if (!parent.isCurrentWallpaper) {
+                                    parent.color = Colors.adapter.surface;
+                                }
+                            }
+                            onPressed: parent.scale = 0.95
+                            onReleased: parent.scale = 1.0
+
+                            onClicked: {
+                                if (GlobalStates.wallpaperManager) {
+                                    GlobalStates.wallpaperManager.setWallpaperByIndex(index);
+                                }
+                            }
+                        }
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: 150
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: 100
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                    }
+                }
             }
         }
     }

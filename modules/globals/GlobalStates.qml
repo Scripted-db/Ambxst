@@ -32,6 +32,7 @@ Singleton {
     property bool dashboardOpen: false
     property bool workspaceShowNumbers: false
     property bool superReleaseMightTrigger: true
+    property var wallpaperManager: null
     onSuperReleaseMightTriggerChanged: {
         workspaceShowNumbersTimer.stop();
     }
