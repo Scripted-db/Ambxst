@@ -43,7 +43,7 @@ Item {
                     background: Rectangle {
                         color: root.state.currentTab === index ? Colors.adapter.primary : "transparent"
                         opacity: 0.1
-                        radius: Configuration.roundness
+                        radius: Configuration.roundness > 0 ? Configuration.roundness + 4 : 0
 
                         Behavior on color {
                             ColorAnimation {
@@ -98,7 +98,7 @@ Item {
             width: parent.width
             height: 300
 
-            radius: Configuration.roundness
+            radius: Configuration.roundness > 0 ? Configuration.roundness + 4 : 0
             color: Colors.adapter.surfaceContainer
             clip: true
 
