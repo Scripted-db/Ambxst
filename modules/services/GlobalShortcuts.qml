@@ -18,6 +18,7 @@ Item {
                 GlobalStates.launcherOpen = false;
             } else {
                 GlobalStates.dashboardOpen = false;
+                GlobalStates.overviewOpen = false;
                 GlobalStates.launcherOpen = true;
             }
         }
@@ -36,7 +37,27 @@ Item {
                 GlobalStates.dashboardOpen = false;
             } else {
                 GlobalStates.launcherOpen = false;
+                GlobalStates.overviewOpen = false;
                 GlobalStates.dashboardOpen = true;
+            }
+        }
+    }
+
+    GlobalShortcut {
+        id: overviewShortcut
+        appid: "ambyst"
+        name: "overview"
+        description: "Toggle window overview"
+
+        onPressed: {
+            console.log("Overview shortcut pressed");
+            // Toggle overview - si ya está abierto, se cierra; si no, abre overview y cierra otros
+            if (GlobalStates.overviewOpen) {
+                GlobalStates.overviewOpen = false;
+            } else {
+                GlobalStates.launcherOpen = false;
+                GlobalStates.dashboardOpen = false;
+                GlobalStates.overviewOpen = true;
             }
         }
     }

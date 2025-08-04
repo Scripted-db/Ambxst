@@ -8,6 +8,7 @@ import qs.modules.globals
 import qs.modules.theme
 import qs.modules.launcher
 import qs.config
+import "./overview"
 
 PanelWindow {
     id: notchPanel
@@ -26,11 +27,12 @@ PanelWindow {
     HyprlandFocusGrab {
         id: focusGrab
         windows: [notchPanel]
-        active: GlobalStates.launcherOpen || GlobalStates.dashboardOpen
+        active: GlobalStates.launcherOpen || GlobalStates.dashboardOpen || GlobalStates.overviewOpen
 
         onCleared: {
             GlobalStates.launcherOpen = false;
             GlobalStates.dashboardOpen = false;
+            GlobalStates.overviewOpen = false;
         }
     }
 
@@ -67,11 +69,16 @@ PanelWindow {
                 cursorShape: Qt.PointingHandCursor
 
                 onClicked: {
-                    // Toggle dashboard - si ya está abierto, se cierra; si no, abre dashboard y cierra launcher
+                    // Cycle through views: default -> dashboard -> overview -> launcher -> default
                     if (GlobalStates.dashboardOpen) {
                         GlobalStates.dashboardOpen = false;
-                    } else {
+                        GlobalStates.overviewOpen = true;
+                    } else if (GlobalStates.overviewOpen) {
+                        GlobalStates.overviewOpen = false;
+                        GlobalStates.launcherOpen = true;
+                    } else if (GlobalStates.launcherOpen) {
                         GlobalStates.launcherOpen = false;
+                    } else {
                         GlobalStates.dashboardOpen = true;
                     }
                 }
@@ -139,6 +146,33 @@ PanelWindow {
         }
     }
 
+    // Overview view component
+    Component {
+        id: overviewViewComponent
+        Item {
+            width: Math.max(overviewItem.implicitWidth, 600)
+            height: Math.max(overviewItem.implicitHeight, 300)
+
+            Overview {
+                id: overviewItem
+                anchors.fill: parent
+
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        GlobalStates.overviewOpen = false;
+                        event.accepted = true;
+                    }
+                }
+
+                Component.onCompleted: {
+                    Qt.callLater(() => {
+                        forceActiveFocus();
+                    });
+                }
+            }
+        }
+    }
+
     // Dashboard view component
     Component {
         id: dashboardViewComponent
@@ -199,18 +233,20 @@ PanelWindow {
         defaultViewComponent: defaultViewComponent
         launcherViewComponent: launcherViewComponent
         dashboardViewComponent: dashboardViewComponent
+        overviewViewComponent: overviewViewComponent
 
         // Handle global keyboard events
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Escape && (GlobalStates.launcherOpen || GlobalStates.dashboardOpen)) {
+            if (event.key === Qt.Key_Escape && (GlobalStates.launcherOpen || GlobalStates.dashboardOpen || GlobalStates.overviewOpen)) {
                 GlobalStates.launcherOpen = false;
                 GlobalStates.dashboardOpen = false;
+                GlobalStates.overviewOpen = false;
                 event.accepted = true;
             }
         }
     }
 
-    // Listen for launcher and dashboard state changes
+    // Listen for launcher, dashboard and overview state changes
     Connections {
         target: GlobalStates
         function onLauncherOpenChanged() {
@@ -235,6 +271,20 @@ PanelWindow {
         function onDashboardOpenChanged() {
             if (GlobalStates.dashboardOpen) {
                 notchContainer.stackView.push(dashboardViewComponent);
+                Qt.callLater(() => {
+                    notchPanel.requestActivate();
+                    notchPanel.forceActiveFocus();
+                });
+            } else {
+                if (notchContainer.stackView.depth > 1) {
+                    notchContainer.stackView.pop();
+                }
+            }
+        }
+
+        function onOverviewOpenChanged() {
+            if (GlobalStates.overviewOpen) {
+                notchContainer.stackView.push(overviewViewComponent);
                 Qt.callLater(() => {
                     notchPanel.requestActivate();
                     notchPanel.forceActiveFocus();

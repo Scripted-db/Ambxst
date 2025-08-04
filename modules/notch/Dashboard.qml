@@ -18,7 +18,7 @@ NotchAnimationBehavior {
     implicitHeight: mainLayout.implicitHeight
 
     // Usar el comportamiento estándar de animaciones del notch
-    visible: GlobalStates.dashboardOpen
+    isVisible: GlobalStates.dashboardOpen
 
     Column {
         id: mainLayout

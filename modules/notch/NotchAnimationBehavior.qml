@@ -6,11 +6,12 @@ Item {
     id: root
     
     // Propiedad para controlar la visibilidad con animaciones
-    property bool visible: false
+    property bool isVisible: false
     
     // Aplicar las animaciones estándar del notch
-    scale: visible ? 1.0 : 0.8
-    opacity: visible ? 1.0 : 0.0
+    scale: isVisible ? 1.0 : 0.8
+    opacity: isVisible ? 1.0 : 0.0
+    visible: opacity > 0
     
     Behavior on scale {
         NumberAnimation {

@@ -11,12 +11,13 @@ Item {
     property Component defaultViewComponent
     property Component launcherViewComponent
     property Component dashboardViewComponent
+    property Component overviewViewComponent
     property var stackView: stackViewInternal
     property bool isExpanded: stackViewInternal.currentItem !== stackViewInternal.initialItem
 
-    implicitWidth: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? Math.max(stackContainer.width + 40, 290) : 290
+    implicitWidth: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen || GlobalStates.overviewOpen) ? Math.max(stackContainer.width + 40, 290) : 290
     // implicitHeight: Math.max(stackContainer.height, 40)
-    implicitHeight: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen) ? Math.max(stackContainer.height, 40) : 40
+    implicitHeight: (GlobalStates.launcherOpen || GlobalStates.dashboardOpen || GlobalStates.overviewOpen) ? Math.max(stackContainer.height, 40) : 40
 
     Behavior on implicitWidth {
         NumberAnimation {

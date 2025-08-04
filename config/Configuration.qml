@@ -40,6 +40,13 @@ Singleton {
                 property bool alwaysShowNumbers: false
                 property bool showNumbers: false
             }
+
+            property JsonObject overview: JsonObject {
+                property int rows: 2
+                property int columns: 5
+                property real scale: 0.15
+                property real workspaceSpacing: 8
+            }
         }
     }
 
@@ -56,4 +63,7 @@ Singleton {
 
     // Workspace configuration
     property QtObject workspaces: loader.adapter.workspaces
+
+    // Overview configuration
+    property QtObject overview: loader.adapter.overview
 }
