@@ -55,6 +55,22 @@ Item {
         bottomLeftRadius: Configuration.roundness > 0 ? (GlobalStates.notchOpen ? Configuration.roundness + 20 : Configuration.roundness + 4) : 0
         bottomRightRadius: Configuration.roundness > 0 ? (GlobalStates.notchOpen ? Configuration.roundness + 20 : Configuration.roundness + 4) : 0
 
+        Behavior on bottomLeftRadius {
+            NumberAnimation {
+                duration: 250
+                easing.type: GlobalStates.notchOpen ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: GlobalStates.notchOpen ? 1.2 : 1.0
+            }
+        }
+
+        Behavior on bottomRightRadius {
+            NumberAnimation {
+                duration: 250
+                easing.type: GlobalStates.notchOpen ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: GlobalStates.notchOpen ? 1.2 : 1.0
+            }
+        }
+
         Item {
             id: stackContainer
             anchors.centerIn: parent

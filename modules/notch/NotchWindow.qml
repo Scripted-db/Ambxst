@@ -179,6 +179,20 @@ PanelWindow {
             shadowBlur: GlobalStates.notchOpen ? 2.0 : 1.0
             shadowColor: Colors.adapter.shadow
             shadowOpacity: GlobalStates.notchOpen ? 0.75 : 0.5
+
+            Behavior on shadowBlur {
+                NumberAnimation {
+                    duration: 250
+                    easing.type: GlobalStates.notchOpen ? Easing.OutBack : Easing.OutQuart
+                }
+            }
+
+            Behavior on shadowOpacity {
+                NumberAnimation {
+                    duration: 250
+                    easing.type: GlobalStates.notchOpen ? Easing.OutBack : Easing.OutQuart
+                }
+            }
         }
 
         defaultViewComponent: defaultViewComponent
