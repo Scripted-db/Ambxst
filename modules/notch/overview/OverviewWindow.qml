@@ -42,6 +42,7 @@ Item {
     y: initY
     width: targetWindowWidth
     height: targetWindowHeight
+    anchors.margins: 4
     z: atInitPosition ? 1 : 99999
 
     Drag.active: false
@@ -76,10 +77,10 @@ Item {
     Rectangle {
         id: windowPreview
         anchors.fill: parent
-        radius: Configuration.roundness * root.scale
-        color: pressed ? Colors.adapter.primaryContainer : hovered ? Colors.adapter.surfaceContainer : Colors.adapter.surface
-        border.color: Colors.adapter.outline
-        border.width: 1
+        radius: Configuration.roundness - 4
+        color: pressed ? Colors.adapter.surfaceContainerHighest : hovered ? Colors.adapter.surfaceContainer : Colors.adapter.surface
+        border.color: Colors.adapter.surfaceContainerHighest
+        border.width: 2
 
         Behavior on color {
             ColorAnimation {
