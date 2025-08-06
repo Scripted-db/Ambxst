@@ -60,7 +60,7 @@ Item {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            GlobalStates.overviewOpen = false;
+            Visibilities.setActiveModule("");
             event.accepted = true;
         } else if (event.key === Qt.Key_Left) {
             Hyprland.dispatch("workspace r-1");
@@ -126,7 +126,7 @@ Item {
                                 acceptedButtons: Qt.LeftButton
                                 onClicked: {
                                     if (overviewRoot.draggingTargetWorkspace === -1) {
-                                        GlobalStates.overviewOpen = false;
+                                        Visibilities.setActiveModule("");
                                         Hyprland.dispatch(`workspace ${workspaceValue}`);
                                     }
                                 }
@@ -222,7 +222,7 @@ Item {
                         }
                     }
                     onWindowClicked: {
-                        GlobalStates.overviewOpen = false;
+                        Visibilities.setActiveModule("");
                         Hyprland.dispatch(`focuswindow address:${windowData.address}`);
                     }
                     onWindowClosed: {

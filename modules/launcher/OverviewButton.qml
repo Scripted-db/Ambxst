@@ -1,5 +1,6 @@
 import QtQuick
 import qs.modules.globals
+import qs.modules.services
 import qs.config
 
 ToggleButton {
@@ -8,11 +9,9 @@ ToggleButton {
 
     onToggle: function () {
         if (GlobalStates.overviewOpen) {
-            GlobalStates.overviewOpen = false;
+            Visibilities.setActiveModule("");
         } else {
-            GlobalStates.dashboardOpen = false;
-            GlobalStates.launcherOpen = false;
-            GlobalStates.overviewOpen = true;
+            Visibilities.setActiveModule("overview");
         }
     }
 }
