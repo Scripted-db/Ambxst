@@ -284,7 +284,7 @@ PanelWindow {
             if (screenVisibilities.dashboard) {
                 notchContainer.stackView.push(dashboardViewComponent);
                 Qt.callLater(() => {
-                    notchPanel.requestActivate();
+                    notchPanel.activate();
                     notchPanel.forceActiveFocus();
                 });
             } else {
@@ -298,7 +298,7 @@ PanelWindow {
             if (screenVisibilities.overview) {
                 notchContainer.stackView.push(overviewViewComponent);
                 Qt.callLater(() => {
-                    notchPanel.requestActivate();
+                    notchPanel.activate();
                     notchPanel.forceActiveFocus();
                 });
             } else {

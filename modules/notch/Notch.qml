@@ -8,6 +8,8 @@ import qs.config
 Item {
     id: notchContainer
 
+    z: 1000
+
     property Component defaultViewComponent
     property Component launcherViewComponent
     property Component dashboardViewComponent

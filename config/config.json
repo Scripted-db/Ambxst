@@ -1,6 +1,6 @@
 {
   "theme": {
-    "oledMode": false,
+    "oledMode": true,
     "roundness": 16,
     "defaultFont": "Roboto Condensed",
     "animDuration": 300
