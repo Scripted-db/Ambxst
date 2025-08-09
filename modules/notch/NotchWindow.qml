@@ -10,6 +10,7 @@ import qs.modules.widgets.launcher
 import qs.modules.widgets.defaultview
 import qs.modules.widgets.overview
 import qs.modules.widgets.dashboard
+import qs.modules.notch
 import qs.modules.services
 import qs.config
 
@@ -34,7 +35,7 @@ PanelWindow {
     HyprlandFocusGrab {
         id: focusGrab
         windows: [notchPanel]
-        active: screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview
+        active: screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu
 
         onCleared: {
             if (screenVisibilities.launcher) {
@@ -84,6 +85,12 @@ PanelWindow {
         DashboardView {}
     }
 
+    // Power menu view component
+    Component {
+        id: powermenuViewComponent
+        PowerMenu {}
+    }
+
     // Center notch
     Notch {
         id: notchContainer
@@ -95,21 +102,21 @@ PanelWindow {
             shadowEnabled: Config.theme.shadowOpacity > 0
             shadowHorizontalOffset: 0
             shadowVerticalOffset: 0
-            shadowBlur: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? 2.0 : 1.0
+            shadowBlur: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? 2.0 : 1.0
             shadowColor: Colors.adapter.shadow
-            shadowOpacity: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? Math.min(Config.theme.shadowOpacity + 0.25, 1.0) : Config.theme.shadowOpacity
+            shadowOpacity: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Math.min(Config.theme.shadowOpacity + 0.25, 1.0) : Config.theme.shadowOpacity
 
             Behavior on shadowBlur {
                 NumberAnimation {
                     duration: Config.animDuration
-                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? Easing.OutBack : Easing.OutQuart
+                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Easing.OutBack : Easing.OutQuart
                 }
             }
 
             Behavior on shadowOpacity {
                 NumberAnimation {
                     duration: Config.animDuration
-                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview) ? Easing.OutBack : Easing.OutQuart
+                    easing.type: screenVisibilities && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu) ? Easing.OutBack : Easing.OutQuart
                 }
             }
         }
@@ -118,11 +125,12 @@ PanelWindow {
         launcherViewComponent: launcherViewComponent
         dashboardViewComponent: dashboardViewComponent
         overviewViewComponent: overviewViewComponent
+        powermenuViewComponent: powermenuViewComponent
         visibilities: screenVisibilities
 
         // Handle global keyboard events
         Keys.onPressed: event => {
-            if (event.key === Qt.Key_Escape && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview)) {
+            if (event.key === Qt.Key_Escape && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.overview || screenVisibilities.powermenu)) {
                 if (screenVisibilities.launcher) {
                     GlobalStates.clearLauncherState();
                 }
@@ -132,7 +140,7 @@ PanelWindow {
         }
     }
 
-    // Listen for launcher, dashboard and overview state changes
+    // Listen for launcher, dashboard, overview and powermenu state changes
     Connections {
         target: screenVisibilities
         function onLauncherChanged() {
@@ -165,6 +173,16 @@ PanelWindow {
         function onOverviewChanged() {
             if (screenVisibilities.overview) {
                 notchContainer.stackView.push(overviewViewComponent);
+            } else {
+                if (notchContainer.stackView.depth > 1) {
+                    notchContainer.stackView.pop();
+                }
+            }
+        }
+
+        function onPowermenuChanged() {
+            if (screenVisibilities.powermenu) {
+                notchContainer.stackView.push(powermenuViewComponent);
             } else {
                 if (notchContainer.stackView.depth > 1) {
                     notchContainer.stackView.pop();

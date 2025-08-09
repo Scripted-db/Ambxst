@@ -15,12 +15,13 @@ Item {
     property Component launcherViewComponent
     property Component dashboardViewComponent
     property Component overviewViewComponent
+    property Component powermenuViewComponent
     property var stackView: stackViewInternal
-    property bool isExpanded: stackViewInternal.currentItem !== stackViewInternal.initialItem
+    property bool isExpanded: stackViewInternal.currentItem && stackViewInternal.initialItem && stackViewInternal.currentItem !== stackViewInternal.initialItem
 
     // Screen-specific visibility properties passed from parent
     property var visibilities
-    readonly property bool screenNotchOpen: visibilities ? (visibilities.launcher || visibilities.dashboard || visibilities.overview) : false
+    readonly property bool screenNotchOpen: visibilities ? (visibilities.launcher || visibilities.dashboard || visibilities.overview || visibilities.powermenu) : false
 
     implicitWidth: screenNotchOpen ? Math.max(stackContainer.width + 40, 290) : 290
     implicitHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen ? Math.max(stackContainer.height, 40) : 40)

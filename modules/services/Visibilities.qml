@@ -53,6 +53,8 @@ Singleton {
                 focusedScreen.dashboard = true;
             } else if (moduleName === "overview") {
                 focusedScreen.overview = true;
+            } else if (moduleName === "powermenu") {
+                focusedScreen.powermenu = true;
             }
             currentActiveModule = moduleName;
         } else {
@@ -81,6 +83,8 @@ Singleton {
             focusedScreen.dashboard = true;
         } else if (currentActiveModule === "overview") {
             focusedScreen.overview = true;
+        } else if (currentActiveModule === "powermenu") {
+            focusedScreen.powermenu = true;
         }
         
         lastFocusedScreen = newFocusedScreen;
@@ -93,6 +97,7 @@ Singleton {
             property bool launcher: false
             property bool dashboard: false
             property bool overview: false
+            property bool powermenu: false
         }
     }
 
@@ -102,6 +107,7 @@ Singleton {
             screenProps.launcher = false;
             screenProps.dashboard = false;
             screenProps.overview = false;
+            screenProps.powermenu = false;
         }
     }
 

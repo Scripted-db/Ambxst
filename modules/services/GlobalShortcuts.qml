@@ -60,4 +60,22 @@ Item {
             }
         }
     }
+
+    GlobalShortcut {
+        id: powermenuShortcut
+        appid: "ambyst"
+        name: "powermenu"
+        description: "Toggle power menu"
+
+        onPressed: {
+            console.log("Power menu shortcut pressed");
+            
+            // Toggle power menu - if already open, close it; otherwise open power menu
+            if (Visibilities.currentActiveModule === "powermenu") {
+                Visibilities.setActiveModule("");
+            } else {
+                Visibilities.setActiveModule("powermenu");
+            }
+        }
+    }
 }
