@@ -3,8 +3,8 @@ import qs.modules.components
 import qs.modules.services
 
 Item {
-    implicitWidth: 300
-    implicitHeight: 60
+    implicitWidth: powerMenu.implicitWidth
+    implicitHeight: powerMenu.implicitHeight
 
     PowerMenu {
         id: powerMenu

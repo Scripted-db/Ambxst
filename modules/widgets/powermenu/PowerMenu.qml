@@ -9,9 +9,9 @@ ActionGrid {
     signal itemSelected
 
     layout: "row"
-    buttonSize: 52
+    buttonSize: 48
     spacing: 8
-    
+
     // Forzar foco al abrir
     Component.onCompleted: {
         root.forceActiveFocus();
