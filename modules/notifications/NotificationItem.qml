@@ -24,7 +24,7 @@ Item {
     property var dragIndexDiff: Math.abs(parentDragIndex - (index ?? 0))
     property real xOffset: dragIndexDiff == 0 ? Math.max(0, parentDragDistance) : parentDragDistance > dragConfirmThreshold ? 0 : dragIndexDiff == 1 ? Math.max(0, parentDragDistance * 0.3) : dragIndexDiff == 2 ? Math.max(0, parentDragDistance * 0.1) : 0
 
-    signal destroyRequested()
+    signal destroyRequested
 
     implicitHeight: background.implicitHeight
 
@@ -51,30 +51,47 @@ Item {
     function destroyWithAnimation() {
         if (root.qmlParent && root.qmlParent.resetDrag)
             root.qmlParent.resetDrag();
-        
+
         // Si es notificación única, delegar al grupo
         if (root.onlyNotification) {
             root.destroyRequested();
             return;
         }
-        
+
         background.anchors.leftMargin = background.anchors.leftMargin;
         destroyAnimation.running = true;
     }
 
-    SequentialAnimation {
+    ParallelAnimation {
         id: destroyAnimation
         running: false
 
         NumberAnimation {
             target: background.anchors
             property: "leftMargin"
-            to: root.width + root.dismissOvershoot
-            duration: 300
+            to: root.width / 8 + root.dismissOvershoot
+            duration: Config.animDuration
             easing.type: Easing.OutBack
             easing.overshoot: 1.1
         }
-        onFinished: () => {
+        NumberAnimation {
+            target: background
+            property: "scale"
+            from: 1.0
+            to: 0.8
+            duration: Config.animDuration
+            easing.type: Easing.OutQuad
+        }
+        NumberAnimation {
+            target: background
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: Config.animDuration
+            easing.type: Easing.OutQuad
+        }
+
+        onFinished: {
             Notifications.discardNotification(notificationObject.id);
         }
     }

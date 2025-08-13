@@ -35,17 +35,33 @@ Item {
     }
 
     // Animación de deslizado para todos los grupos
-    SequentialAnimation {
+    ParallelAnimation {
         id: destroyAnimation
         running: false
 
         NumberAnimation {
             target: background.anchors
             property: "leftMargin"
-            to: root.width + root.dismissOvershoot
-            duration: 300
+            to: root.width / 8 + root.dismissOvershoot
+            duration: Config.animDuration
             easing.type: Easing.OutBack
             easing.overshoot: 1.1
+        }
+        NumberAnimation {
+            target: background
+            property: "scale"
+            from: 1.0
+            to: 0.8
+            duration: Config.animDuration
+            easing.type: Easing.OutQuad
+        }
+        NumberAnimation {
+            target: background
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: Config.animDuration
+            easing.type: Easing.OutQuad
         }
         onFinished: () => {
             root.notifications.forEach(notif => {
@@ -75,7 +91,7 @@ Item {
     // HoverHandler dedicado para pausar/reanudar timers
     HoverHandler {
         id: hoverHandler
-        
+
         onHoveredChanged: {
             if (hovered) {
                 if (notificationGroup?.appName) {
@@ -245,7 +261,7 @@ Item {
                         visible: root.expanded || (index < 2)
                         anchors.left: parent?.left
                         anchors.right: parent?.right
-                        
+
                         onDestroyRequested: {
                             if (root.notificationCount === 1) {
                                 root.destroyWithAnimation();
