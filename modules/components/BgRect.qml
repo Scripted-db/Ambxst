@@ -7,8 +7,8 @@ import qs.config
 ClippingRectangle {
     color: Colors.background
     radius: Config.roundness
-    border.color: Colors.surfaceBright
-    border.width: 0
+    border.color: Colors.adapter.overBackground
+    border.width: Config.theme.currentTheme === "sticker" ? 4 : 0
 
     layer.enabled: true
     layer.effect: MultiEffect {

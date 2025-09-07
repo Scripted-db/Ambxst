@@ -17,7 +17,7 @@ BgRect {
     RowLayout {
         id: rowLayout
 
-        anchors.fill: parent
+        anchors.centerIn: parent
         anchors.margins: 8
         spacing: 8
 

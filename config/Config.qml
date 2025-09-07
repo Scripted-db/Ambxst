@@ -24,6 +24,7 @@ Singleton {
                 property string font: "Roboto Condensed"
                 property int fontSize: 14
                 property bool fillIcons: false
+                property string currentTheme: "default"
                 property int animDuration: 300
             }
 
@@ -63,6 +64,7 @@ Singleton {
     property real opacity: Math.min(Math.max(theme.opacity, 0.1), 1.0)
     property int roundness: theme.roundness
     property string defaultFont: theme.defaultFont
+    property string currentTheme: theme.currentTheme
     property int animDuration: theme.animDuration
 
     // Bar configuration
@@ -74,4 +76,8 @@ Singleton {
 
     // Overview configuration
     property QtObject overview: loader.adapter.overview
+
+    // Notch configuration
+    property QtObject notch: loader.adapter.notch
+    property string notchTheme: currentTheme === "sticker" ? "island" : notch.theme
 }

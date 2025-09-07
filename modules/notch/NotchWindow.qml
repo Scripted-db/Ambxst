@@ -105,6 +105,8 @@ PanelWindow {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 
+        anchors.topMargin: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0)
+
         layer.enabled: true
         layer.effect: MultiEffect {
             shadowEnabled: Config.theme.shadowOpacity > 0

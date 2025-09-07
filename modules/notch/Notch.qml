@@ -24,8 +24,11 @@ Item {
     property var visibilities
     readonly property bool screenNotchOpen: visibilities ? (visibilities.launcher || visibilities.dashboard || visibilities.overview || visibilities.powermenu) : false
 
+    property int defaultHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen ? Math.max(stackContainer.height, 40) : 40)
+    property int islandHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 36) : 36) : (screenNotchOpen ? Math.max(stackContainer.height, 36) : 36)
+
     implicitWidth: screenNotchOpen ? Math.max(stackContainer.width + 40, 290) : 290
-    implicitHeight: Config.bar.showBackground ? (screenNotchOpen ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen ? Math.max(stackContainer.height, 40) : 40)
+    implicitHeight: Config.notchTheme === "default" ? defaultHeight : (Config.notchTheme === "island" ? islandHeight : defaultHeight)
 
     Behavior on implicitWidth {
         NumberAnimation {
@@ -45,6 +48,7 @@ Item {
 
     RoundCorner {
         id: leftCorner
+        visible: Config.notchTheme === "default"
         anchors.top: parent.top
         anchors.right: notchRect.left
         corner: RoundCorner.CornerEnum.TopRight
@@ -58,11 +62,15 @@ Item {
         width: parent.implicitWidth - 40
         height: parent.implicitHeight
         layer.enabled: false
+        radius: 0
 
-        topLeftRadius: 0
-        topRightRadius: 0
-        bottomLeftRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness + 4) : 0
-        bottomRightRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness + 4) : 0
+        property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen ? Config.roundness + 20 : Config.roundness + 4) : 0
+        property int islandRadius: screenNotchOpen ? Config.roundness + 20 : Config.roundness
+
+        topLeftRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
+        topRightRadius: Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? islandRadius : 0)
+        bottomLeftRadius: defaultRadius
+        bottomRightRadius: defaultRadius
         clip: true
 
         Behavior on radius {
@@ -190,6 +198,7 @@ Item {
 
     RoundCorner {
         id: rightCorner
+        visible: Config.notchTheme === "default"
         anchors.top: parent.top
         anchors.left: notchRect.right
         corner: RoundCorner.CornerEnum.TopLeft
