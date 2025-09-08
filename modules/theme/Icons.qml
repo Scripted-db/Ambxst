@@ -6,17 +6,23 @@ import qs.config
 QtObject {
     // Icon font
     readonly property string font: Config.theme.fillIcons ? "Phosphor-Fill" : "Phosphor-Bold"
-    // Overview button icon
+    // Overview button
     readonly property string overview: ""
-    // Powermenu icons
+    // Powermenu
     readonly property string lock: ""
     readonly property string suspend: ""
     readonly property string logout: ""
     readonly property string reboot: ""
     readonly property string shutdown: ""
-    // Caret icons
+    // Caret
     readonly property string caretLeft: ""
     readonly property string caretRight: ""
     readonly property string caretUp: ""
     readonly property string caretDown: ""
+    // Dashboard
+    readonly property string widgets: ""
+    readonly property string pins: ""
+    readonly property string kanban: ""
+    readonly property string wallpapers: ""
+    readonly property string assistant: ""
 }
