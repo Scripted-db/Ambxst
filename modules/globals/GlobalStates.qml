@@ -13,6 +13,7 @@ Singleton {
     // Persistent launcher state across monitors
     property string launcherSearchText: ""
     property int launcherSelectedIndex: -1
+    property int launcherCurrentTab: 0
 
     function clearLauncherState() {
         launcherSearchText = "";

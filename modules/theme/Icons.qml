@@ -25,4 +25,8 @@ QtObject {
     readonly property string kanban: ""
     readonly property string wallpapers: ""
     readonly property string assistant: ""
+    // Launcher
+    readonly property string apps: ""
+    readonly property string terminal: ""
+    readonly property string clipboard: ""
 }
