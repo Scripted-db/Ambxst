@@ -245,7 +245,7 @@ Rectangle {
             Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.imgSize
-                visible: root.imageItems.length > 0
+                visible: root.imageItems.length > 0 && root.searchText.length === 0
 
                 ClippingRectangle {
                     anchors.fill: parent
@@ -417,7 +417,7 @@ Rectangle {
                 id: imageScrollBar
                 Layout.fillWidth: true
                 Layout.preferredHeight: 10
-                visible: root.imageItems.length > 0
+                visible: root.imageItems.length > 0 && root.searchText.length === 0
                 orientation: Qt.Horizontal
 
                 size: imageResultsList.width / imageResultsList.contentWidth
@@ -444,7 +444,7 @@ Rectangle {
             ListView {
                 id: textResultsList
                 Layout.fillWidth: true
-                Layout.preferredHeight: 3 * 48
+                Layout.preferredHeight: root.searchText.length > 0 ? 5 * 48 : 3 * 48
                 visible: true
                 clip: true
 
