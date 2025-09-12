@@ -19,6 +19,8 @@ Rectangle {
     property int selectedRecentIndex: -1
     property bool isRecentFocused: false
     property bool hasNavigatedFromSearch: false
+    property bool clearButtonFocused: false
+    property bool clearButtonConfirmState: false
     property var emojiData: []
     property var recentEmojis: []
     property var filteredEmojis: []
@@ -41,8 +43,22 @@ Rectangle {
         selectedRecentIndex = -1;
         isRecentFocused = false;
         hasNavigatedFromSearch = false;
+        clearButtonFocused = false;
+        clearButtonConfirmState = false;
         searchInput.focusInput();
         updateFilteredEmojis();
+    }
+
+    function resetClearButton() {
+        clearButtonConfirmState = false;
+    }
+
+    function clearRecentEmojis() {
+        recentEmojis = [];
+        saveRecentEmojis();
+        clearButtonConfirmState = false;
+        clearButtonFocused = false;
+        searchInput.focusInput();
     }
 
     function focusSearchInput() {
@@ -103,7 +119,7 @@ Rectangle {
 
     function addToRecent(emoji) {
         // Remove if already exists
-        recentEmojis = recentEmojis.filter(function(item) {
+        recentEmojis = recentEmojis.filter(function (item) {
             return item.emoji !== emoji.emoji;
         });
 
@@ -118,7 +134,7 @@ Rectangle {
         }
 
         // Sort by usage desc, then last used desc
-        recentEmojis.sort(function(a, b) {
+        recentEmojis.sort(function (a, b) {
             if (a.usage !== b.usage) {
                 return b.usage - a.usage;
             }
@@ -306,49 +322,172 @@ Rectangle {
         anchors.fill: parent
         spacing: 8
 
-        // Search input
-        SearchInput {
-            id: searchInput
+        // Barra de búsqueda con botón de limpiar
+        RowLayout {
             Layout.fillWidth: true
-            text: root.searchText
-            placeholderText: "Search emojis..."
+            spacing: 8
 
-            onSearchTextChanged: text => {
-                root.searchText = text;
-            }
+            SearchInput {
+                id: searchInput
+                Layout.fillWidth: true
+                text: root.searchText
+                placeholderText: "Search emojis..."
 
-            onAccepted: {
-                if (isRecentFocused && selectedRecentIndex >= 0 && selectedRecentIndex < recentEmojis.length) {
-                    var selectedEmoji = recentEmojis[selectedRecentIndex];
-                    if (selectedEmoji) {
-                        root.copyEmoji(selectedEmoji);
+                onSearchTextChanged: text => {
+                    root.searchText = text;
+                }
+
+                onAccepted: {
+                    if (isRecentFocused && selectedRecentIndex >= 0 && selectedRecentIndex < recentEmojis.length) {
+                        var selectedEmoji = recentEmojis[selectedRecentIndex];
+                        if (selectedEmoji) {
+                            root.copyEmoji(selectedEmoji);
+                        }
+                    } else if (!isRecentFocused && selectedIndex >= 0 && selectedIndex < filteredEmojis.length) {
+                        var selectedEmoji = filteredEmojis[selectedIndex];
+                        if (selectedEmoji) {
+                            root.copyEmoji(selectedEmoji);
+                        }
                     }
-                } else if (!isRecentFocused && selectedIndex >= 0 && selectedIndex < filteredEmojis.length) {
-                    var selectedEmoji = filteredEmojis[selectedIndex];
-                    if (selectedEmoji) {
-                        root.copyEmoji(selectedEmoji);
-                    }
+                }
+
+                onEscapePressed: {
+                    root.itemSelected();
+                }
+
+                onDownPressed: {
+                    root.onDownPressed();
+                }
+
+                onUpPressed: {
+                    root.onUpPressed();
+                }
+
+                onLeftPressed: {
+                    root.onLeftPressed();
+                }
+
+                onRightPressed: {
+                    root.onRightPressed();
                 }
             }
 
-            onEscapePressed: {
-                root.itemSelected();
-            }
+            // Botón de limpiar recientes
+            Rectangle {
+                id: clearButton
+                Layout.preferredWidth: root.clearButtonConfirmState ? clearButtonContent.implicitWidth + 32 : 48
+                Layout.preferredHeight: 48
+                radius: searchInput.radius
+                color: {
+                    if (root.clearButtonConfirmState) {
+                        return Colors.adapter.error;
+                    } else if (root.clearButtonFocused || clearButtonMouseArea.containsMouse) {
+                        return Colors.surfaceBright;
+                    } else {
+                        return Colors.surface;
+                    }
+                }
+                focus: root.clearButtonFocused
+                activeFocusOnTab: true
 
-            onDownPressed: {
-                root.onDownPressed();
-            }
+                Behavior on color {
+                    ColorAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutQuart
+                    }
+                }
 
-            onUpPressed: {
-                root.onUpPressed();
-            }
+                Behavior on Layout.preferredWidth {
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutQuart
+                    }
+                }
 
-            onLeftPressed: {
-                root.onLeftPressed();
-            }
+                onActiveFocusChanged: {
+                    if (activeFocus) {
+                        root.clearButtonFocused = true;
+                    } else {
+                        root.clearButtonFocused = false;
+                        root.resetClearButton();
+                    }
+                }
 
-            onRightPressed: {
-                root.onRightPressed();
+                MouseArea {
+                    id: clearButtonMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onClicked: {
+                        if (root.clearButtonConfirmState) {
+                            root.clearRecentEmojis();
+                        } else {
+                            root.clearButtonConfirmState = true;
+                        }
+                    }
+                }
+
+                RowLayout {
+                    id: clearButtonContent
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    spacing: 8
+
+                    Text {
+                        Layout.preferredWidth: 32
+                        text: root.clearButtonConfirmState ? Icons.xeyes : Icons.broom
+                        font.family: Icons.font
+                        font.pixelSize: 20
+                        color: root.clearButtonConfirmState ? Colors.adapter.overError : Colors.adapter.primary
+                        horizontalAlignment: Text.AlignHCenter
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: "Clear recent?"
+                        font.family: Config.theme.font
+                        font.weight: Font.Bold
+                        font.pixelSize: Config.theme.fontSize
+                        color: Colors.adapter.overError
+                        opacity: root.clearButtonConfirmState ? 1.0 : 0.0
+                        visible: opacity > 0
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+                    }
+                }
+
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                        if (root.clearButtonConfirmState) {
+                            root.clearRecentEmojis();
+                        } else {
+                            root.clearButtonConfirmState = true;
+                        }
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Escape) {
+                        root.resetClearButton();
+                        root.clearButtonFocused = false;
+                        searchInput.focusInput();
+                        event.accepted = true;
+                    } else if (event.key === Qt.Key_Tab && (event.modifiers & Qt.ShiftModifier)) {
+                        root.resetClearButton();
+                        root.clearButtonFocused = false;
+                        searchInput.focusInput();
+                        event.accepted = true;
+                    }
+                }
             }
         }
 
@@ -378,15 +517,9 @@ Rectangle {
                     required property var modelData
                     required property int index
 
-                    width: emojiText.implicitWidth + 16 // Ancho basado en el contenido del emoji + padding
+                    width: emojiText.implicitWidth + 24 // Ancho basado en el contenido del emoji + padding
                     height: 48
-                    color: {
-                        if (root.isRecentFocused && root.selectedRecentIndex === index) {
-                            return Colors.adapter.primary;
-                        } else {
-                            return Colors.adapter.surface;
-                        }
-                    }
+                    color: "transparent"
                     radius: Config.roundness > 0 ? Config.roundness - 4 : 0
 
                     Behavior on color {
@@ -426,9 +559,7 @@ Rectangle {
                 }
 
                 highlight: Rectangle {
-                    color: "transparent"
-                    border.color: Colors.adapter.primary
-                    border.width: 2
+                    color: Colors.adapter.primary
                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
                     visible: root.isRecentFocused
                 }
