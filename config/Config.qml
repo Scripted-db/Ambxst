@@ -64,6 +64,10 @@ Singleton {
                 property int rounding: 16
                 property bool syncRoundness: true
             }
+
+            property JsonObject performance: JsonObject {
+                property bool blurTransition: true
+            }
         }
     }
 
@@ -94,4 +98,8 @@ Singleton {
     // Hyprland configuration
     property QtObject hyprland: loader.adapter.hyprland
     property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - hyprland.borderSize) : Math.max(0, hyprland.rounding - hyprland.borderSize)
+
+    // Performance configuration
+    property QtObject performance: loader.adapter.performance
+    property bool blurTransition: performance.blurTransition
 }
