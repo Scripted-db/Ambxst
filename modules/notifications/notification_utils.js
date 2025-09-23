@@ -24,10 +24,16 @@ const getFriendlyNotifTimeString = (timestamp) => {
         }
     }
     
-    // Yesterday
+    // Multiple days - show relative days
+    const diffDays = Math.floor(diffMs / 86400000);
+    if (diffDays > 0) {
+        return `${diffDays}d`;
+    }
+    
+    // Yesterday (fallback, shouldn't reach here normally)
     if (messageTime.toDateString() === new Date(now.getTime() - 86400000).toDateString()) 
         return 'Yesterday';
     
-    // Older dates
+    // Older dates (fallback for very old notifications)
     return Qt.formatDateTime(messageTime, "MMMM dd");
 };

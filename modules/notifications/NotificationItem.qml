@@ -7,6 +7,7 @@ import qs.modules.theme
 import qs.modules.services
 import qs.config
 import "./NotificationAnimation.qml"
+import "./notification_utils.js" as NotificationUtils
 
 Item {
     id: root
@@ -26,6 +27,21 @@ Item {
     signal destroyRequested
 
     implicitHeight: background.implicitHeight
+
+    // Timer para actualizar el timestamp cada minuto
+    Timer {
+        id: timestampUpdateTimer
+        interval: 60000 // 1 minuto
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: {
+            // Forzar actualización del binding del timestamp
+            if (timestampText) {
+                timestampText.text = NotificationUtils.getFriendlyNotifTimeString(root.notificationObject.time);
+            }
+        }
+    }
 
     function processNotificationBody(body) {
         // Limpiar HTML básico y saltos de línea para vista simple
@@ -96,17 +112,44 @@ Item {
             anchors.margins: root.padding
             spacing: 8
 
-            // Título de la notificación
-            Text {
-                id: summaryText
+            // Row con app name, summary y timestamp
+            RowLayout {
                 Layout.fillWidth: true
-                font.family: Config.theme.font
-                font.pixelSize: 14
-                font.weight: Font.Bold
-                color: Colors.adapter.primary
-                elide: Text.ElideRight
-                text: root.notificationObject.summary || ""
-                visible: text.length > 0
+                spacing: 8
+
+                Text {
+                    id: appNameText
+                    font.family: Config.theme.font
+                    font.pixelSize: 11
+                    font.weight: Font.Bold
+                    color: Colors.adapter.outline
+                    text: root.notificationObject.appName || ""
+                    visible: text.length > 0
+                    elide: Text.ElideRight
+                    Layout.maximumWidth: Math.max(60, parent.width * 0.25)
+                }
+
+                Text {
+                    id: summaryText
+                    Layout.fillWidth: true
+                    font.family: Config.theme.font
+                    font.pixelSize: 14
+                    font.weight: Font.Bold
+                    color: Colors.adapter.primary
+                    elide: Text.ElideRight
+                    text: root.notificationObject.summary || ""
+                    visible: text.length > 0
+                }
+
+                Text {
+                    id: timestampText
+                    font.family: Config.theme.font
+                    font.pixelSize: 11
+                    color: Colors.adapter.overBackground
+                    text: NotificationUtils.getFriendlyNotifTimeString(root.notificationObject.time)
+                    visible: text.length > 0
+                    // No elide para el timestamp
+                }
             }
 
             // Contenido de la notificación

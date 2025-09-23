@@ -9,6 +9,7 @@ import qs.modules.globals
 import qs.modules.components
 import qs.modules.notifications
 import qs.config
+import "../notifications/notification_utils.js" as NotificationUtils
 
 Item {
     id: root
@@ -20,6 +21,21 @@ Item {
     property bool notchHovered: false
     property bool hovered: notchHovered || mouseArea.containsMouse || anyButtonHovered
     property bool anyButtonHovered: false
+
+    // Timer para actualizar el timestamp cada minuto
+    Timer {
+        id: timestampUpdateTimer
+        interval: 60000 // 1 minuto
+        repeat: true
+        running: true
+        triggeredOnStart: true
+        onTriggered: {
+            // Forzar actualización del timestamp
+            if (timestampText && currentNotification) {
+                timestampText.text = NotificationUtils.getFriendlyNotifTimeString(currentNotification.time);
+            }
+        }
+    }
 
     // MouseArea para detectar hover en toda el área
     MouseArea {
@@ -139,38 +155,57 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: hovered ? 4 : 0
 
-                // Fila del summary y app name
+                // Fila del summary, app name y timestamp
                 Row {
                     width: parent.width
                     spacing: 4
 
-                    Text {
-                        id: summaryText
-                        width: Math.min(implicitWidth, parent.width - (appNameText.visible ? appNameText.width + parent.spacing : 0))
-                        text: currentNotification ? currentNotification.summary : ""
-                        font.family: Config.theme.font
-                        font.pixelSize: Config.theme.fontSize
-                        font.weight: Font.Bold
-                        color: Colors.adapter.primary
-                        elide: Text.ElideRight
-                        maximumLineCount: 1
-                        wrapMode: Text.NoWrap
-                        verticalAlignment: Text.AlignVCenter
+                    // Contenedor izquierdo para summary y app name
+                    Row {
+                        width: parent.width - timestampText.width - parent.spacing
+                        spacing: 4
+
+                        Text {
+                            id: summaryText
+                            width: Math.min(implicitWidth, parent.width - (appNameText.visible ? appNameText.width + parent.spacing : 0))
+                            text: currentNotification ? currentNotification.summary : ""
+                            font.family: Config.theme.font
+                            font.pixelSize: Config.theme.fontSize
+                            font.weight: Font.Bold
+                            color: Colors.adapter.primary
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            wrapMode: Text.NoWrap
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Text {
+                            id: appNameText
+                            width: Math.min(implicitWidth, Math.max(60, parent.width * 0.3))
+                            text: currentNotification ? "• " + currentNotification.appName : ""
+                            font.family: Config.theme.font
+                            font.pixelSize: Config.theme.fontSize - 1
+                            font.weight: Font.Bold
+                            color: Colors.adapter.outline
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            wrapMode: Text.NoWrap
+                            verticalAlignment: Text.AlignVCenter
+                            visible: text !== ""
+                        }
                     }
 
+                    // Timestamp a la derecha
                     Text {
-                        id: appNameText
-                        width: Math.min(implicitWidth, Math.max(80, parent.width * 0.3))
-                        text: currentNotification ? "• " + currentNotification.appName : ""
+                        id: timestampText
+                        text: currentNotification ? NotificationUtils.getFriendlyNotifTimeString(currentNotification.time) : ""
                         font.family: Config.theme.font
-                        font.pixelSize: Config.theme.fontSize
-                        font.weight: Font.Bold
-                        color: Colors.adapter.outline
-                        elide: Text.ElideRight
-                        maximumLineCount: 1
-                        wrapMode: Text.NoWrap
+                        font.pixelSize: Config.theme.fontSize - 1
+                        color: Colors.adapter.overBackground
                         verticalAlignment: Text.AlignVCenter
                         visible: text !== ""
+                        anchors.verticalCenter: parent.verticalCenter
+                        // No elide para que siempre se muestre completo
                     }
                 }
 

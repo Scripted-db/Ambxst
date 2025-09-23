@@ -36,7 +36,7 @@ ClippingRectangle {
         active: root.appIcon == ""
         anchors.fill: parent
         sourceComponent: Text {
-            text: NotificationUtils.findSuitableMaterialSymbol(root.summary)
+            text: "🔔" // Icono de notificación simple como fallback
             anchors.fill: parent
             color: (root.urgency == NotificationUrgency.Critical) ? Colors.adapter.error : Colors.adapter.primary
             font.family: Config.theme.font
