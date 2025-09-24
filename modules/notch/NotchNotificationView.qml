@@ -89,17 +89,11 @@ Item {
     // Manejo del hover - pausa/reanuda timers de timeout de todas las notificaciones
     onHoveredChanged: {
         if (hovered) {
-            // Pausar timers de todas las notificaciones activas
-            for (let i = 0; i < Notifications.popupList.length; i++) {
-                const notification = Notifications.popupList[i];
-                Notifications.pauseGroupTimers(notification.appName);
-            }
+            // Pausar todos los timers de notificaciones activas
+            Notifications.pauseAllTimers();
         } else {
-            // Reanudar timers de todas las notificaciones activas
-            for (let i = 0; i < Notifications.popupList.length; i++) {
-                const notification = Notifications.popupList[i];
-                Notifications.resumeGroupTimers(notification.appName);
-            }
+            // Reanudar todos los timers de notificaciones activas
+            Notifications.resumeAllTimers();
         }
     }
 

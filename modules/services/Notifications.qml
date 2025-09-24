@@ -348,6 +348,22 @@ Singleton {
         });
     }
 
+    function pauseAllTimers() {
+        root.popupList.forEach(notif => {
+            if (notif.timer) {
+                notif.timer.pause();
+            }
+        });
+    }
+
+    function resumeAllTimers() {
+        root.popupList.forEach(notif => {
+            if (notif.timer) {
+                notif.timer.resume();
+            }
+        });
+    }
+
     function triggerListChange() {
         root.list = root.list.slice(0);
     }
