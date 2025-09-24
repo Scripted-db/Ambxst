@@ -184,16 +184,17 @@ Item {
                     id: dotsColumn
                     width: parent.width
                     spacing: 4
-                    
+
                     // Posición Y animada para el efecto de scroll
                     y: {
-                        if (Notifications.popupList.length <= 3) return 0;
-                        
+                        if (Notifications.popupList.length <= 3)
+                            return 0;
+
                         const totalNotifications = Notifications.popupList.length;
                         const dotHeight = 8 + 4; // altura del punto + spacing
                         const maxY = -(totalNotifications - 3) * dotHeight;
                         const currentIndex = root.currentIndex;
-                        
+
                         // Calcular posición basada en el índice actual
                         let targetY = 0;
                         if (currentIndex >= 1 && currentIndex < totalNotifications - 1) {
@@ -203,7 +204,7 @@ Item {
                             // Al final, mostrar los últimos 3
                             targetY = maxY;
                         }
-                        
+
                         return Math.max(maxY, Math.min(0, targetY));
                     }
 
@@ -221,18 +222,18 @@ Item {
                             width: 8
                             height: 8
                             radius: 4
-                            color: index === root.currentIndex ? Colors.adapter.primary : Colors.adapter.outline
-                            
+                            color: index === root.currentIndex ? Colors.adapter.primary : Colors.surfaceBright
+
                             Behavior on color {
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic
                                 }
                             }
-                            
+
                             // Animación de escala para el punto activo
-                            scale: index === root.currentIndex ? 1.2 : 1.0
-                            
+                            scale: index === root.currentIndex ? 1.0 : 0.5
+
                             Behavior on scale {
                                 NumberAnimation {
                                     duration: Config.animDuration
