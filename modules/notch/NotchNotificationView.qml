@@ -239,7 +239,7 @@ Item {
                     }
 
                     // Función para navegar a una notificación específica
-                    function navigateToNotification(index) {
+                    function navigateToNotification(index, forceDirection = null) {
                         if (index >= 0 && index < Notifications.popupList.length) {
                             const newNotification = Notifications.popupList[index];
                             const currentItem = notificationStack.currentItem;
@@ -247,7 +247,12 @@ Item {
                             if (!currentItem || !currentItem.notification || currentItem.notification.id !== newNotification.id) {
 
                                 // Determinar dirección de la transición
-                                let direction = index > root.currentIndex ? StackView.PushTransition : StackView.PopTransition;
+                                let direction;
+                                if (forceDirection !== null) {
+                                    direction = forceDirection;
+                                } else {
+                                    direction = index > root.currentIndex ? StackView.PushTransition : StackView.PopTransition;
+                                }
 
                                 // Usar replace para evitar acumulación en el stack
                                 replace(notificationComponent, {
@@ -278,13 +283,34 @@ Item {
                                 return;
                             }
 
-                            // Ajustar el índice y navegar siempre para asegurar consistencia
+                            // Obtener la notificación actual antes del ajuste
+                            const currentNotificationId = notificationStack.currentItem?.notification?.id;
+                            const oldIndex = root.currentIndex;
+
+                            // Ajustar el índice si es necesario
                             if (root.currentIndex >= Notifications.popupList.length) {
                                 root.currentIndex = Math.max(0, Notifications.popupList.length - 1);
                             }
+
+                            // Determinar si una notificación fue eliminada y calcular la dirección apropiada
+                            const newNotification = Notifications.popupList[root.currentIndex];
+                            let forceDirection = null;
                             
-                            // Siempre navegar a la notificación actual para asegurar que se muestra la correcta
-                            notificationStack.navigateToNotification(root.currentIndex);
+                            // Si la notificación actual cambió, significa que se eliminó una
+                            if (currentNotificationId && newNotification && currentNotificationId !== newNotification.id) {
+                                // Si estábamos viendo una notificación posterior y ahora vemos una anterior,
+                                // significa que se eliminó una notificación antes de la actual -> transición hacia abajo
+                                if (oldIndex > 0 && root.currentIndex < oldIndex) {
+                                    forceDirection = StackView.PopTransition; // Aparece desde arriba (hacia abajo)
+                                }
+                                // Si se eliminó la notificación actual y vamos a la siguiente
+                                else if (root.currentIndex === oldIndex) {
+                                    forceDirection = StackView.PushTransition; // Aparece desde abajo (hacia arriba)
+                                }
+                            }
+                            
+                            // Navegar a la notificación actual con la dirección calculada
+                            notificationStack.navigateToNotification(root.currentIndex, forceDirection);
                         }
                     }
 
