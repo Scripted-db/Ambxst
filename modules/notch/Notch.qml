@@ -136,6 +136,17 @@ Item {
                 anchors.topMargin: (hasActiveNotifications && stackViewInternal.currentItem && stackViewInternal.currentItem.hovered) ? Config.theme.borderSize : 16
                 initialItem: hasActiveNotifications ? notificationViewComponent : defaultViewComponent
 
+                Component.onCompleted: {
+                    // Establecer el estado inicial correcto
+                    if (hasActiveNotifications) {
+                        isShowingNotifications = true
+                        isShowingDefault = false
+                    } else {
+                        isShowingDefault = true
+                        isShowingNotifications = false
+                    }
+                }
+
                 Behavior on anchors.topMargin {
                     NumberAnimation {
                         duration: Config.animDuration / 2
@@ -254,7 +265,13 @@ Item {
                         easing.type: Easing.OutQuart
                     }
                 }
-    }
+                }
+            }
+        }
+
+    // Propiedades para mejorar el control del estado de las vistas
+    property bool isShowingNotifications: false
+    property bool isShowingDefault: false
 
     // Conexión para cambiar automáticamente entre vistas según las notificaciones
     Connections {
@@ -264,22 +281,20 @@ Item {
             if (!screenNotchOpen) {
                 if (hasActiveNotifications) {
                     // Solo cambiar a notificationView si no estamos ya mostrando notificaciones
-                    if (stackViewInternal.depth === 1 && 
-                        stackViewInternal.currentItem && 
-                        stackViewInternal.currentItem.toString().indexOf("NotchNotificationView") === -1) {
+                    if (!isShowingNotifications) {
                         stackViewInternal.replace(notificationViewComponent)
+                        isShowingNotifications = true
+                        isShowingDefault = false
                     }
                 } else {
-                    // Solo cambiar a defaultView si no la estamos ya mostrando
-                    if (stackViewInternal.depth === 1 && 
-                        stackViewInternal.currentItem &&
-                        stackViewInternal.currentItem.toString().indexOf("DefaultView") === -1) {
+                    // Solo cambiar a defaultView si no estamos ya mostrando la vista por defecto
+                    if (!isShowingDefault) {
                         stackViewInternal.replace(defaultViewComponent)
+                        isShowingDefault = true
+                        isShowingNotifications = false
                     }
                 }
             }
-        }
-    }
         }
     }
 

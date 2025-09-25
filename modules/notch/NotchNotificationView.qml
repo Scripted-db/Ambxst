@@ -28,7 +28,7 @@ Item {
     // Contador para detectar cuando se añaden nuevas notificaciones
     property int lastNotificationCount: 0
 
-    // Timer para actualizar el timestamp cada minuto
+    // Timer para forzar actualización del timestamp cada minuto
     Timer {
         id: timestampUpdateTimer
         interval: 60000 // 1 minuto
@@ -36,9 +36,9 @@ Item {
         running: true
         triggeredOnStart: true
         onTriggered: {
-            // Forzar actualización del timestamp
-            if (timestampText && currentNotification) {
-                timestampText.text = NotificationUtils.getFriendlyNotifTimeString(currentNotification.time);
+            // Forzar actualización recreando el componente
+            if (currentNotification && notificationStack.currentItem) {
+                notificationStack.navigateToNotification(currentIndex, StackView.ReplaceTransition);
             }
         }
     }
