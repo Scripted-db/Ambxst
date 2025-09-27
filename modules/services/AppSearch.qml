@@ -42,8 +42,37 @@ Singleton {
             && !iconName.includes("image-missing");
     }
 
+    function getIconFromDesktopEntry(className) {
+        if (!className || className.length === 0) return null;
+
+        for (let i = 0; i < list.length; i++) {
+            const app = list[i];
+            // Match by executable name (first command argument)
+            if (app.command && app.command.length > 0 && app.command[0] === className) {
+                return app.icon || "application-x-executable";
+            }
+            // Match by application name
+            if (app.name && app.name.toLowerCase() === className.toLowerCase()) {
+                return app.icon || "application-x-executable";
+            }
+            // Match by keywords
+            if (app.keywords && app.keywords.length > 0) {
+                for (let j = 0; j < app.keywords.length; j++) {
+                    if (app.keywords[j].toLowerCase() === className.toLowerCase()) {
+                        return app.icon || "application-x-executable";
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     function guessIcon(str) {
         if (!str || str.length == 0) return "image-missing";
+
+        // First, try to find icon from desktop entries
+        const desktopIcon = getIconFromDesktopEntry(str);
+        if (desktopIcon) return desktopIcon;
 
         if (substitutions[str])
             return substitutions[str];
