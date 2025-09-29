@@ -476,51 +476,55 @@ Item {
                                     }
                                 }
 
-                                // Botón de descartar
-                                Item {
-                                    Layout.preferredWidth: 32
-                                    Layout.preferredHeight: 32
-                                    Layout.alignment: Qt.AlignTop
+                                 // Botón de descartar
+                                 Item {
+                                     Layout.preferredWidth: hovered ? 32 : 0
+                                     Layout.preferredHeight: hovered ? 32 : 0
+                                     Layout.alignment: Qt.AlignTop
 
-                                    Button {
-                                        id: dismissButton
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        visible: true
+                                     Loader {
+                                         anchors.fill: parent
+                                         active: hovered
 
-                                        background: Rectangle {
-                                            color: parent.pressed ? Colors.adapter.error : (parent.hovered ? Colors.surfaceBright : Colors.surface)
-                                            radius: Config.roundness > 0 ? Config.roundness + 4 : 0
+                                         sourceComponent: Button {
+                                             id: dismissButton
+                                             anchors.fill: parent
+                                             hoverEnabled: true
 
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: Config.animDuration
-                                                }
-                                            }
-                                        }
+                                             background: Rectangle {
+                                                 color: parent.pressed ? Colors.adapter.error : (parent.hovered ? Colors.surfaceBright : Colors.surface)
+                                                 radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
-                                        contentItem: Text {
-                                            text: Icons.cancel
-                                            font.family: Icons.font
-                                            font.pixelSize: 16
-                                            color: parent.pressed ? Colors.adapter.overError : (parent.hovered ? Colors.adapter.overBackground : Colors.adapter.error)
-                                            horizontalAlignment: Text.AlignHCenter
-                                            verticalAlignment: Text.AlignVCenter
+                                                 Behavior on color {
+                                                     ColorAnimation {
+                                                         duration: Config.animDuration
+                                                     }
+                                                 }
+                                             }
 
-                                            Behavior on color {
-                                                ColorAnimation {
-                                                    duration: Config.animDuration
-                                                }
-                                            }
-                                        }
+                                             contentItem: Text {
+                                                 text: Icons.cancel
+                                                 font.family: Icons.font
+                                                 font.pixelSize: 20
+                                                 color: parent.pressed ? Colors.adapter.overError : (parent.hovered ? Colors.adapter.overBackground : Colors.adapter.error)
+                                                 horizontalAlignment: Text.AlignHCenter
+                                                 verticalAlignment: Text.AlignVCenter
 
-                                        onClicked: {
-                                            if (notification) {
-                                                Notifications.discardNotification(notification.id);
-                                            }
-                                        }
-                                    }
-                                }
+                                                 Behavior on color {
+                                                     ColorAnimation {
+                                                         duration: Config.animDuration
+                                                     }
+                                                 }
+                                             }
+
+                                             onClicked: {
+                                                 if (notification) {
+                                                     Notifications.discardNotification(notification.id);
+                                                 }
+                                             }
+                                         }
+                                     }
+                                 }
                             }
 
                             // Botones de acción (solo visible con hover)
