@@ -230,10 +230,11 @@ Item {
                             id: timeText
                             Layout.rightMargin: 10
                             horizontalAlignment: Text.AlignLeft
-                            text: root.multipleNotifications ? qsTr("%1 notifications").arg(root.notificationCount) : NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
+                            text: root.multipleNotifications ? "" : NotificationUtils.getFriendlyNotifTimeString(notificationGroup?.time)
                             font.family: Config.theme.font
                             font.pixelSize: Config.theme.fontSize
                             color: Colors.adapter.overBackground
+                            visible: text !== ""
                         }
                     }
                     NotificationGroupExpandButton {
