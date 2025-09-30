@@ -35,7 +35,7 @@ Rectangle {
 
         // Right panel - Notification history
         ClippingRectangle {
-            Layout.preferredWidth: 340
+            Layout.preferredWidth: 250
             Layout.fillHeight: true
             color: Colors.surface
             radius: Config.roundness > 4 ? Config.roundness + 4 : 0
@@ -55,7 +55,7 @@ Rectangle {
                         required property string modelData
                         width: notificationList.width
                         notificationGroup: Notifications.groupsByAppName[modelData]
-                         expanded: false  // Collapsed by default for history view
+                        expanded: false  // Collapsed by default for history view
                         popup: false
                     }
                 }

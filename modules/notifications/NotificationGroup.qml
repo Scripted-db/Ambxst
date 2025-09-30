@@ -43,7 +43,7 @@ Item {
     property bool expanded: false
 
     onNotificationCountChanged: {
-        root.expanded = notificationCount === 1;
+        if (notificationCount === 1) root.expanded = true;
     }
     property bool popup: false
     property real padding: 8
