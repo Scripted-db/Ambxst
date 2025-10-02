@@ -445,6 +445,7 @@ Item {
                                                             font.family: Config.theme.font
                                                             font.pixelSize: Config.theme.fontSize
                                                             font.weight: Font.Bold
+                                                            font.underline: notification && notification.urgency == NotificationUrgency.Critical && hovered
                                                             color: notification && notification.urgency == NotificationUrgency.Critical ? Colors.criticalText : Colors.primary
                                                             elide: Text.ElideRight
                                                             maximumLineCount: 1

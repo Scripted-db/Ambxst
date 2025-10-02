@@ -166,6 +166,7 @@ Item {
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
                                         font.weight: Font.Bold
+                                        font.underline: latestNotification && latestNotification.urgency == NotificationUrgency.Critical && onlyNotification
                                         color: latestNotification && latestNotification.urgency == NotificationUrgency.Critical ? Colors.criticalText : Colors.primary
                                         elide: Text.ElideRight
                                         maximumLineCount: 1
@@ -282,6 +283,7 @@ Item {
                                             font.family: Config.theme.font
                                             font.pixelSize: Config.theme.fontSize
                                             font.weight: Font.Bold
+                                            font.underline: latestNotification && latestNotification.urgency == NotificationUrgency.Critical && expanded
                                             color: latestNotification && latestNotification.urgency == NotificationUrgency.Critical ? Colors.criticalText : Colors.primary
                                             elide: Text.ElideRight
                                         }
