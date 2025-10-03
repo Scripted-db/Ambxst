@@ -30,7 +30,10 @@ Singleton {
             target: modelData
 
             Component.onCompleted: {
-                if (root.trackedPlayer == null || modelData.isPlaying) {
+                const dbusName = (modelData.dbusName || "").toLowerCase();
+                const shouldIgnore = !Config.bar.enableFirefoxPlayer && dbusName.includes("firefox");
+                
+                if (!shouldIgnore && (root.trackedPlayer == null || modelData.isPlaying)) {
                     root.trackedPlayer = modelData
                 }
             }
