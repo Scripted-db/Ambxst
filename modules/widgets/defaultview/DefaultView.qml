@@ -13,7 +13,8 @@ Item {
     Behavior on implicitWidth {
         NumberAnimation {
             duration: Config.animDuration
-            easing.type: Easing.OutQuart
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.2
         }
     }
 
@@ -31,7 +32,8 @@ Item {
         Behavior on spacing {
             NumberAnimation {
                 duration: Config.animDuration
-                easing.type: Easing.OutQuart
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.2
             }
         }
 

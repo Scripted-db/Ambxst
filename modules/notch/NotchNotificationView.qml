@@ -21,7 +21,8 @@ Item {
     Behavior on implicitWidth {
         NumberAnimation {
             duration: Config.animDuration
-            easing.type: Easing.OutQuart
+            easing.type: Easing.OutBack
+            easing.overshoot: 1.2
         }
     }
 
@@ -350,14 +351,15 @@ Item {
                         Column {
                             id: notificationContent
                             width: parent.width
-                            spacing: hovered ? 8 : 0
+        spacing: hovered ? 8 : 0
 
-                            Behavior on spacing {
-                                NumberAnimation {
-                                    duration: Config.animDuration
-                                    easing.type: Easing.OutQuart
-                                }
-                            }
+        Behavior on spacing {
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutBack
+                easing.overshoot: 1.2
+            }
+        }
 
                             // Contenido principal de la notificación
                             Item {

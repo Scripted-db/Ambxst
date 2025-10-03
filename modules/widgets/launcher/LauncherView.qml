@@ -31,6 +31,13 @@ Item {
     implicitWidth: 480
     implicitHeight: Math.min(stack.currentItem ? stack.currentItem.implicitHeight : 368, 368)
 
+    Behavior on implicitHeight {
+        NumberAnimation {
+            duration: Config.animDuration
+            easing.type: Easing.OutQuart
+        }
+    }
+
     // Reset al tab seleccionado cuando se abre el launcher
     Component.onCompleted: {
         root.state.currentTab = GlobalStates.launcherCurrentTab;

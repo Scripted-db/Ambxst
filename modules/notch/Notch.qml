@@ -89,6 +89,22 @@ Item {
             height: stackViewInternal.currentItem ? stackViewInternal.currentItem.implicitHeight + (screenNotchOpen ? 32 : 0) : 32
             clip: true
 
+            Behavior on width {
+                enabled: stackViewInternal.busy
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutQuart
+                }
+            }
+
+            Behavior on height {
+                enabled: stackViewInternal.busy
+                NumberAnimation {
+                    duration: Config.animDuration
+                    easing.type: Easing.OutQuart
+                }
+            }
+
             // Propiedad para controlar el blur durante las transiciones
             property real transitionBlur: 0.0
 
