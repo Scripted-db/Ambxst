@@ -13,9 +13,18 @@ Singleton {
     FileView {
         id: loader
         path: Qt.resolvedUrl("../config.json")
-        preload: true
+        blockLoading: true
+        atomicWrites: true
         watchChanges: true
         onFileChanged: reload()
+        onAdapterUpdated: writeAdapter()
+
+        Component.onCompleted: {
+            if (!loader.loaded || loader.error === FileViewError.FileNotFound) {
+                console.log("config.json not found, creating with default values...")
+                loader.writeAdapter()
+            }
+        }
 
         adapter: JsonAdapter {
             property JsonObject theme: JsonObject {
