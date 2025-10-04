@@ -57,7 +57,7 @@ Item {
         Row {
             id: mainRow
             anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width - 32
+            width: parent.width - 28
             height: Config.bar.showBackground ? (Config.notchTheme === "island" ? 36 : 44) : (Config.notchTheme === "island" ? 36 : 40)
             spacing: 8
 
