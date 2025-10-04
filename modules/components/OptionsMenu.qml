@@ -107,7 +107,7 @@ Menu {
             visible: {
                 if (root.hoveredIndex === -1) return false;
                 let item = root.items[root.hoveredIndex];
-                return item && !item.isSeparator; // No highlight en separadores
+                return item && item.isSeparator === false;
             }
             opacity: visible ? 1.0 : 0
             

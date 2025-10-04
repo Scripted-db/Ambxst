@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
 import qs.modules.theme
+import qs.modules.services
 import qs.modules.components
 import qs.config
 
@@ -12,34 +13,25 @@ MouseArea {
 
     required property var bar
     required property SystemTrayItem item
-    property bool targetMenuOpen: false
     property int trayItemSize: 20
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     Layout.fillHeight: bar.orientation === "horizontal"
     implicitWidth: trayItemSize
     implicitHeight: trayItemSize
+    
     onClicked: event => {
         switch (event.button) {
         case Qt.LeftButton:
             item.activate();
             break;
         case Qt.RightButton:
-            if (item.hasMenu) {
-                // Posicionar el menú basado en la posición del mouse
-                let globalPos = mapToGlobal(event.x, event.y);
-                contextMenu.x = globalPos.x;
-                contextMenu.y = globalPos.y;
-                contextMenu.open();
+            if (item.hasMenu && Visibilities.contextMenu) {
+                Visibilities.contextMenu.openMenu(item.menu);
             }
             break;
         }
         event.accepted = true;
-    }
-
-    ContextMenu {
-        id: contextMenu
-        menuHandle: root.item.menu
     }
 
     IconImage {

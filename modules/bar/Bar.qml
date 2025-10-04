@@ -71,7 +71,7 @@ PanelWindow {
                 PropertyChanges {
                     target: bar
                     width: undefined
-                    height: Visibilities.contextMenuOpen ? Screen.height : 44
+                    height: 44
                 }
             },
             State {
@@ -87,7 +87,7 @@ PanelWindow {
                 PropertyChanges {
                     target: bar
                     width: undefined
-                    height: Visibilities.contextMenuOpen ? Screen.height : 44
+                    height: 44
                 }
             },
             State {
@@ -102,7 +102,7 @@ PanelWindow {
                 }
                 PropertyChanges {
                     target: bar
-                    width: Visibilities.contextMenuOpen ? Screen.width : 44
+                    width: 44
                     height: undefined
                 }
             },
@@ -118,7 +118,7 @@ PanelWindow {
                 }
                 PropertyChanges {
                     target: bar
-                    width: Visibilities.contextMenuOpen ? Screen.width : 44
+                    width: 44
                     height: undefined
                 }
             }

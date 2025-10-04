@@ -9,10 +9,17 @@ import qs.modules.widgets.dashboard.wallpapers
 import qs.modules.notch
 import qs.modules.services
 import qs.modules.corners
+import qs.modules.components
 import qs.config
 
 ShellRoot {
     id: root
+
+    ContextMenu {
+        id: contextMenu
+        screen: Quickshell.screens[0]
+        Component.onCompleted: Visibilities.setContextMenu(contextMenu)
+    }
 
     Variants {
         model: Quickshell.screens
