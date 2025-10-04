@@ -13,7 +13,7 @@ BgRect {
     property bool weatherVisible: false
     property string currentDayAbbrev: ""
 
-    Layout.preferredWidth: dayDisplay.implicitWidth + (weatherVisible ? weatherDisplay.implicitWidth + sep.implicitWidth : 0) + timeDisplay.implicitWidth + (weatherVisible ? 56 : 40)
+    Layout.preferredWidth: dayDisplay.implicitWidth + (weatherVisible ? weatherDisplay.implicitWidth + sep.implicitWidth : 0) + timeDisplay.implicitWidth + (weatherVisible ? 48 : 40)
     Layout.preferredHeight: 36
 
     RowLayout {
