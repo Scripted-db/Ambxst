@@ -22,7 +22,7 @@ BgRect {
     property int weatherRetryCount: 0
     property int weatherMaxRetries: 5
 
-    Layout.preferredWidth: vertical ? 36 : (dayDisplay.implicitWidth + (weatherVisible ? separator.implicitWidth + symbolDisplay.implicitWidth + tempDisplay.implicitWidth + 16 : 0) + (weatherVisible ? 20 : 20))
+    Layout.preferredWidth: vertical ? 36 : rowLayout.implicitWidth + 20
     implicitHeight: vertical ? columnLayout.implicitHeight + 20 : 36
     Layout.preferredHeight: implicitHeight
 
@@ -43,7 +43,6 @@ BgRect {
 
         Separator {
             id: separator
-            visible: weatherContainer.weatherVisible
         }
 
         Text {
@@ -53,7 +52,6 @@ BgRect {
             font.pixelSize: 16
             font.family: Config.theme.font
             font.bold: true
-            visible: weatherContainer.weatherVisible
         }
 
         Text {
@@ -63,7 +61,6 @@ BgRect {
             font.pixelSize: Config.theme.fontSize
             font.family: Config.theme.font
             font.bold: true
-            visible: weatherContainer.weatherVisible
         }
     }
 
@@ -89,7 +86,6 @@ BgRect {
         Separator {
             id: separatorV
             vert: true
-            visible: weatherContainer.weatherVisible
             Layout.alignment: Qt.AlignHCenter
         }
 
@@ -100,7 +96,6 @@ BgRect {
             font.pixelSize: 16
             font.family: Config.theme.font
             font.bold: true
-            visible: weatherContainer.weatherVisible
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.NoWrap
             Layout.alignment: Qt.AlignHCenter
@@ -113,7 +108,6 @@ BgRect {
             font.pixelSize: Config.theme.fontSize
             font.family: Config.theme.font
             font.bold: true
-            visible: weatherContainer.weatherVisible
             horizontalAlignment: Text.AlignHCenter
             wrapMode: Text.NoWrap
             Layout.alignment: Qt.AlignHCenter
