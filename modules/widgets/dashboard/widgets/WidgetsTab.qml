@@ -12,6 +12,11 @@ Rectangle {
         anchors.fill: parent
         spacing: 8
 
+        NotificationHistory {
+            Layout.preferredWidth: 320
+            Layout.fillHeight: true
+        }
+
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -26,11 +31,6 @@ Rectangle {
                 font.pixelSize: 16
                 font.weight: Font.Medium
             }
-        }
-
-        NotificationHistory {
-            Layout.preferredWidth: 290
-            Layout.fillHeight: true
         }
     }
 }
