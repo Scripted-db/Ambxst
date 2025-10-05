@@ -534,7 +534,6 @@ PanelWindow {
         }
 
         Loader {
-            asynchronous: true
             anchors.fill: parent
             sourceComponent: {
                 if (!parent.source)
