@@ -29,13 +29,12 @@ ClippingRectangle {
     Loader {
         id: appIconLoader
         active: root.image == "" && root.appIcon != ""
-        anchors.centerIn: parent
+        anchors.fill: parent
         sourceComponent: Image {
             id: appIconImage
-            width: root.appIconSize
-            height: root.appIconSize
+            anchors.fill: parent
             source: root.appIcon ? "image://icon/" + root.appIcon : ""
-            fillMode: Image.PreserveAspectFit
+            fillMode: Image.PreserveAspectCrop
             smooth: true
         }
     }
@@ -69,12 +68,16 @@ ClippingRectangle {
                 active: root.appIcon != ""
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
-                sourceComponent: Image {
-                    width: root.smallAppIconSize
-                    height: root.smallAppIconSize
-                    source: root.appIcon ? "image://icon/" + root.appIcon : ""
-                    fillMode: Image.PreserveAspectFit
-                    smooth: true
+                width: root.smallAppIconSize
+                height: root.smallAppIconSize
+                sourceComponent: ClippingRectangle {
+                    radius: root.radius * root.smallAppIconScale
+                    Image {
+                        anchors.fill: parent
+                        source: root.appIcon ? "image://icon/" + root.appIcon : ""
+                        fillMode: Image.PreserveAspectCrop
+                        smooth: true
+                    }
                 }
             }
         }
