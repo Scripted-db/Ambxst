@@ -98,9 +98,9 @@ PanelWindow {
         scanWallpapers.running = true;
     }
 
-    onCurrentWallpaperChanged: {
-        // Matugen se ejecuta manualmente en las funciones de cambio
-    }
+    onCurrentWallpaperChanged:
+    // Matugen se ejecuta manualmente en las funciones de cambio
+    {}
 
     function setWallpaper(path) {
         console.log("setWallpaper called with:", path);
@@ -193,7 +193,7 @@ PanelWindow {
 
     FileView {
         id: wallpaperConfig
-        path: Quickshell.cacheDir + "/wallpapers.json"
+        path: Quickshell.cachePath("wallpapers.json")
         watchChanges: true
 
         onFileChanged: reload()
@@ -250,7 +250,7 @@ PanelWindow {
     Process {
         id: checkWallpapersJson
         running: false
-        command: ["test", "-f", Quickshell.cacheDir + "/wallpapers.json"]
+        command: ["test", "-f", Quickshell.cachePath("wallpapers.json")]
 
         onExited: function (exitCode) {
             if (exitCode !== 0) {
@@ -400,14 +400,14 @@ PanelWindow {
                                 currentIndex = 0;
                             }
 
-                        if (!initialLoadCompleted) {
-                            if (!wallpaperConfig.adapter.currentWall) {
-                                wallpaperConfig.adapter.currentWall = wallpaperPaths[0];
+                            if (!initialLoadCompleted) {
+                                if (!wallpaperConfig.adapter.currentWall) {
+                                    wallpaperConfig.adapter.currentWall = wallpaperPaths[0];
+                                }
+                                console.log("DEBUG: Setting initialLoadCompleted to true");
+                                initialLoadCompleted = true;
+                                // runMatugenForCurrentWallpaper() will be called by onCurrentWallChanged
                             }
-                            console.log("DEBUG: Setting initialLoadCompleted to true");
-                            initialLoadCompleted = true;
-                            // runMatugenForCurrentWallpaper() will be called by onCurrentWallChanged
-                        }
                         }
                     }
                 }

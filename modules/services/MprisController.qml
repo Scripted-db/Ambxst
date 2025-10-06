@@ -23,10 +23,10 @@ Singleton {
     }
     property MprisPlayer activePlayer: trackedPlayer ?? filteredPlayers[0] ?? null
 
-    property string cacheFilePath: Quickshell.cacheDir + "/lastPlayer.json"
+    property string cacheFilePath: Quickshell.cachePath("lastPlayer.json")
     property bool isInitializing: true
     property string cachedDbusName: ""
-    
+
     FileView {
         id: cacheFile
         path: root.cacheFilePath
@@ -56,7 +56,7 @@ Singleton {
                 root.isInitializing = false;
                 return;
             }
-            
+
             const obj = JSON.parse(data);
             if (obj && obj.dbusName) {
                 root.cachedDbusName = obj.dbusName;
@@ -75,12 +75,13 @@ Singleton {
     }
 
     function saveLastPlayer() {
-        if (!root.trackedPlayer || root.isInitializing) return;
-        
+        if (!root.trackedPlayer || root.isInitializing)
+            return;
+
         const data = JSON.stringify({
             dbusName: root.trackedPlayer.dbusName
         });
-        
+
         cacheFile.setText(data);
     }
 
@@ -94,7 +95,7 @@ Singleton {
             Component.onCompleted: {
                 const dbusName = (modelData.dbusName || "").toLowerCase();
                 const shouldIgnore = !Config.bar.enableFirefoxPlayer && dbusName.includes("firefox");
-                
+
                 if (!shouldIgnore && (root.trackedPlayer == null || modelData.isPlaying)) {
                     root.trackedPlayer = modelData;
                 }
@@ -104,20 +105,20 @@ Singleton {
                 if (root.trackedPlayer == null || !root.trackedPlayer.isPlaying) {
                     for (const player of root.filteredPlayers) {
                         if (player.playbackState.isPlaying) {
-                            root.trackedPlayer = player
-                            break
+                            root.trackedPlayer = player;
+                            break;
                         }
                     }
 
                     if (trackedPlayer == null && root.filteredPlayers.length != 0) {
-                        trackedPlayer = root.filteredPlayers[0]
+                        trackedPlayer = root.filteredPlayers[0];
                     }
                 }
             }
 
             function onPlaybackStateChanged() {
-                // Comentado para evitar cambio automático de player
-                // if (root.trackedPlayer !== modelData) root.trackedPlayer = modelData
+            // Comentado para evitar cambio automático de player
+            // if (root.trackedPlayer !== modelData) root.trackedPlayer = modelData
             }
         }
     }
@@ -125,20 +126,21 @@ Singleton {
     property bool isPlaying: this.activePlayer && this.activePlayer.isPlaying
     property bool canTogglePlaying: this.activePlayer?.canTogglePlaying ?? false
     function togglePlaying() {
-        if (this.canTogglePlaying) this.activePlayer.togglePlaying()
+        if (this.canTogglePlaying)
+            this.activePlayer.togglePlaying();
     }
 
     property bool canGoPrevious: this.activePlayer?.canGoPrevious ?? false
     function previous() {
         if (this.canGoPrevious) {
-            this.activePlayer.previous()
+            this.activePlayer.previous();
         }
     }
 
     property bool canGoNext: this.activePlayer?.canGoNext ?? false
     function next() {
         if (this.canGoNext) {
-            this.activePlayer.next()
+            this.activePlayer.next();
         }
     }
 
@@ -148,7 +150,7 @@ Singleton {
     property var loopState: this.activePlayer?.loopState ?? MprisLoopState.None
     function setLoopState(loopState) {
         if (this.loopSupported) {
-            this.activePlayer.loopState = loopState
+            this.activePlayer.loopState = loopState;
         }
     }
 
@@ -156,12 +158,12 @@ Singleton {
     property bool hasShuffle: this.activePlayer?.shuffle ?? false
     function setShuffle(shuffle) {
         if (this.shuffleSupported) {
-            this.activePlayer.shuffle = shuffle
+            this.activePlayer.shuffle = shuffle;
         }
     }
 
     function setActivePlayer(player) {
-        const targetPlayer = player ?? Mpris.players[0]
+        const targetPlayer = player ?? Mpris.players[0];
 
         this.trackedPlayer = targetPlayer;
         this.saveLastPlayer();
@@ -169,17 +171,18 @@ Singleton {
 
     function cyclePlayer(direction) {
         const players = root.filteredPlayers;
-        if (players.length === 0) return;
-        
+        if (players.length === 0)
+            return;
+
         const currentIndex = players.indexOf(this.activePlayer);
         let newIndex;
-        
+
         if (direction > 0) {
             newIndex = (currentIndex + 1) % players.length;
         } else {
             newIndex = (currentIndex - 1 + players.length) % players.length;
         }
-        
+
         this.trackedPlayer = players[newIndex];
         this.saveLastPlayer();
     }

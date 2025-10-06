@@ -46,18 +46,18 @@ Singleton {
 
                 // Cachear imágenes
                 if (appIcon && !appIcon.startsWith("data:")) {
-                    root.cacheImageAsBase64(appIcon, function(cachedData) {
+                    root.cacheImageAsBase64(appIcon, function (cachedData) {
                         cachedAppIcon = cachedData;
                     });
                 }
                 if (image && !image.startsWith("data:")) {
-                    root.cacheImageAsBase64(image, function(cachedData) {
+                    root.cacheImageAsBase64(image, function (cachedData) {
                         cachedImage = cachedData;
                     });
                 }
 
                 // Escuchar cuando la notificación es cerrada por la aplicación
-                notification.closed.connect(function(reason) {
+                notification.closed.connect(function (reason) {
                     // CloseRequested = 3: la aplicación solicitó cerrar la notificación
                     if (reason === 3) {
                         root.discardNotification(id);
@@ -141,7 +141,7 @@ Singleton {
 
     FileView {
         id: notifFileView
-        path: Quickshell.cacheDir + "/notifications.json"
+        path: Quickshell.cachePath("notifications.json")
         onLoaded: loadNotifications()
     }
 
@@ -153,16 +153,19 @@ Singleton {
         return notifComponent.createObject(root, {
             "id": json.id,
             "actions": json.actions,
-            "appIcon": json.cachedAppIcon || json.appIcon,  // Usar cached si disponible
+            "appIcon": json.cachedAppIcon || json.appIcon  // Usar cached si disponible
+            ,
             "appName": json.appName,
             "body": json.body,
-            "image": json.cachedImage || json.image,  // Usar cached si disponible
+            "image": json.cachedImage || json.image  // Usar cached si disponible
+            ,
             "summary": json.summary,
             "time": json.time,
             "urgency": json.urgency,
             "cachedAppIcon": json.cachedAppIcon || "",
             "cachedImage": json.cachedImage || "",
-            "isCached": json.isCached || true,  // Default to true for loaded notifications
+            "isCached": json.isCached || true  // Default to true for loaded notifications
+            ,
             "popup": false  // No popup para notificaciones cargadas
         });
     }
@@ -203,7 +206,8 @@ Singleton {
             // Set idOffset to max id + 1
             let maxId = 0;
             root.list.forEach(notif => {
-                if (notif.id > maxId) maxId = notif.id;
+                if (notif.id > maxId)
+                    maxId = notif.id;
             });
             root.idOffset = maxId + 1;
         } catch (e) {
@@ -291,7 +295,7 @@ Singleton {
             if (!notification || (!notification.summary && !notification.body)) {
                 return;
             }
-            
+
             notification.tracked = true;
             const newNotifObject = notifComponent.createObject(root, {
                 "id": notification.id + root.idOffset,
@@ -333,7 +337,8 @@ Singleton {
     }
 
     function discardNotifications(ids) {
-        if (!ids || ids.length === 0) return;
+        if (!ids || ids.length === 0)
+            return;
 
         // Remover todas las notificaciones de la lista de una vez
         const idsSet = new Set(ids);
@@ -405,8 +410,7 @@ Singleton {
             const notifServerNotif = notifServer.trackedNotifications.values[notifServerIndex];
             const action = notifServerNotif.actions.find(action => action.identifier === notifIdentifier);
             action.invoke();
-        } else {
-        }
+        } else {}
         if (autoDiscard) {
             root.discardNotification(id);
         }
@@ -483,7 +487,7 @@ Singleton {
         xhr.responseType = "arraybuffer";
         xhr.timeout = 5000; // 5 segundos timeout
 
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status === 200 && xhr.response) {
                 try {
                     var arrayBuffer = xhr.response;
@@ -514,11 +518,11 @@ Singleton {
             }
         };
 
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             callback(imageUrl);
         };
 
-        xhr.ontimeout = function() {
+        xhr.ontimeout = function () {
             callback(imageUrl);
         };
 
