@@ -105,7 +105,7 @@ Singleton {
     }
 
     function executeDesktopFile(filePath) {
-        execDesktopProcess.command = ["gio", "launch", filePath];
+        execDesktopProcess.command = ["sh", "-c", "cd ~ && gio launch '" + filePath.replace(/'/g, "'\\''") + "'"];
         execDesktopProcess.running = true;
     }
 
