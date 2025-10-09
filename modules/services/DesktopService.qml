@@ -89,6 +89,12 @@ Singleton {
         getDesktopDirProcess.running = true;
     }
 
+    function generateThumbnails() {
+        if (desktopDir) {
+            thumbnailProcess.running = true;
+        }
+    }
+
     function scanDesktop() {
         if (desktopDir) {
             if (parsingInProgress) {
@@ -292,6 +298,7 @@ Singleton {
         onFileChanged: {
             console.log("Desktop directory changed, rescanning...");
             scanDesktop();
+            thumbnailTimer.restart();
         }
     }
 
@@ -579,6 +586,41 @@ Singleton {
                     console.warn("Error opening file:", text);
                 }
             }
+        }
+    }
+
+    Process {
+        id: thumbnailProcess
+        running: false
+        command: ["python3", Qt.resolvedUrl("../../scripts/desktop_thumbgen.py").toString().replace("file://", ""), desktopDir, Quickshell.cacheDir + "/desktop_thumbnails"]
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.log("Thumbnail generation:", text);
+                }
+            }
+        }
+
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.log("Thumbnail generation output:", text);
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: thumbnailTimer
+        interval: 1000
+        running: false
+        onTriggered: generateThumbnails()
+    }
+
+    onDesktopDirChanged: {
+        if (desktopDir) {
+            thumbnailTimer.running = true;
         }
     }
 }

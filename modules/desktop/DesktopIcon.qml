@@ -1,6 +1,8 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
+import Quickshell.Io
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.services
@@ -14,6 +16,35 @@ Item {
     required property string itemType
     required property string itemIcon
     property bool isDesktopFile: false
+
+    readonly property string thumbnailPath: {
+        const ext = itemPath.substring(itemPath.lastIndexOf('.') + 1).toLowerCase();
+        const videoExts = ['mp4', 'webm', 'mov', 'avi', 'mkv', 'gif'];
+        const imageExts = ['jpg', 'jpeg', 'png', 'webp', 'tif', 'tiff', 'bmp'];
+        
+        if (itemType === 'folder' || isDesktopFile) {
+            return '';
+        }
+        
+        if (videoExts.includes(ext) || imageExts.includes(ext)) {
+            const fileName = itemPath.substring(itemPath.lastIndexOf('/') + 1);
+            return Quickshell.cacheDir + "/desktop_thumbnails/" + fileName + ".jpg";
+        }
+        
+        return '';
+    }
+    
+    readonly property bool hasThumbnail: thumbnailPath !== '' && Qt.platform.os !== "windows"
+    property int thumbnailRefresh: 0
+
+    FileView {
+        path: root.thumbnailPath
+        watchChanges: root.hasThumbnail
+
+        onFileChanged: {
+            root.thumbnailRefresh++;
+        }
+    }
 
     signal activated
     signal contextMenuRequested
@@ -82,7 +113,12 @@ Item {
                 anchors.centerIn: parent
                 width: Config.desktop.iconSize
                 height: Config.desktop.iconSize
-                sourceComponent: Config.tintIcons ? tintedIconComponent : normalIconComponent
+                sourceComponent: {
+                    if (root.hasThumbnail) {
+                        return normalIconComponent;
+                    }
+                    return Config.tintIcons ? tintedIconComponent : normalIconComponent;
+                }
             }
         }
 
@@ -104,10 +140,27 @@ Item {
     Component {
         id: normalIconComponent
         Image {
-            source: "image://icon/" + root.itemIcon
+            property bool thumbnailExists: false
+            source: {
+                root.thumbnailRefresh;
+                if (root.hasThumbnail) {
+                    return "file://" + root.thumbnailPath;
+                }
+                return "image://icon/" + root.itemIcon;
+            }
             fillMode: Image.PreserveAspectFit
             asynchronous: true
             smooth: true
+            cache: false
+            
+            onStatusChanged: {
+                if (status === Image.Ready && root.hasThumbnail) {
+                    thumbnailExists = true;
+                } else if (status === Image.Error && root.hasThumbnail) {
+                    thumbnailExists = false;
+                    source = "image://icon/" + root.itemIcon;
+                }
+            }
 
             Rectangle {
                 anchors.fill: parent
@@ -130,10 +183,27 @@ Item {
         id: tintedIconComponent
         Tinted {
             sourceItem: Image {
-                source: "image://icon/" + root.itemIcon
+                property bool thumbnailExists: false
+                source: {
+                    root.thumbnailRefresh;
+                    if (root.hasThumbnail) {
+                        return "file://" + root.thumbnailPath;
+                    }
+                    return "image://icon/" + root.itemIcon;
+                }
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
                 smooth: true
+                cache: false
+                
+                onStatusChanged: {
+                    if (status === Image.Ready && root.hasThumbnail) {
+                        thumbnailExists = true;
+                    } else if (status === Image.Error && root.hasThumbnail) {
+                        thumbnailExists = false;
+                        source = "image://icon/" + root.itemIcon;
+                    }
+                }
             }
         }
     }
