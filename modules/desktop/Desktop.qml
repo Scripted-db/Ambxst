@@ -44,8 +44,8 @@ PanelWindow {
         anchors.leftMargin: desktop.barPosition === "left" ? desktop.barSize + 16 : 16
         anchors.rightMargin: desktop.barPosition === "right" ? desktop.barSize + 16 : 16
 
-        property int cellWidth: Config.desktop.iconSize + 32
         property int cellHeight: Config.desktop.iconSize + 40 + Config.desktop.spacingVertical
+        property int cellWidth: cellHeight
         property int maxRows: Math.floor(height / cellHeight)
         property int maxColumns: Math.floor(width / cellWidth)
 

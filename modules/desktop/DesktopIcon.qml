@@ -18,7 +18,7 @@ Item {
     signal activated
     signal contextMenuRequested
 
-    width: Config.desktop.iconSize + Config.desktop.spacing
+    width: Config.desktop.iconSize * 1.5
     height: Config.desktop.iconSize + 40
 
     Rectangle {
