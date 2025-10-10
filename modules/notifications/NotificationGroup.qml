@@ -58,10 +58,11 @@ Item {
     property var dragIndexDiff: Math.abs(parentDragIndex - (index ?? 0))
     property real xOffset: dragIndexDiff == 0 ? Math.max(0, parentDragDistance) : parentDragDistance > dragConfirmThreshold ? 0 : dragIndexDiff == 1 ? Math.max(0, parentDragDistance * 0.3) : dragIndexDiff == 2 ? Math.max(0, parentDragDistance * 0.1) : 0
 
-    function destroyWithAnimation() {
+    function destroyWithAnimation(isDiscardAll = false) {
         if (root.qmlParent && root.qmlParent.resetDrag)
             root.qmlParent.resetDrag();
         background.anchors.leftMargin = background.anchors.leftMargin;
+        notificationAnimation.isDiscardAll = isDiscardAll;
         notificationAnimation.startDestroy();
     }
 
@@ -72,9 +73,11 @@ Item {
         parentWidth: root.width
 
         onDestroyFinished: {
-            // Usar discard masivo para mejor rendimiento
-            const ids = root.notifications.map(notif => notif.id);
-            Notifications.discardNotifications(ids);
+            if (!notificationAnimation.isDiscardAll) {
+                // Usar discard masivo para mejor rendimiento
+                const ids = root.notifications.map(notif => notif.id);
+                Notifications.discardNotifications(ids);
+            }
         }
     }
 

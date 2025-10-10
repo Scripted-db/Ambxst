@@ -8,6 +8,7 @@ Item {
     property Item targetItem: null
     property real dismissOvershoot: 20
     property real parentWidth: 0
+    property bool isDiscardAll: false
 
     // Señales para diferentes tipos de animación
     signal destroyFinished

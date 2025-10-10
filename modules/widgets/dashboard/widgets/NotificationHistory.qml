@@ -9,6 +9,62 @@ import qs.modules.corners
 import qs.config
 
 Item {
+    property var cascadeItems: []
+    property int cascadeIndex: -1
+
+    function discardAllWithAnimation() {
+        const children = notificationList.contentItem.children;
+        if (children.length === 0) {
+            Notifications.discardAllNotifications();
+            return;
+        }
+
+        // Capture the current items to avoid issues if they change during animation
+        cascadeItems = [];
+        for (let i = 0; i < children.length; i++) {
+            if (children[i] && children[i].destroyWithAnimation) {
+                cascadeItems.push(children[i]);
+            }
+        }
+
+        if (cascadeItems.length === 0) {
+            Notifications.discardAllNotifications();
+            return;
+        }
+
+        cascadeIndex = cascadeItems.length - 1; // Start from last
+        cascadeTimer.restart();
+    }
+
+    Timer {
+        id: cascadeTimer
+        interval: 100 // 0.1 seconds delay between each animation
+        repeat: true
+        onTriggered: {
+            if (cascadeIndex >= 0) {
+                const item = cascadeItems[cascadeIndex];
+                if (item && item.destroyWithAnimation) {
+                    item.destroyWithAnimation(true);
+                }
+                cascadeIndex--;
+            } else {
+                // All animations started, schedule final discard
+                stop();
+                cascadeItems = []; // Clear
+                const totalDelay = Config.animDuration + 50;
+                discardAllTimer.interval = totalDelay;
+                discardAllTimer.restart();
+            }
+        }
+    }
+
+    Timer {
+        id: discardAllTimer
+        interval: Config.animDuration + 50 // Animation duration + small buffer
+        repeat: false
+        onTriggered: Notifications.discardAllNotifications()
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
@@ -130,7 +186,7 @@ Item {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     hoverEnabled: true
-                    onClicked: Notifications.discardAllNotifications()
+                    onClicked: discardAllWithAnimation()
                 }
             }
         }

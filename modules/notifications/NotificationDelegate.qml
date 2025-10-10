@@ -435,8 +435,7 @@ Item {
                         onClicked: {
                             if (latestNotification) {
                                 Notifications.attemptInvokeAction(latestNotification.id, modelData.identifier, false);
-                                const ids = root.notifications.map(notif => notif.id);
-                                Notifications.discardNotifications(ids);
+                                root.destroyRequested();
                             }
                         }
                     }
