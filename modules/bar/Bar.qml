@@ -124,94 +124,16 @@ PanelWindow {
             }
         ]
 
-        Rectangle {
+        BarBg {
             id: barBg
             anchors.fill: parent
-            property color configColor: Colors[Config.bar.bgColor] || Colors.surface
-            property color bgColor: Qt.rgba(configColor.r, configColor.g, configColor.b, Config.bar.bgOpacity)
-            color: Config.bar.showBackground ? bgColor : "transparent"
-
-            RoundCorner {
-                id: cornerLeft
-                visible: Config.theme.enableCorners
-                size: Config.roundness > 0 ? Config.roundness + 4 : 0
-                x: panel.position === "left" ? parent.width : (panel.position === "right" ? -size : 0)
-                y: panel.position === "top" ? parent.height : (panel.position === "bottom" ? -size : 0)
-                corner: {
-                    if (panel.position === "top") return RoundCorner.CornerEnum.TopLeft
-                    if (panel.position === "bottom") return RoundCorner.CornerEnum.BottomLeft
-                    if (panel.position === "left") return RoundCorner.CornerEnum.TopLeft
-                    if (panel.position === "right") return RoundCorner.CornerEnum.TopRight
-                }
-                color: parent.color
-            }
-
-            RoundCorner {
-                id: cornerRight
-                visible: Config.theme.enableCorners
-                size: Config.roundness > 0 ? Config.roundness + 4 : 0
-                x: panel.position === "left" ? parent.width : (panel.position === "right" ? -size : parent.width - size)
-                y: panel.position === "top" ? parent.height : (panel.position === "bottom" ? -size : parent.height - size)
-                corner: {
-                    if (panel.position === "top") return RoundCorner.CornerEnum.TopRight
-                    if (panel.position === "bottom") return RoundCorner.CornerEnum.BottomRight
-                    if (panel.position === "left") return RoundCorner.CornerEnum.BottomLeft
-                    if (panel.position === "right") return RoundCorner.CornerEnum.BottomRight
-                }
-                color: parent.color
-            }
+            position: panel.position
         }
 
-        Rectangle {
+        BarBgShadow {
             id: barBgShadow
             anchors.fill: barBg
-            color: Config.bar.showBackground ? "black" : "transparent"
-
-            layer.enabled: true
-            layer.smooth: true
-            layer.effect: MultiEffect {
-                maskEnabled: true
-                maskSource: barBgShadow
-                maskInverted: true
-                maskThresholdMin: 0.5
-                maskSpreadAtMin: 1.0
-                shadowEnabled: true
-                shadowHorizontalOffset: 0
-                shadowVerticalOffset: 0
-                shadowBlur: 1
-                shadowColor: Colors[Config.theme.shadowColor] || Colors.shadow
-                shadowOpacity: Config.theme.shadowOpacity
-            }
-
-            RoundCorner {
-                id: shadowCornerLeft
-                visible: Config.theme.enableCorners
-                size: Config.roundness > 0 ? Config.roundness + 4 : 0
-                x: panel.position === "left" ? parent.width : (panel.position === "right" ? -size : 0)
-                y: panel.position === "top" ? parent.height : (panel.position === "bottom" ? -size : 0)
-                corner: {
-                    if (panel.position === "top") return RoundCorner.CornerEnum.TopLeft
-                    if (panel.position === "bottom") return RoundCorner.CornerEnum.BottomLeft
-                    if (panel.position === "left") return RoundCorner.CornerEnum.TopLeft
-                    if (panel.position === "right") return RoundCorner.CornerEnum.TopRight
-                }
-                color: parent.color
-            }
-
-            RoundCorner {
-                id: shadowCornerRight
-                visible: Config.theme.enableCorners
-                size: Config.roundness > 0 ? Config.roundness + 4 : 0
-                x: panel.position === "left" ? parent.width : (panel.position === "right" ? -size : parent.width - size)
-                y: panel.position === "top" ? parent.height : (panel.position === "bottom" ? -size : parent.height - size)
-                corner: {
-                    if (panel.position === "top") return RoundCorner.CornerEnum.TopRight
-                    if (panel.position === "bottom") return RoundCorner.CornerEnum.BottomRight
-                    if (panel.position === "left") return RoundCorner.CornerEnum.BottomLeft
-                    if (panel.position === "right") return RoundCorner.CornerEnum.BottomRight
-                }
-                color: parent.color
-            }
+            position: panel.position
         }
 
         RowLayout {

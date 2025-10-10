@@ -65,13 +65,15 @@ Singleton {
 
             property JsonObject bar: JsonObject {
                 property string position: "top"
-                property string launcherIcon: ""
+                property string launcherIcon: ""
                 property bool showBackground: false
                 property real bgOpacity: 0.5
                 property string bgColor: "surface"
                 property bool verbose: true
                 property list<string> screenList: []
                 property bool enableFirefoxPlayer: false
+                property list<var> barColor: [["surface", 0.0]]
+                property string barOrientation: "vertical"
             }
 
             property JsonObject workspaces: JsonObject {
