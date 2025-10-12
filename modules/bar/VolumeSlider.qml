@@ -25,54 +25,34 @@ Item {
             }
         }
 
-        RowLayout {
+        StyledSlider {
+            id: volumeSlider
             anchors.fill: parent
             anchors.margins: 8
-            spacing: 4
+            value: 0
+            icon: {
+                if (Audio.sink?.audio?.muted)
+                    return Icons.speakerSlash;
+                const vol = Audio.sink?.audio?.volume ?? 0;
+                if (vol < 0.01)
+                    return Icons.speakerX;
+                if (vol < 0.19)
+                    return Icons.speakerNone;
+                if (vol < 0.49)
+                    return Icons.speakerLow;
+                return Icons.speakerHigh;
+            }
+            progressColor: Audio.sink?.audio?.muted ? Colors.outline : Colors.primary
 
-            Text {
-                id: volumeIcon
-                text: {
-                    if (Audio.sink?.audio?.muted)
-                        return Icons.speakerSlash;
-                    const vol = Audio.sink?.audio?.volume ?? 0;
-                    if (vol < 0.01)
-                        return Icons.speakerX;
-                    if (vol < 0.19)
-                        return Icons.speakerNone;
-                    if (vol < 0.49)
-                        return Icons.speakerLow;
-                    return Icons.speakerHigh;
-                }
-                font.family: Icons.font
-                font.pixelSize: 20
-                color: Colors.overBackground
-
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onEntered: volumeIcon.color = Colors.primary
-                    onExited: volumeIcon.color = Colors.overBackground
-                    onClicked: {
-                        if (Audio.sink?.audio) {
-                            Audio.sink.audio.muted = !Audio.sink.audio.muted;
-                        }
-                    }
+            onValueChanged: {
+                if (Audio.sink?.audio) {
+                    Audio.sink.audio.volume = value;
                 }
             }
 
-            StyledSlider {
-                id: volumeSlider
-                Layout.fillWidth: true
-                height: 4
-                value: 0
-                progressColor: Audio.sink?.audio?.muted ? Colors.outline : Colors.primary
-
-                onValueChanged: {
-                    if (Audio.sink?.audio) {
-                        Audio.sink.audio.volume = value;
-                    }
+            onIconClicked: {
+                if (Audio.sink?.audio) {
+                    Audio.sink.audio.muted = !Audio.sink.audio.muted;
                 }
             }
 
