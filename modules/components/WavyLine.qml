@@ -11,11 +11,17 @@ Item {
     property real fullLength: width
     property real speed: 2.4
 
+    // Layer con multisampling para anti-aliasing
+    layer.enabled: Config.performance.wavyLine
+    layer.smooth: true
+    layer.textureSize: Qt.size(root.width * 2, root.height * 2)
+    layer.samples: 8
+    
     ShaderEffect {
         id: wavyShader
         anchors.fill: parent
         visible: Config.performance.wavyLine
-
+        
         property real phase: 0
         property real amplitude: root.lineWidth * root.amplitudeMultiplier
         property real frequency: root.frequency
@@ -25,10 +31,17 @@ Item {
         property real canvasHeight: root.height
         property real fullLength: root.fullLength
 
-        vertexShader: "wavyline.vert.qsb"
-        fragmentShader: "wavyline.frag.qsb"
+        vertexShader: Qt.resolvedUrl("wavyline.vert.qsb")
+        fragmentShader: Qt.resolvedUrl("wavyline.frag.qsb")
 
         Component.onCompleted: {
+            console.log("Shader values:");
+            console.log("  amplitude:", amplitude);
+            console.log("  frequency:", frequency);
+            console.log("  lineWidth:", lineWidth);
+            console.log("  canvasWidth:", canvasWidth);
+            console.log("  canvasHeight:", canvasHeight);
+            console.log("  fullLength:", fullLength);
             animationTimer.start();
         }
 
@@ -55,6 +68,6 @@ Item {
     }
 
     function requestPaint() {
-    // Mantenido por compatibilidad
+        // Mantenido por compatibilidad
     }
 }

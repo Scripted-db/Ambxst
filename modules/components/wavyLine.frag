@@ -1,8 +1,6 @@
 #version 440
-
 layout(location = 0) in vec2 qt_TexCoord0;
 layout(location = 0) out vec4 fragColor;
-
 layout(std140, binding = 0) uniform buf {
     mat4 qt_Matrix;
     float qt_Opacity;
@@ -18,33 +16,69 @@ layout(std140, binding = 0) uniform buf {
 
 #define PI 3.14159265359
 
+// Función para suavizar los bordes laterales con forma más redondeada
+float roundedEdge(float x, float width, float radius) {
+    float distFromLeft = x;
+    float distFromRight = width - x;
+    float edgeDist = min(distFromLeft, distFromRight);
+    
+    // Usar una curva más suave (cuadrática) para un efecto más redondeado
+    if (edgeDist >= radius) return 1.0;
+    float t = edgeDist / radius;
+    return t * t * (3.0 - 2.0 * t); // Smootherstep para mayor suavidad
+}
+
+// Calcula la cobertura de un punto considerando la derivada
+float coverage(vec2 pos, float centerY) {
+    float x = pos.x;
+    float k = ubuf.frequency * 2.0 * PI / ubuf.fullLength;
+    
+    // Valor de la onda
+    float waveValue = sin(k * x + ubuf.phase);
+    float waveY = centerY + ubuf.amplitude * waveValue;
+    
+    // Derivada de la onda para calcular el ancho efectivo
+    float derivative = abs(cos(k * x + ubuf.phase) * k * ubuf.amplitude);
+    
+    // El ancho efectivo aumenta con la pendiente de la onda
+    float effectiveWidth = ubuf.lineWidth * 0.1 * sqrt(1.0 + derivative * derivative);
+    
+    // Distancia del píxel a la línea de la onda
+    float dist = abs(pos.y - waveY);
+    
+    // Antialiasing considerando el ancho efectivo
+    float halfWidth = effectiveWidth * 0.5;
+    float fadeRange = 1.5;
+    
+    return 1.0 - smoothstep(halfWidth - fadeRange, halfWidth + fadeRange, dist);
+}
+
 void main() {
     vec2 pixelPos = qt_TexCoord0 * vec2(ubuf.canvasWidth, ubuf.canvasHeight);
     float centerY = ubuf.canvasHeight * 0.5;
     
-    // Debug: visualiza diferentes valores
-    // Descomenta una línea a la vez para ver qué está pasando
+    // Supersampling 3x3: muestrea 9 puntos alrededor del píxel
+    float alpha = 0.0;
+    float samples = 0.0;
     
-    // Test 1: ¿Funciona el gradiente básico?
-    // fragColor = vec4(qt_TexCoord0.x, qt_TexCoord0.y, 0.0, 1.0);
+    for (float dy = -0.66; dy <= 0.66; dy += 0.66) {
+        for (float dx = -0.66; dx <= 0.66; dx += 0.66) {
+            vec2 samplePos = pixelPos + vec2(dx, dy);
+            alpha += coverage(samplePos, centerY);
+            samples += 1.0;
+        }
+    }
     
-    // Test 2: ¿La amplitud es correcta? (debería variar en Y)
-    float x = pixelPos.x;
-    float waveValue = sin(ubuf.frequency * 2.0 * PI * x / ubuf.fullLength + ubuf.phase);
-    // fragColor = vec4(waveValue * 0.5 + 0.5, 0.0, 0.0, 1.0);
+    alpha /= samples;
     
-    // Test 3: Visualiza la amplitud
-    // fragColor = vec4(ubuf.amplitude / 10.0, 0.0, 0.0, 1.0);
+    // Suavizado en los bordes laterales con forma más redondeada
+    float edgeRadius = ubuf.lineWidth * 3.0; // Radio mayor para más suavidad
+    float edgeFade = roundedEdge(pixelPos.x, ubuf.canvasWidth, edgeRadius);
+    alpha *= edgeFade;
     
-    // Versión actual con valores visibles
-    float waveY = centerY + ubuf.amplitude * waveValue;
-    float dist = abs(pixelPos.y - waveY);
+    if (alpha < 0.01) {
+        discard;
+    }
     
-    // Aumenta la tolerancia para ver si hay algo
-    float alpha = 1.0 - smoothstep(0.0, ubuf.lineWidth * 2.0, dist);
-    
-    // Debug color: mezcla rojo donde debería estar la onda
-    vec3 debugColor = mix(ubuf.shaderColor.rgb, vec3(1.0, 0.0, 0.0), step(dist, 2.0));
-    
-    fragColor = vec4(debugColor, alpha * ubuf.qt_Opacity);
+    fragColor = vec4(ubuf.shaderColor.rgb, ubuf.shaderColor.a * alpha * ubuf.qt_Opacity);
 }
