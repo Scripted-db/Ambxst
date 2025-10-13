@@ -19,6 +19,7 @@ ClippingRectangle {
     property real smallAppIconScale: 0.4
     property real appIconSize: size * appIconScale
     property real smallAppIconSize: size * smallAppIconScale
+    property bool usingAppIconFallback: false
 
     implicitWidth: size
     implicitHeight: size
@@ -89,16 +90,22 @@ ClippingRectangle {
                 Image {
                     id: notifImage
                     anchors.fill: parent
-                    source: root.image
+                    source: status === Image.Error && root.appIcon ? "image://icon/" + root.appIcon : root.image
                     fillMode: Image.PreserveAspectCrop
                     smooth: true
+                    onStatusChanged: {
+                        if (status === Image.Error && root.appIcon) {
+                            source = "image://icon/" + root.appIcon;
+                            usingAppIconFallback = true;
+                        }
+                    }
                 }
             }
 
             // App icon pequeño superpuesto si hay imagen
             Loader {
                 id: notifImageAppIconLoader
-                active: root.appIcon != ""
+                active: root.appIcon != "" && !usingAppIconFallback
                 anchors.bottom: parent.bottom
                 anchors.right: parent.right
                 width: root.smallAppIconSize
