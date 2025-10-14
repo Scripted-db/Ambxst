@@ -177,12 +177,12 @@ Item {
                 }
             }
 
-            StyledToolTip {
-                tooltipText: root.tooltipText
-                visible: root.isDragging && root.tooltip
-                x: hDragHandle.x + hDragHandle.width / 2 - width / 2
-                y: hDragHandle.y - height - 5
-            }
+             StyledToolTip {
+                 tooltipText: root.tooltipText
+                 visible: root.isDragging && root.tooltip && !root.vertical
+                 x: hDragHandle.x + hDragHandle.width / 2 - width / 2
+                 y: hDragHandle.y - height - 5
+             }
         }
     }
 
@@ -309,12 +309,12 @@ Item {
                 }
             }
 
-            StyledToolTip {
-                tooltipText: root.tooltipText
-                visible: root.isDragging && root.tooltip
-                x: vDragHandle.x + vDragHandle.width + 5
-                y: vDragHandle.y + vDragHandle.height / 2 - height / 2
-            }
+             StyledToolTip {
+                 tooltipText: root.tooltipText
+                 visible: root.isDragging && root.tooltip && root.vertical
+                 x: vDragHandle.x + vDragHandle.width + 5
+                 y: vDragHandle.y + vDragHandle.height / 2 - height / 2
+             }
         }
     }
 
