@@ -9,4 +9,4 @@ WALLPAPER="$1"
 
 pkill -f "mpvpaper -o" 2>/dev/null
 
-nohup mpvpaper -o "no-audio loop hwdec=auto scale=bilinear interpolation=no video-sync=display-resample panscan=1.0 video-scale-x=1.0 video-scale-y=1.0 video-align-x=0.5 video-align-y=0.5 load-scripts=no" ALL "$WALLPAPER" >/dev/null 2>&1 &
+nohup mpvpaper -o "no-audio loop hwdec=auto scale=bilinear interpolation=no video-sync=display-resample panscan=1.0 video-scale-x=1.0 video-scale-y=1.0 load-scripts=no" ALL "$WALLPAPER" >/dev/null 2>&1 &
