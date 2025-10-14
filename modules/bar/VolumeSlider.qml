@@ -5,8 +5,12 @@ import qs.modules.components
 import qs.modules.theme
 
 Item {
+    id: root
     Layout.preferredWidth: 128
     Layout.fillHeight: true
+
+    // required property var bar
+    // property bool vertical: bar.orientation === "vertical"
 
     Component.onCompleted: volumeSlider.value = Audio.sink?.audio?.volume ?? 0
 

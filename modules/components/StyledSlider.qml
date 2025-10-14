@@ -14,14 +14,14 @@ import qs.modules.components
 Item {
     id: root
 
-    Layout.fillHeight: orientation === "v"
-    Layout.fillWidth: orientation === "h"
-    implicitHeight: orientation === "h" ? 4 : 100
-    implicitWidth: orientation === "v" ? 4 : 100
+    Layout.fillHeight: vertical
+    Layout.fillWidth: !vertical
+    implicitHeight: !vertical ? 4 : 100
+    implicitWidth: vertical ? 4 : 100
 
     signal iconClicked
 
-    property string orientation: "h" // "h" for horizontal, "v" for vertical
+    property bool vertical: false // true for vertical, false for horizontal
     property string icon: ""
     property real value: 0
     property bool isDragging: false
@@ -65,7 +65,7 @@ Item {
     // Horizontal Layout
     RowLayout {
         id: horizontalLayout
-        visible: root.orientation === "h"
+        visible: !root.vertical
         anchors.fill: parent
         anchors.leftMargin: root.iconPos === "start" && root.icon !== "" ? iconText.width + spacing : 0
         anchors.rightMargin: root.iconPos === "end" && root.icon !== "" ? iconText.width + spacing : 0
@@ -189,7 +189,7 @@ Item {
     // Vertical Layout
     ColumnLayout {
         id: verticalLayout
-        visible: root.orientation === "v"
+        visible: root.vertical
         anchors.fill: parent
         anchors.topMargin: root.iconPos === "start" && root.icon !== "" ? iconText.height + spacing : 0
         anchors.bottomMargin: root.iconPos === "end" && root.icon !== "" ? iconText.height + spacing : 0
@@ -325,8 +325,8 @@ Item {
         font.family: Icons.font
         font.pixelSize: 20
          color: Colors.overBackground
-         x: root.orientation === "h" ? (root.iconPos === "start" ? 0 : parent.width - width) : (parent.width - width) / 2
-         y: root.orientation === "v" ? (root.iconPos === "start" ? 0 : parent.height - height) : (parent.height - height) / 2
+          x: !root.vertical ? (root.iconPos === "start" ? 0 : parent.width - width) : (parent.width - width) / 2
+          y: root.vertical ? (root.iconPos === "start" ? 0 : parent.height - height) : (parent.height - height) / 2
  
          MouseArea {
              anchors.fill: parent
@@ -345,56 +345,56 @@ Item {
         cursorShape: Qt.PointingHandCursor
         z: 3
         
-        property var activeLayout: root.orientation === "h" ? horizontalLayout : verticalLayout
-        property real layoutStart: root.orientation === "h" ? activeLayout.x : activeLayout.y
-         property real layoutSize: root.orientation === "h" ? activeLayout.width : activeLayout.height
+        property var activeLayout: !root.vertical ? horizontalLayout : verticalLayout
+        property real layoutStart: !root.vertical ? activeLayout.x : activeLayout.y
+         property real layoutSize: !root.vertical ? activeLayout.width : activeLayout.height
          
-         function isInIconArea(mouseX: real, mouseY: real): bool {
-            if (root.orientation === "h") {
-                return (root.iconPos === "start" && mouseX < iconText.width + horizontalLayout.spacing) ||
-                       (root.iconPos === "end" && mouseX > parent.width - iconText.width - horizontalLayout.spacing)
-            } else {
-                return (root.iconPos === "start" && mouseY < iconText.height + verticalLayout.spacing) ||
-                       (root.iconPos === "end" && mouseY > parent.height - iconText.height - verticalLayout.spacing)
-            }
-        }
+          function isInIconArea(mouseX: real, mouseY: real): bool {
+             if (!root.vertical) {
+                 return (root.iconPos === "start" && mouseX < iconText.width + horizontalLayout.spacing) ||
+                        (root.iconPos === "end" && mouseX > parent.width - iconText.width - horizontalLayout.spacing)
+             } else {
+                 return (root.iconPos === "start" && mouseY < iconText.height + verticalLayout.spacing) ||
+                        (root.iconPos === "end" && mouseY > parent.height - iconText.height - verticalLayout.spacing)
+             }
+         }
         
-         function calculatePosition(mouseX: real, mouseY: real): real {
-            const mousePos = root.orientation === "h" ? mouseX : mouseY
-            const relativePos = mousePos - layoutStart
-            let ratio = Math.max(0, Math.min(1, relativePos / layoutSize))
-            if (root.orientation === "v") {
-                ratio = 1 - ratio // Invert for vertical
-            }
-            return ratio
-        }
+          function calculatePosition(mouseX: real, mouseY: real): real {
+             const mousePos = !root.vertical ? mouseX : mouseY
+             const relativePos = mousePos - layoutStart
+             let ratio = Math.max(0, Math.min(1, relativePos / layoutSize))
+             if (root.vertical) {
+                 ratio = 1 - ratio // Invert for vertical
+             }
+             return ratio
+         }
         
          onClicked: mouse => {
-            if (isInIconArea(mouse.x, mouse.y)) {
-                mouse.accepted = false
-                return
-            }
-            const mousePos = root.orientation === "h" ? mouse.x : mouse.y
-            if (mousePos >= layoutStart && mousePos <= layoutStart + layoutSize) {
-                root.value = calculatePosition(mouse.x, mouse.y)
-            } else {
-                mouse.accepted = false
-            }
-        }
+             if (isInIconArea(mouse.x, mouse.y)) {
+                 mouse.accepted = false
+                 return
+             }
+             const mousePos = !root.vertical ? mouse.x : mouse.y
+             if (mousePos >= layoutStart && mousePos <= layoutStart + layoutSize) {
+                 root.value = calculatePosition(mouse.x, mouse.y)
+             } else {
+                 mouse.accepted = false
+             }
+         }
         
          onPressed: mouse => {
-            if (isInIconArea(mouse.x, mouse.y)) {
-                mouse.accepted = false
-                return
-            }
-            const mousePos = root.orientation === "h" ? mouse.x : mouse.y
-            if (mousePos >= layoutStart && mousePos <= layoutStart + layoutSize) {
-                root.isDragging = true
-                root.dragPosition = calculatePosition(mouse.x, mouse.y)
-            } else {
-                mouse.accepted = false
-            }
-        }
+             if (isInIconArea(mouse.x, mouse.y)) {
+                 mouse.accepted = false
+                 return
+             }
+             const mousePos = !root.vertical ? mouse.x : mouse.y
+             if (mousePos >= layoutStart && mousePos <= layoutStart + layoutSize) {
+                 root.isDragging = true
+                 root.dragPosition = calculatePosition(mouse.x, mouse.y)
+             } else {
+                 mouse.accepted = false
+             }
+         }
         
          onReleased: mouse => {
             if (root.isDragging) {
