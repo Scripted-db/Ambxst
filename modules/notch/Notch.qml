@@ -269,24 +269,26 @@ Item {
         color: Colors.background
     }
 
-     // Unified outline canvas (single continuous stroke around silhouette)
-     Canvas {
-         id: outlineCanvas
-         anchors.top: parent.top
-         anchors.left: leftCorner.visible ? leftCorner.left : notchRect.left
-         width: (Config.notchTheme === "default" && leftCorner.visible && rightCorner.visible) ? leftCorner.width + notchRect.width + rightCorner.width : notchRect.width
-         height: notchRect.height
-         z: 5000
-         antialiasing: true
-         visible: Config.notchTheme === "default" && Config.theme.borderSize > 0
+    // Unified outline canvas (single continuous stroke around silhouette)
+    Canvas {
+        id: outlineCanvas
+        anchors.top: parent.top
+        anchors.left: leftCorner.visible ? leftCorner.left : notchRect.left
+        width: (Config.notchTheme === "default" && leftCorner.visible && rightCorner.visible) ? leftCorner.width + notchRect.width + rightCorner.width : notchRect.width
+        height: notchRect.height
+        z: 5000
+        antialiasing: true
+        visible: Config.notchTheme === "default" && Config.theme.borderSize > 0
         onPaint: {
-            if (Config.notchTheme !== "default") return; // Only draw for default theme
+            if (Config.notchTheme !== "default")
+                return; // Only draw for default theme
             var ctx = getContext("2d");
             ctx.clearRect(0, 0, width, height);
             // Resolve dynamic border color from config (string key referencing Colors)
             var colorKey = Config.theme.borderColor || "primary";
             var strokeColor = Colors[colorKey] !== undefined ? Colors[colorKey] : Colors.primary;
-            if (Config.theme.borderSize <= 0) return; // No outline when borderSize is 0
+            if (Config.theme.borderSize <= 0)
+                return; // No outline when borderSize is 0
             ctx.strokeStyle = strokeColor;
             ctx.lineWidth = Config.theme.borderSize;
             ctx.lineJoin = "round";
@@ -320,10 +322,53 @@ Item {
             }
             ctx.stroke();
         }
-        Connections { target: Colors; function onPrimaryChanged() { outlineCanvas.requestPaint(); } }
-        Connections { target: Config.theme; function onBorderSizeChanged() { outlineCanvas.requestPaint(); } function onBorderColorChanged() { outlineCanvas.requestPaint(); } }
-        Connections { target: notchRect; function onBottomLeftRadiusChanged() { outlineCanvas.requestPaint(); } function onBottomRightRadiusChanged() { outlineCanvas.requestPaint(); } function onTopLeftRadiusChanged() { outlineCanvas.requestPaint(); } function onTopRightRadiusChanged() { outlineCanvas.requestPaint(); } function onWidthChanged() { outlineCanvas.requestPaint(); } function onHeightChanged() { outlineCanvas.requestPaint(); } }
-        Connections { target: leftCorner; function onSizeChanged() { outlineCanvas.requestPaint(); } }
-        Connections { target: rightCorner; function onSizeChanged() { outlineCanvas.requestPaint(); } }
+        Connections {
+            target: Colors
+            function onPrimaryChanged() {
+                outlineCanvas.requestPaint();
+            }
+        }
+        Connections {
+            target: Config.theme
+            function onBorderSizeChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onBorderColorChanged() {
+                outlineCanvas.requestPaint();
+            }
+        }
+        Connections {
+            target: notchRect
+            function onBottomLeftRadiusChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onBottomRightRadiusChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onTopLeftRadiusChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onTopRightRadiusChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onWidthChanged() {
+                outlineCanvas.requestPaint();
+            }
+            function onHeightChanged() {
+                outlineCanvas.requestPaint();
+            }
+        }
+        Connections {
+            target: leftCorner
+            function onSizeChanged() {
+                outlineCanvas.requestPaint();
+            }
+        }
+        Connections {
+            target: rightCorner
+            function onSizeChanged() {
+                outlineCanvas.requestPaint();
+            }
+        }
     }
 }

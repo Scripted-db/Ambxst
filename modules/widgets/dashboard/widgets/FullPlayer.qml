@@ -60,10 +60,11 @@ PaneRect {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
-                frequency: 2
-                color: Colors.outline
-                amplitudeMultiplier: 1
-                height: 16
+                anchors.margins: -4
+                frequency: 4
+                color: Colors.surfaceBright
+                amplitudeMultiplier: 2
+                height: 24
                 lineWidth: 4
                 fullLength: width
                 visible: true
@@ -260,13 +261,13 @@ PaneRect {
                     }
                 }
 
-                 PositionSlider {
-                     id: positionSlider
-                     Layout.fillWidth: true
-                     Layout.preferredHeight: 4
+                PositionSlider {
+                    id: positionSlider
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 4
 
-                     player: MprisController.activePlayer
-                 }
+                    player: MprisController.activePlayer
+                }
 
                 Text {
                     id: nextBtn

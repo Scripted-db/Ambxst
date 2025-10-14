@@ -42,10 +42,11 @@ Item {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            frequency: 2
-            color: Colors.outline
-            amplitudeMultiplier: 1
-            height: 16
+            anchors.margins: -4
+            frequency: 4
+            color: Colors.surfaceBright
+            amplitudeMultiplier: 2
+            height: 24
             lineWidth: 4
             fullLength: width
             visible: compactPlayer.player === null
@@ -267,16 +268,16 @@ Item {
                 }
             }
 
-             PositionSlider {
-                 id: positionSlider
-                 Layout.fillWidth: true
-                 Layout.preferredHeight: 4
-                 Layout.leftMargin: compactPlayer.notchHovered ? 0 : 8
-                 Layout.rightMargin: compactPlayer.notchHovered ? 0 : 8
-                 visible: compactPlayer.player !== null
+            PositionSlider {
+                id: positionSlider
+                Layout.fillWidth: true
+                Layout.preferredHeight: 4
+                Layout.leftMargin: compactPlayer.notchHovered ? 0 : 8
+                Layout.rightMargin: compactPlayer.notchHovered ? 0 : 8
+                visible: compactPlayer.player !== null
 
-                 player: compactPlayer.player
-             }
+                player: compactPlayer.player
+            }
 
             Text {
                 id: nextBtn
