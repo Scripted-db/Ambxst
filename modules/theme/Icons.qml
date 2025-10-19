@@ -5,14 +5,17 @@ import QtQuick
 QtObject {
     // Icon font
     readonly property string font: "Phosphor-Bold"
+
     // Overview button
     readonly property string overview: ""
+
     // Powermenu
     readonly property string lock: ""
     readonly property string suspend: ""
     readonly property string logout: ""
     readonly property string reboot: ""
     readonly property string shutdown: ""
+
     // Caret
     readonly property string caretLeft: ""
     readonly property string caretRight: ""
@@ -35,6 +38,7 @@ QtObject {
     readonly property string kanban: ""
     readonly property string wallpapers: ""
     readonly property string assistant: ""
+
     // Launcher
     readonly property string apps: ""
     readonly property string terminal: ""
@@ -43,11 +47,13 @@ QtObject {
     readonly property string emoji: ""
     readonly property string shortcut: ""
     readonly property string launch: ""
+
     // Notifications
     readonly property string bell: ""
     readonly property string bellRinging: ""
     readonly property string bellSlash: ""
     readonly property string bellZ: ""
+
     // Player
     readonly property string play: ""
     readonly property string pause: ""
@@ -64,21 +70,25 @@ QtObject {
     readonly property string firefox: "<font face='Symbols Nerd Font Mono'>󰈹</font>"
     readonly property string chromium: "<font face='Symbols Nerd Font Mono'></font>"
     readonly property string telegram: "<font face='Symbols Nerd Font Mono'></font>"
+
     // Clock
     readonly property string clock: ""
     readonly property string alarm: ""
     readonly property string timer: ""
+
     // Volume
     readonly property string speakerSlash: ""
     readonly property string speakerX: ""
     readonly property string speakerNone: ""
     readonly property string speakerLow: ""
     readonly property string speakerHigh: ""
+
     // Keyboard
     readonly property string keyboard: ""
     readonly property string backspace: ""
     readonly property string enter: ""
     readonly property string shift: ""
+
     // Misc
     readonly property string accept: ""
     readonly property string cancel: ""
