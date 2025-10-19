@@ -43,6 +43,8 @@ Item {
     property color iconColor: Colors.overBackground
     property real handleSpacing: 4
     property bool resizeParent: true
+    property real iconRotation: 0
+    property real iconScale: 1
 
     property real animatedProgress: progressRatio
     Behavior on animatedProgress {
@@ -277,6 +279,8 @@ Item {
         font.family: Icons.font
         font.pixelSize: 20
         color: Colors.overBackground
+        rotation: root.iconRotation
+        scale: root.iconScale
         x: !root.vertical ? (root.iconPos === "start" ? 0 : parent.width - width) : (parent.width - width) / 2
         y: root.vertical ? (root.iconPos === "start" ? 0 : parent.height - height) : (parent.height - height) / 2
         MouseArea {

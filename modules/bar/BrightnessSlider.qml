@@ -6,31 +6,65 @@ import qs.modules.theme
 
 Item {
     id: root
-
     required property var bar
-
+    
     // Orientación derivada de la barra
     property bool vertical: bar.orientation === "vertical"
-
+    
     // Estado de hover para activar wavy
     property bool isHovered: false
     property bool mainHovered: false
     property bool iconHovered: false
     property bool externalBrightnessChange: false
-
+    
+    // Propiedades para animación del icono
+    property string currentIcon: Icons.sun
+    property real iconRotation: 0
+    property real iconScale: 1
+    property real previousValue: 0
+    
+    // Animaciones individuales con IDs
+    NumberAnimation {
+        id: rotationAnim
+        target: root
+        property: "iconRotation"
+        duration: Config.animDuration
+        easing.type: Easing.InOutCubic
+    }
+    
+    NumberAnimation {
+        id: scaleAnim
+        target: root
+        property: "iconScale"
+        duration: Config.animDuration
+        easing.type: Easing.InOutCubic
+    }
+    
+    // Función helper para animar el icono
+    function animateIcon(brightness) {
+        rotationAnim.stop();
+        scaleAnim.stop();
+        
+        rotationAnim.to = (brightness / 1.0) * 90;
+        scaleAnim.to = 0.8 + (brightness / 1.0) * 0.2;
+        
+        rotationAnim.start();
+        scaleAnim.start();
+    }
+    
     HoverHandler {
         onHoveredChanged: {
             root.mainHovered = hovered;
             root.isHovered = root.mainHovered || root.iconHovered;
         }
     }
-
+    
     // Tamaño basado en hover para BgRect con animación
     implicitWidth: root.vertical ? 4 : 80
     implicitHeight: root.vertical ? 80 : 4
     Layout.preferredWidth: root.vertical ? 4 : 80
     Layout.preferredHeight: root.vertical ? 80 : 4
-
+    
     states: [
         State {
             name: "hovered"
@@ -44,29 +78,34 @@ Item {
             }
         }
     ]
-
+    
     transitions: Transition {
         NumberAnimation {
             properties: "implicitWidth,implicitHeight,Layout.preferredWidth,Layout.preferredHeight"
-            duration: 200
+            duration: Config.animDuration
             easing.type: Easing.OutCubic
         }
     }
+    
     Layout.fillWidth: root.vertical
     Layout.fillHeight: !root.vertical
-
+    
     // Obtener el monitor para la pantalla actual
     property var currentMonitor: Brightness.getMonitorForScreen(bar.screen)
-
+    
     Component.onCompleted: {
         if (currentMonitor) {
             brightnessSlider.value = currentMonitor.brightness;
+            const brightness = currentMonitor.brightness;
+            currentIcon = Icons.sun;
+            iconRotation = (brightness / 1.0) * 360;
+            iconScale = 0.5 + (brightness / 1.0) * 0.5;
         }
     }
-
+    
     BgRect {
         anchors.fill: parent
-
+        
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
@@ -86,13 +125,14 @@ Item {
                 }
             }
         }
-
+        
         StyledSlider {
             id: brightnessSlider
             anchors.fill: parent
             anchors.margins: 8
             anchors.rightMargin: root.vertical ? 8 : 16
             anchors.topMargin: root.vertical ? 16 : 8
+            
             vertical: root.vertical
             smoothDrag: true
             value: 0
@@ -100,40 +140,48 @@ Item {
             wavy: true
             wavyAmplitude: (root.isHovered || brightnessSlider.isDragging || root.externalBrightnessChange) ? (1.5 * value) : 0
             wavyFrequency: (root.isHovered || brightnessSlider.isDragging || root.externalBrightnessChange) ? (8.0 * value) : 0
+            
             iconPos: root.vertical ? "end" : "start"
-            icon: {
-                const brightness = currentMonitor ? currentMonitor.brightness : 0;
-                if (brightness < 0.01) {
-                    return Icons.moon;
-                } else if (brightness < 0.3) {
-                    return Icons.sunDim;
-                } else {
-                    return Icons.sun;
-                }
-            }
+            icon: root.currentIcon
+            iconRotation: root.iconRotation
+            iconScale: root.iconScale
             progressColor: Colors.primary
-
+            
             onValueChanged: {
                 if (currentMonitor) {
                     currentMonitor.setBrightness(value);
                 }
+                
+                // Siempre usar Icons.sun
+                currentIcon = Icons.sun;
+                
+                // Animar el icono
+                root.animateIcon(value);
+                
+                previousValue = value;
             }
-
+            
             onIconClicked: {
                 // Opcional: toggle o algo, pero por ahora solo el slider
             }
-
+            
             Connections {
                 target: currentMonitor
                 function onBrightnessChanged() {
                     if (currentMonitor) {
                         brightnessSlider.value = currentMonitor.brightness;
+                        const brightness = currentMonitor.brightness;
+                        currentIcon = Icons.sun;
+                        
+                        // Animar el icono
+                        root.animateIcon(brightness);
+                        
                         root.externalBrightnessChange = true;
                         externalChangeTimer.restart();
                     }
                 }
             }
-
+            
             Connections {
                 target: brightnessSlider
                 function onIconHovered(hovered) {
@@ -142,7 +190,7 @@ Item {
                 }
             }
         }
-
+        
         Timer {
             id: externalChangeTimer
             interval: 1000
