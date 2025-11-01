@@ -48,6 +48,7 @@ Item {
     property real iconRotation: 0
     property real iconScale: 1
     property bool sliderVisible: true
+    property bool iconClickable: true
 
     property real animatedProgress: progressRatio
     Behavior on animatedProgress {
@@ -297,17 +298,26 @@ Item {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
+            cursorShape: root.iconClickable ? Qt.PointingHandCursor : Qt.ArrowCursor
+            enabled: root.iconClickable
             z: 4
             onEntered: {
-                iconColor = Colors.primary;
-                root.iconHovered(true);
+                if (root.iconClickable) {
+                    iconColor = Colors.primary;
+                    root.iconHovered(true);
+                }
             }
             onExited: {
-                iconColor = Colors.overBackground;
-                root.iconHovered(false);
+                if (root.iconClickable) {
+                    iconColor = Colors.overBackground;
+                    root.iconHovered(false);
+                }
             }
-            onClicked: root.iconClicked()
+            onClicked: {
+                if (root.iconClickable) {
+                    root.iconClicked();
+                }
+            }
         }
     }
 

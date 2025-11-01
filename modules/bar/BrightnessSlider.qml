@@ -12,9 +12,8 @@ Item {
 
     property bool vertical: bar.orientation === "vertical"
     property bool isHovered: false
-    property bool mainHovered: false
-    property bool iconHovered: false
     property bool externalBrightnessChange: false
+    property bool isExpanded: false
 
     property real iconRotation: (brightnessSlider.value / 1.0) * 180
     property real iconScale: 0.8 + (brightnessSlider.value / 1.0) * 0.2
@@ -46,8 +45,11 @@ Item {
 
     HoverHandler {
         onHoveredChanged: {
-            root.mainHovered = hovered;
-            root.isHovered = root.mainHovered || root.iconHovered;
+            root.isHovered = hovered;
+            // Contraer cuando el mouse sale completamente del componente
+            if (!hovered && root.isExpanded && !brightnessSlider.isDragging) {
+                root.isExpanded = false;
+            }
         }
     }
 
@@ -56,8 +58,8 @@ Item {
 
     states: [
         State {
-            name: "hovered"
-            when: root.isHovered || brightnessSlider.isDragging || root.externalBrightnessChange
+            name: "expanded"
+            when: root.isExpanded || brightnessSlider.isDragging || root.externalBrightnessChange
             PropertyChanges {
                 target: root
                 Layout.preferredWidth: root.vertical ? 36 : 150
@@ -87,22 +89,32 @@ Item {
         anchors.fill: parent
         layer.enabled: root.layerEnabled
 
+        Rectangle {
+            anchors.fill: parent
+            color: Colors.primary
+            opacity: root.isHovered && !root.isExpanded ? 0.25 : 0
+            radius: parent.radius
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                }
+            }
+        }
+
         MouseArea {
             anchors.fill: parent
-            hoverEnabled: true
-            onEntered: {
-                root.mainHovered = true;
-                root.isHovered = root.mainHovered || root.iconHovered;
-            }
-            onExited: {
-                root.mainHovered = false;
-                root.isHovered = root.mainHovered || root.iconHovered;
+            hoverEnabled: false
+            onClicked: {
+                root.isExpanded = !root.isExpanded;
             }
             onWheel: wheel => {
-                if (wheel.angleDelta.y > 0) {
-                    brightnessSlider.value = Math.min(1, brightnessSlider.value + 0.1);
-                } else {
-                    brightnessSlider.value = Math.max(0, brightnessSlider.value - 0.1);
+                if (root.isExpanded) {
+                    if (wheel.angleDelta.y > 0) {
+                        brightnessSlider.value = Math.min(1, brightnessSlider.value + 0.1);
+                    } else {
+                        brightnessSlider.value = Math.max(0, brightnessSlider.value - 0.1);
+                    }
                 }
             }
         }
@@ -118,9 +130,11 @@ Item {
             value: 0
             resizeParent: false
             wavy: true
-            sliderVisible: root.isHovered || isDragging || root.externalBrightnessChange
-            wavyAmplitude: (root.isHovered || isDragging || root.externalBrightnessChange) ? (1.5 * value) : 0
-            wavyFrequency: (root.isHovered || isDragging || root.externalBrightnessChange) ? (8.0 * value) : 0
+            scroll: root.isExpanded
+            iconClickable: root.isExpanded
+            sliderVisible: root.isExpanded || isDragging || root.externalBrightnessChange
+            wavyAmplitude: (root.isExpanded || isDragging || root.externalBrightnessChange) ? (1.5 * value) : 0
+            wavyFrequency: (root.isExpanded || isDragging || root.externalBrightnessChange) ? (8.0 * value) : 0
             iconPos: root.vertical ? "end" : "start"
             icon: Icons.sun
             iconRotation: root.iconRotation
@@ -149,8 +163,7 @@ Item {
             Connections {
                 target: brightnessSlider
                 function onIconHovered(hovered) {
-                    root.iconHovered = hovered;
-                    root.isHovered = root.mainHovered || root.iconHovered;
+                    // No hacer nada aquí, el HoverHandler principal maneja todo
                 }
             }
         }
