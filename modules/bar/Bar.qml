@@ -16,6 +16,7 @@ import qs.modules.components
 import qs.modules.services
 import qs.modules.bar
 import qs.config
+import "." as Bar
 
 PanelWindow {
     id: panel
@@ -247,6 +248,11 @@ PanelWindow {
                                 id: rightWidgets
                                 spacing: 4
 
+                                Bar.PowerProfileSelector {
+                                    id: powerProfileSelector
+                                    orientation: "horizontal"
+                                }
+
                                 MicSlider {
                                     id: micSlider
                                     bar: panel
@@ -405,6 +411,11 @@ PanelWindow {
                             ColumnLayout {
                                 id: bottomWidgets
                                 spacing: 4
+
+                                Bar.PowerProfileSelector {
+                                    id: powerProfileSelectorVert
+                                    orientation: "vertical"
+                                }
 
                                 MicSlider {
                                     id: micSliderVert

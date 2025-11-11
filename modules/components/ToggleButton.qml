@@ -36,7 +36,7 @@ Button {
         text: root.buttonIcon
         textFormat: Text.RichText
         font.family: Icons.font
-        font.pixelSize: 20
+        font.pixelSize: 18
         color: root.pressed ? Colors.background : Colors.primary
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

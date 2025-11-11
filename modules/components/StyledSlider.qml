@@ -289,7 +289,7 @@ Item {
         visible: root.icon !== ""
         text: root.icon
         font.family: Icons.font
-        font.pixelSize: 20
+        font.pixelSize: 18
         color: Colors.overBackground
         rotation: root.iconRotation
         scale: root.iconScale

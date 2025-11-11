@@ -19,7 +19,7 @@ Item {
 
         SequentialAnimation {
             id: shakeAnimation
-            
+
             NumberAnimation {
                 target: shakeContainer
                 property: "rotation"
@@ -63,7 +63,7 @@ Item {
             text: Notifications.silent ? Icons.bellZ : (Notifications.list.length > 0 ? Icons.bellRinging : Icons.bell)
             textFormat: Text.RichText
             font.family: Icons.font
-            font.pixelSize: 20
+            font.pixelSize: 18
             color: hovered ? Colors.primary : (Notifications.list.length > 0 ? Colors.error : Colors.overBackground)
 
             HoverHandler {
@@ -80,13 +80,13 @@ Item {
         target: Notifications
         function onPopupListChanged() {
             if (Notifications.popupList.length > previousNotifCount) {
-                shakeAnimation.restart()
+                shakeAnimation.restart();
             }
-            previousNotifCount = Notifications.popupList.length
+            previousNotifCount = Notifications.popupList.length;
         }
     }
 
     Component.onCompleted: {
-        previousNotifCount = Notifications.popupList.length
+        previousNotifCount = Notifications.popupList.length;
     }
 }

@@ -139,7 +139,7 @@ Item {
                         text: Notifications.silent ? Icons.bellZ : Icons.bell
                         textFormat: Text.RichText
                         font.family: Icons.font
-                        font.pixelSize: 20
+                        font.pixelSize: 18
                         color: Notifications.silent ? Colors.overPrimary : Colors.primary
 
                         Behavior on color {
@@ -183,7 +183,7 @@ Item {
                     text: Icons.broom
                     textFormat: Text.RichText
                     font.family: Icons.font
-                    font.pixelSize: 20
+                    font.pixelSize: 18
                     color: broomHover.pressed ? Colors.overError : Colors.error
 
                     Behavior on color {
