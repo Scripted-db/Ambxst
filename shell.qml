@@ -14,6 +14,7 @@ import qs.modules.services
 import qs.modules.corners
 import qs.modules.components
 import qs.modules.desktop
+import qs.modules.lockscreen
 import qs.config
 
 ShellRoot {
@@ -98,6 +99,18 @@ ShellRoot {
             required property ShellScreen modelData
             sourceComponent: ScreenCorners {
                 screen: cornersLoader.modelData
+            }
+        }
+    }
+
+    Variants {
+        model: Quickshell.screens
+
+        Loader {
+            id: lockscreenLoader
+            active: true
+            required property ShellScreen modelData
+            sourceComponent: LockScreen {
             }
         }
     }

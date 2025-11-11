@@ -69,11 +69,20 @@ NotchAnimationBehavior {
                 Notifications.hideAllPopups();
             }
             if (GlobalStates.dashboardCurrentTab === 3) {
-                Qt.callLater(() => {
-                    if (stack.currentItem && stack.currentItem.focusSearch) {
-                        stack.currentItem.focusSearch();
-                    }
-                });
+                // Dar tiempo al StackView para que cargue el item
+                focusWallpapersTimer.restart();
+            }
+        }
+    }
+
+    // Timer para asegurar que el foco se establezca después de que el componente esté listo
+    Timer {
+        id: focusWallpapersTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            if (stack.currentItem && stack.currentItem.focusSearch) {
+                stack.currentItem.focusSearch();
             }
         }
     }
@@ -223,6 +232,13 @@ NotchAnimationBehavior {
                 // Cargar directamente el componente correcto según GlobalStates
                 initialItem: components[GlobalStates.dashboardCurrentTab]
 
+                // Handler para cuando el item actual cambia
+                onCurrentItemChanged: {
+                    if (currentItem && root.state.currentTab === 3 && currentItem.focusSearch) {
+                        focusWallpapersTimer.restart();
+                    }
+                }
+
                 // Función para navegar a un tab específico
                 function navigateToTab(index) {
                     if (index >= 0 && index < components.length && index !== root.state.currentTab) {
@@ -240,11 +256,8 @@ NotchAnimationBehavior {
                         }
 
                         if (index === 3) {
-                            Qt.callLater(() => {
-                                if (stack.currentItem && stack.currentItem.focusSearch) {
-                                    stack.currentItem.focusSearch();
-                                }
-                            });
+                            // Dar tiempo al StackView para que cargue el item
+                            focusWallpapersTimer.restart();
                         }
                     }
                 }

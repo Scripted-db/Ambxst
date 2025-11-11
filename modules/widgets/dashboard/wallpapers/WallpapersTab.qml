@@ -98,9 +98,15 @@ FocusScope {
 
     // Actualizar subcarpetas cuando la pestaña se haga visible
     onVisibleChanged: {
-        if (visible && GlobalStates.wallpaperManager) {
-            console.log("WallpapersTab became visible, updating subfolders");
-            GlobalStates.wallpaperManager.scanSubfolders();
+        if (visible) {
+            if (GlobalStates.wallpaperManager) {
+                console.log("WallpapersTab became visible, updating subfolders");
+                GlobalStates.wallpaperManager.scanSubfolders();
+            }
+            // Forzar foco cuando se hace visible
+            Qt.callLater(() => {
+                focusSearch();
+            });
         }
     }
 

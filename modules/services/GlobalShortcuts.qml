@@ -175,4 +175,14 @@ Item {
             }
         }
     }
+
+    GlobalShortcut {
+        appid: root.appId
+        name: "lockscreen"
+        description: "Toggle lockscreen"
+
+        onPressed: {
+            GlobalStates.lockscreenVisible = !GlobalStates.lockscreenVisible;
+        }
+    }
 }

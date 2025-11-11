@@ -60,4 +60,7 @@ Singleton {
     readonly property bool overviewOpen: getActiveOverview()
     readonly property bool launcherOpen: getActiveLauncher()
     readonly property bool dashboardOpen: getActiveDashboard()
+
+    // Lockscreen state
+    property bool lockscreenVisible: false
 }
