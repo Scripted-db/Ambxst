@@ -13,7 +13,9 @@ import qs.config
 PanelWindow {
     id: root
 
-    visible: GlobalStates.lockscreenVisible
+    property bool unlocking: false
+
+    visible: GlobalStates.lockscreenVisible || unlocking
     anchors {
         top: true
         bottom: true
@@ -49,8 +51,16 @@ PanelWindow {
         blur: 0
         blurMax: 64
         visible: false
+        opacity: (GlobalStates.lockscreenVisible && !unlocking) ? 1 : 0
 
         Behavior on blur {
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on opacity {
             NumberAnimation {
                 duration: Config.animDuration
                 easing.type: Easing.OutCubic
@@ -62,7 +72,14 @@ PanelWindow {
     Rectangle {
         anchors.fill: parent
         color: "black"
-        opacity: 0.25
+        opacity: (GlobalStates.lockscreenVisible && !unlocking) ? 0.25 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     // Left sidebar
@@ -72,7 +89,7 @@ PanelWindow {
             top: parent.top
             bottom: parent.bottom
         }
-        x: GlobalStates.lockscreenVisible ? 0 : -width
+        x: (GlobalStates.lockscreenVisible && !unlocking) ? 0 : -width
         width: 350
         color: Colors.background
 
@@ -181,6 +198,8 @@ PanelWindow {
 
                     onAccepted: {
                         if (passwordInput.text === "123") {
+                            unlocking = true;
+                            unlockResetTimer.start();
                             GlobalStates.lockscreenVisible = false;
                             passwordInput.clear();
                         } else {
@@ -189,6 +208,8 @@ PanelWindow {
                     }
 
                     onEscapePressed: {
+                        unlocking = true;
+                        unlockResetTimer.start();
                         GlobalStates.lockscreenVisible = false;
                         passwordInput.clear();
                     }
@@ -251,16 +272,26 @@ PanelWindow {
         }
     }
 
+    // Timer to reset unlocking state after animation starts
+    Timer {
+        id: unlockResetTimer
+        interval: Config.animDuration
+        onTriggered: {
+            unlocking = false;
+        }
+    }
+
     // Focus the input when lockscreen becomes visible
     onVisibleChanged: {
-        if (visible) {
+        if (visible && GlobalStates.lockscreenVisible) {
             blurEffect.blur = 0;
             screencopyBackground.captureFrame();
             blurEffect.visible = true;
             blurAnimTimer.start();
             passwordInput.focusInput();
-        } else {
+        } else if (!visible) {
             blurAnimTimer.stop();
+            unlockResetTimer.stop();
             blurEffect.visible = false;
             blurEffect.blur = 0;
         }
@@ -325,6 +356,8 @@ PanelWindow {
     // Capture all keyboard input
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
+            unlocking = true;
+            unlockResetTimer.start();
             GlobalStates.lockscreenVisible = false;
             passwordInput.clear();
             event.accepted = true;
