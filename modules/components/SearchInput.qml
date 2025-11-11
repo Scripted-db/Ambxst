@@ -12,6 +12,8 @@ PaneRect {
     property string iconText: ""
     property bool clearOnEscape: true
     property bool handleTabNavigation: false  // Si true, captura Tab y emite señales. Si false, usa navegación normal.
+    property bool passwordMode: false  // Si true, muestra círculos en lugar del texto
+    property bool centerText: false  // Si true, centra el texto horizontalmente
 
     signal searchTextChanged(string text)
     signal accepted
@@ -61,6 +63,8 @@ PaneRect {
             font.pixelSize: Config.theme.fontSize
             color: Colors.overBackground
             background: null
+            echoMode: root.passwordMode ? TextInput.Password : TextInput.Normal
+            horizontalAlignment: root.centerText ? TextInput.AlignHCenter : TextInput.AlignLeft
 
             onTextChanged: {
                 root.searchTextChanged(text);

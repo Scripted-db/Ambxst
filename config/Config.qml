@@ -158,6 +158,10 @@ Singleton {
                 property int spacingVertical: 16
                 property string textColor: "overBackground"
             }
+
+            property JsonObject lockscreen: JsonObject {
+                property string position: "top"
+            }
         }
     }
 
@@ -216,4 +220,7 @@ Singleton {
 
     // Desktop configuration
     property QtObject desktop: loader.adapter.desktop
+
+    // Lockscreen configuration
+    property QtObject lockscreen: loader.adapter.lockscreen
 }
