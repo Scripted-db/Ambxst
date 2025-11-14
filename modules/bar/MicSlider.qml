@@ -69,6 +69,7 @@ Item {
             radius: parent.radius
 
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                 }

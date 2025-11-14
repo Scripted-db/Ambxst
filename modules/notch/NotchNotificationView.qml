@@ -19,6 +19,7 @@ Item {
     implicitHeight: hovered ? mainColumn.implicitHeight - 16 : mainColumn.implicitHeight
 
     Behavior on implicitWidth {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutBack
@@ -163,6 +164,7 @@ Item {
                     clip: true
 
                     Behavior on implicitHeight {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -356,6 +358,7 @@ Item {
                             spacing: hovered ? 8 : 0
 
                             Behavior on spacing {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutBack
@@ -370,6 +373,7 @@ Item {
                                 implicitHeight: mainContentRow.implicitHeight + (criticalMargins * 2)
 
                                 Behavior on criticalMargins {
+                                    enabled: Config.animDuration > 0
                                     NumberAnimation {
                                         duration: Config.animDuration
                                         easing.type: Easing.OutQuart
@@ -413,6 +417,7 @@ Item {
                                             urgency: notification ? notification.urgency : NotificationUrgency.Normal
 
                                             Behavior on Layout.preferredWidth {
+                                                enabled: Config.animDuration > 0
                                                 NumberAnimation {
                                                     duration: Config.animDuration
                                                     easing.type: Easing.OutQuart
@@ -420,6 +425,7 @@ Item {
                                             }
 
                                             Behavior on Layout.preferredHeight {
+                                                enabled: Config.animDuration > 0
                                                 NumberAnimation {
                                                     duration: Config.animDuration
                                                     easing.type: Easing.OutQuart
@@ -590,6 +596,7 @@ Item {
                                         z: 200
 
                                         Behavior on Layout.preferredWidth {
+                                            enabled: Config.animDuration > 0
                                             NumberAnimation {
                                                 duration: Config.animDuration
                                                 easing.type: Easing.OutQuart
@@ -597,6 +604,7 @@ Item {
                                         }
 
                                         Behavior on Layout.preferredHeight {
+                                            enabled: Config.animDuration > 0
                                             NumberAnimation {
                                                 duration: Config.animDuration
                                                 easing.type: Easing.OutQuart
@@ -650,6 +658,7 @@ Item {
                                 z: 200
 
                                 Behavior on implicitHeight {
+                                    enabled: Config.animDuration > 0
                                     NumberAnimation {
                                         duration: Config.animDuration
                                         easing.type: Easing.OutQuart
@@ -711,6 +720,7 @@ Item {
                 clip: true
 
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
@@ -746,6 +756,7 @@ Item {
                     }
 
                     Behavior on y {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutCubic
@@ -763,6 +774,7 @@ Item {
                             color: isCritical ? Colors.criticalRed : (index === root.currentIndex ? Colors.primary : Colors.surfaceBright)
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic
@@ -773,6 +785,7 @@ Item {
                             scale: index === root.currentIndex ? 1.0 : 0.5
 
                             Behavior on scale {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic

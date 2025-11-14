@@ -69,6 +69,7 @@ Item {
     Layout.preferredHeight: schemeListExpanded ? 40 + 4 + (40 * 3) + 8 : 48
 
     Behavior on Layout.preferredHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -83,6 +84,7 @@ Item {
         border.width: keyboardNavigationActive && schemeButton.activeFocus ? 2 : 0
 
         Behavior on border.width {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration / 3
                 easing.type: Easing.OutQuart
@@ -243,6 +245,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
 
                             Behavior on x {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 200
                                     easing.type: Easing.OutCubic
@@ -313,6 +316,7 @@ Item {
                                 leftPadding: 8
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -343,7 +347,7 @@ Item {
                             z: -1
                         }
 
-                        highlightMoveDuration: Config.animDuration / 2
+                        highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration : 0 > 0 ? Config.animDuration / 2 : 0
                         highlightMoveVelocity: -1
                         highlightResizeDuration: Config.animDuration / 2
                         highlightResizeVelocity: -1
@@ -351,6 +355,7 @@ Item {
 
                     // Animate topMargin for ClippingRectangle
                     Behavior on Layout.topMargin {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -358,6 +363,7 @@ Item {
                     }
 
                     Behavior on Layout.preferredHeight {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -365,6 +371,7 @@ Item {
                     }
 
                     Behavior on opacity {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart

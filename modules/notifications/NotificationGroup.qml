@@ -148,7 +148,7 @@ Item {
         anchors.leftMargin: root.xOffset
 
         Behavior on anchors.leftMargin {
-            enabled: !dragManager.dragging
+            enabled: !dragManager.dragging && Config.animDuration > 0
             NumberAnimation {
                 duration: 300
                 easing.type: Easing.OutCubic
@@ -159,6 +159,7 @@ Item {
         implicitHeight: expanded ? row.implicitHeight + padding * 2 : Math.max(56 + padding * 2, row.implicitHeight + padding * 2)
 
         Behavior on implicitHeight {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration
                 easing.type: Easing.OutBack
@@ -178,6 +179,7 @@ Item {
                 spacing: root.notificationCount === 1 ? 0 : (root.expanded ? 8 : 4)
 
                 Behavior on spacing {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutCubic
@@ -264,6 +266,7 @@ Item {
                     reuseItems: true
 
                     Behavior on spacing {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutCubic

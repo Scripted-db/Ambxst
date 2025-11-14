@@ -31,12 +31,14 @@ Item {
     }
 
     Behavior on iconRotation {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: 400
             easing.type: Easing.OutCubic
         }
     }
     Behavior on iconScale {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: 400
             easing.type: Easing.OutCubic
@@ -96,6 +98,7 @@ Item {
             radius: parent.radius
 
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                 }

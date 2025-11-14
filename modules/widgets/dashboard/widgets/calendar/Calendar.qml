@@ -109,12 +109,14 @@ Item {
                     anchors.right: parent.right
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration / 4
                         }
                     }
 
                     Behavior on radius {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 4
                         }
@@ -127,6 +129,7 @@ Item {
                         color: leftMouseArea.pressed ? Colors.overPrimary : Colors.primary
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 4
                             }
@@ -151,12 +154,14 @@ Item {
                 color: rightMouseArea.pressed ? Colors.primary : (rightMouseArea.containsMouse ? Colors.surfaceBright : Colors.surface)
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration / 4
                     }
                 }
 
                 Behavior on radius {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 4
                     }
@@ -169,6 +174,7 @@ Item {
                     color: rightMouseArea.pressed ? Colors.overPrimary : Colors.primary
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration / 4
                         }

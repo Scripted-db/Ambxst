@@ -81,6 +81,7 @@ Item {
                 visible: false
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration / 2
                     }

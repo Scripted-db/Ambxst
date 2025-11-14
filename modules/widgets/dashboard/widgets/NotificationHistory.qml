@@ -123,12 +123,14 @@ Item {
                     anchors.right: parent.right
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration / 4
                         }
                     }
 
                     Behavior on radius {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 4
                         }
@@ -143,6 +145,7 @@ Item {
                         color: Notifications.silent ? Colors.overPrimary : Colors.primary
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 4
                             }
@@ -167,12 +170,14 @@ Item {
                 color: broomHover.pressed ? Colors.error : (broomHover.containsMouse ? Colors.overError : Colors.surface)
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration / 4
                     }
                 }
 
                 Behavior on radius {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 4
                     }
@@ -187,6 +192,7 @@ Item {
                     color: broomHover.pressed ? Colors.overError : Colors.error
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration / 4
                         }

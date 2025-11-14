@@ -346,6 +346,7 @@ FocusScope {
                                 border.width: oledCheckboxContainer.keyboardNavigationActive && oledCheckbox.activeFocus ? 2 : 0
 
                                 Behavior on opacity {
+                                    enabled: Config.animDuration > 0
                                     NumberAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -353,6 +354,7 @@ FocusScope {
                                 }
 
                                 Behavior on border.width {
+                                    enabled: Config.animDuration > 0
                                     NumberAnimation {
                                         duration: Config.animDuration / 3
                                         easing.type: Easing.OutQuart
@@ -381,6 +383,7 @@ FocusScope {
                                             leftPadding: 8
 
                                             Behavior on color {
+                                                enabled: Config.animDuration > 0
                                                 ColorAnimation {
                                                     duration: Config.animDuration / 2
                                                     easing.type: Easing.OutQuart
@@ -438,6 +441,7 @@ FocusScope {
                                             color: oledCheckbox.checked ? Colors.primary : Colors.background
 
                                             Behavior on color {
+                                                enabled: Config.animDuration > 0
                                                 ColorAnimation {
                                                     duration: Config.animDuration / 2
                                                     easing.type: Easing.OutQuart
@@ -455,6 +459,7 @@ FocusScope {
                                                 opacity: oledCheckbox.checked ? 1.0 : 0.0
 
                                                 Behavior on scale {
+                                                    enabled: Config.animDuration > 0
                                                     NumberAnimation {
                                                         duration: Config.animDuration / 2
                                                         easing.type: Easing.OutBack
@@ -463,6 +468,7 @@ FocusScope {
                                                 }
 
                                                 Behavior on opacity {
+                                                    enabled: Config.animDuration > 0
                                                     NumberAnimation {
                                                         duration: Config.animDuration / 2
                                                         easing.type: Easing.OutQuart
@@ -553,6 +559,7 @@ FocusScope {
                         z: 100
 
                         Behavior on x {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -560,6 +567,7 @@ FocusScope {
                         }
 
                         Behavior on y {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -793,6 +801,7 @@ FocusScope {
 
                         // Animaciones de color y escala.
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutCubic
@@ -800,6 +809,7 @@ FocusScope {
                         }
 
                         Behavior on scale {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 3
                                 easing.type: Easing.OutCubic

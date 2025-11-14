@@ -266,12 +266,14 @@ Item {
                 border.color: overviewRoot.activeBorderColor
 
                 Behavior on x {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on y {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart

@@ -125,21 +125,24 @@ Item {
                 opacity: (workspaceOccupied[index] && !(!activeWindow?.activated && monitor?.activeWorkspace?.id === index + 1)) ? Config.opacity : 0
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
                 Behavior on radiusLeft {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
 
                 Behavior on radiusRight {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
@@ -179,21 +182,24 @@ Item {
                 opacity: (workspaceOccupied[index] && !(!activeWindow?.activated && monitor?.activeWorkspace?.id === index + 1)) ? Config.opacity : 0
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
                 Behavior on radiusTop {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
 
                 Behavior on radiusBottom {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
-                        duration: Config.animDuration - 100
+                        duration: Math.max(0, Config.animDuration - 100)
                         easing.type: Easing.OutQuad
                     }
                 }
@@ -220,16 +226,46 @@ Item {
             return currentWorkspaceHasWindows ? Config.roundness > 0 ? Math.max(Config.roundness - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitHeight / 2;
         }
 
-        Behavior on radius { NumberAnimation { duration: Config.animDuration - 100; easing.type: Easing.OutQuad } }
+        Behavior on radius {
+
+
+            enabled: Config.animDuration > 0
+
+
+            NumberAnimation { duration: Math.max(0, Config.animDuration - 100); easing.type: Easing.OutQuad }
+
+
+        }
         color: Colors.primary
         anchors.verticalCenter: parent.verticalCenter
 
         x: Math.min(idx1, idx2) * workspaceButtonWidth + activeWorkspaceMargin + widgetPadding
         y: parent.height / 2 - implicitHeight / 2
 
-        Behavior on activeWorkspaceMargin { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuad } }
-        Behavior on idx1 { NumberAnimation { duration: Config.animDuration / 3; easing.type: Easing.OutSine } }
-        Behavior on idx2 { NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutSine } }
+        Behavior on activeWorkspaceMargin {
+
+
+            enabled: Config.animDuration > 0
+
+
+            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuad }
+
+
+        }
+        Behavior on idx1 {
+
+            enabled: Config.animDuration > 0
+
+            NumberAnimation { duration: Config.animDuration / 3; easing.type: Easing.OutSine }
+
+        }
+        Behavior on idx2 {
+
+            enabled: Config.animDuration > 0
+
+            NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutSine }
+
+        }
     }
 
     // Vertical active workspace highlight
@@ -251,16 +287,46 @@ Item {
             return currentWorkspaceHasWindows ? Config.roundness > 0 ? Math.max(Config.roundness - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitWidth / 2;
         }
 
-        Behavior on radius { NumberAnimation { duration: Config.animDuration - 100; easing.type: Easing.OutQuad } }
+        Behavior on radius {
+
+
+            enabled: Config.animDuration > 0
+
+
+            NumberAnimation { duration: Math.max(0, Config.animDuration - 100); easing.type: Easing.OutQuad }
+
+
+        }
         color: Colors.primary
         anchors.horizontalCenter: parent.horizontalCenter
 
         x: parent.width / 2 - implicitWidth / 2
         y: Math.min(idx1, idx2) * workspaceButtonWidth + activeWorkspaceMargin + widgetPadding
 
-        Behavior on activeWorkspaceMargin { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuad } }
-        Behavior on idx1 { NumberAnimation { duration: Config.animDuration / 3; easing.type: Easing.OutSine } }
-        Behavior on idx2 { NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutSine } }
+        Behavior on activeWorkspaceMargin {
+
+
+            enabled: Config.animDuration > 0
+
+
+            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutQuad }
+
+
+        }
+        Behavior on idx1 {
+
+            enabled: Config.animDuration > 0
+
+            NumberAnimation { duration: Config.animDuration / 3; easing.type: Easing.OutSine }
+
+        }
+        Behavior on idx2 {
+
+            enabled: Config.animDuration > 0
+
+            NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutSine }
+
+        }
     }
 
     RowLayout {
@@ -311,6 +377,7 @@ Item {
                         color: (monitor?.activeWorkspace?.id == button.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
 
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: 150
                                 easing.type: Easing.OutQuad
@@ -327,6 +394,7 @@ Item {
                         color: (monitor?.activeWorkspace?.id == button.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
 
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: 150
                                 easing.type: Easing.OutQuad
@@ -351,24 +419,28 @@ Item {
                             visible: !Config.tintIcons
 
                             Behavior on opacity {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on anchors.bottomMargin {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on anchors.rightMargin {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on implicitSize {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
@@ -434,6 +506,7 @@ Item {
                         color: (monitor?.activeWorkspace?.id == buttonVert.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
 
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: 150
                                 easing.type: Easing.OutQuad
@@ -450,6 +523,7 @@ Item {
                         color: (monitor?.activeWorkspace?.id == buttonVert.workspaceValue) ? Colors.background : (workspaceOccupied[index] ? Colors.overBackground : Colors.overSecondaryFixedVariant)
 
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: 150
                                 easing.type: Easing.OutQuad
@@ -474,24 +548,28 @@ Item {
                             visible: !Config.tintIcons
 
                             Behavior on opacity {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on anchors.bottomMargin {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on anchors.rightMargin {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad
                                 }
                             }
                             Behavior on implicitSize {
+                                enabled: Config.animDuration > 0
                                 NumberAnimation {
                                     duration: 150
                                     easing.type: Easing.OutQuad

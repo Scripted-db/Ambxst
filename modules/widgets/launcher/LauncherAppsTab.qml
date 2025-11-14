@@ -40,6 +40,7 @@ Rectangle {
     color: "transparent"
 
     Behavior on height {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -334,6 +335,7 @@ Rectangle {
                         elide: Text.ElideRight
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutCubic
@@ -349,7 +351,7 @@ Rectangle {
                 visible: root.selectedIndex >= 0 && (root.optionsMenuOpen ? root.selectedIndex === root.menuItemIndex : true)
             }
 
-            highlightMoveDuration: Config.animDuration / 2
+            highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration : 0 > 0 ? Config.animDuration / 2 : 0
             highlightMoveVelocity: -1
         }
     }

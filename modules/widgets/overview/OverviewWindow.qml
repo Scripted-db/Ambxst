@@ -71,24 +71,28 @@ Item {
     clip: true
 
     Behavior on x {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on y {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on width {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on height {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -120,12 +124,14 @@ Item {
         clip: true
 
         Behavior on color {
+            enabled: Config.animDuration > 0
             ColorAnimation {
                 duration: Config.animDuration / 2
             }
         }
 
         Behavior on border.color {
+            enabled: Config.animDuration > 0
             ColorAnimation {
                 duration: Config.animDuration / 2
             }
@@ -147,12 +153,14 @@ Item {
             sourceComponent: Config.tintIcons ? tintedWindowIconComponent : normalWindowIconComponent
 
             Behavior on width {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
                 }
             }
             Behavior on height {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -198,6 +206,7 @@ Item {
             horizontalAlignment: Text.AlignHCenter
 
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                 }
@@ -217,12 +226,14 @@ Item {
         z: 5
 
         Behavior on color {
+            enabled: Config.animDuration > 0
             ColorAnimation {
                 duration: Config.animDuration / 2
             }
         }
 
         Behavior on border.color {
+            enabled: Config.animDuration > 0
             ColorAnimation {
                 duration: Config.animDuration / 2
             }

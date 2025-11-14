@@ -8,6 +8,7 @@ Item {
     implicitHeight: powerMenu.implicitHeight
 
     Behavior on implicitWidth {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -15,6 +16,7 @@ Item {
     }
 
     Behavior on implicitHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart

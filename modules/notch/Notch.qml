@@ -35,7 +35,7 @@ Item {
     implicitHeight: Config.notchTheme === "default" ? defaultHeight : (Config.notchTheme === "island" ? islandHeight : defaultHeight)
 
     Behavior on implicitWidth {
-        enabled: screenNotchOpen || stackViewInternal.busy
+        enabled: (screenNotchOpen || stackViewInternal.busy) && Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: isExpanded ? Easing.OutBack : Easing.OutQuart
@@ -44,7 +44,7 @@ Item {
     }
 
     Behavior on implicitHeight {
-        enabled: screenNotchOpen || stackViewInternal.busy
+        enabled: (screenNotchOpen || stackViewInternal.busy) && Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: isExpanded ? Easing.OutBack : Easing.OutQuart
@@ -95,6 +95,7 @@ Item {
         }
 
         Behavior on radius {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration
                 easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart

@@ -659,7 +659,9 @@ PanelWindow {
         // Trigger animation when source changes
         onSourceChanged: {
             if (previousSource !== "" && source !== previousSource) {
-                transitionAnimation.restart();
+                if (Config.animDuration > 0) {
+                    transitionAnimation.restart();
+                }
             }
             previousSource = source;
 

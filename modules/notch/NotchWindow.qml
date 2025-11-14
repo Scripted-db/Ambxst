@@ -191,6 +191,7 @@ PanelWindow {
             }
 
             Behavior on width {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutBack
@@ -199,6 +200,7 @@ PanelWindow {
             }
 
             Behavior on height {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -222,6 +224,7 @@ PanelWindow {
                 notchHovered: notificationPopupContainer.popupHovered
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart

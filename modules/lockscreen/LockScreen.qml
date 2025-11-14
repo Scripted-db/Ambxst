@@ -45,6 +45,7 @@ WlSessionLockSurface {
         }
 
         Behavior on zoomScale {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -102,6 +103,7 @@ WlSessionLockSurface {
         }
 
         Behavior on blur {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -142,6 +144,7 @@ WlSessionLockSurface {
         }
 
         Behavior on zoomScale {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -167,6 +170,7 @@ WlSessionLockSurface {
         }
 
         Behavior on opacity {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutQuint
@@ -174,6 +178,7 @@ WlSessionLockSurface {
         }
 
         Behavior on zoomScale {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -214,6 +219,7 @@ WlSessionLockSurface {
                 layer.effect: BgShadow {}
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration * 2
                         easing.type: Easing.OutExpo
@@ -221,6 +227,7 @@ WlSessionLockSurface {
                 }
 
                 Behavior on slideOffset {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration * 2
                         easing.type: Easing.OutExpo
@@ -251,6 +258,7 @@ WlSessionLockSurface {
                 layer.effect: BgShadow {}
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration * 2
                         easing.type: Easing.OutExpo
@@ -258,6 +266,7 @@ WlSessionLockSurface {
                 }
 
                 Behavior on slideOffset {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration * 2
                         easing.type: Easing.OutExpo
@@ -298,6 +307,7 @@ WlSessionLockSurface {
         opacity: startAnim ? 1 : 0
 
         Behavior on anchors.leftMargin {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -305,6 +315,7 @@ WlSessionLockSurface {
         }
 
         Behavior on opacity {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutQuad
@@ -338,6 +349,7 @@ WlSessionLockSurface {
         scale: startAnim ? 1 : 0.92
 
         Behavior on anchors.topMargin {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -345,6 +357,7 @@ WlSessionLockSurface {
         }
 
         Behavior on anchors.bottomMargin {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutExpo
@@ -352,6 +365,7 @@ WlSessionLockSurface {
         }
 
         Behavior on opacity {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutQuad
@@ -359,6 +373,7 @@ WlSessionLockSurface {
         }
 
         Behavior on scale {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration * 2
                 easing.type: Easing.OutBack
@@ -438,6 +453,7 @@ WlSessionLockSurface {
                     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuad
@@ -464,6 +480,7 @@ WlSessionLockSurface {
                             rotation: 0
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic
@@ -503,6 +520,7 @@ WlSessionLockSurface {
                             enabled: !authenticating
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic
@@ -510,6 +528,7 @@ WlSessionLockSurface {
                             }
 
                             Behavior on placeholderTextColor {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutQuad
@@ -674,7 +693,9 @@ WlSessionLockSurface {
             if (exitCode === 0) {
                 // Autenticación exitosa - trigger exit animation
                 startAnim = false;
-                exitOpacityAnimation.start();
+                if (Config.animDuration > 0) {
+                    exitOpacityAnimation.start();
+                }
 
                 // Wait for exit animation, then unlock
                 unlockTimer.start();
@@ -732,7 +753,9 @@ WlSessionLockSurface {
 
                 errorMessage = msg;
                 console.warn("PAM auth failed:", exitCode, msg);
-                wrongPasswordAnim.start();
+                if (Config.animDuration > 0) {
+                    wrongPasswordAnim.start();
+                }
             }
         }
     }
@@ -781,7 +804,9 @@ WlSessionLockSurface {
         
         // Start animations
         startAnim = true;
-        opacityAnimation.start();
+        if (Config.animDuration > 0) {
+            opacityAnimation.start();
+        }
         passwordInput.forceActiveFocus();
     }
 }

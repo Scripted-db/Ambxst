@@ -24,6 +24,7 @@ Item {
     implicitHeight: hasActiveNotifications ? (mainRow.height + (expandedState ? notificationView.implicitHeight + (Config.notchTheme === "island" ? 56 : 52) : notificationView.implicitHeight + (Config.notchTheme === "island" ? 40 : 36))) : mainRow.height
 
     Behavior on implicitHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -31,6 +32,7 @@ Item {
     }
 
     Behavior on implicitWidth {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutBack
@@ -77,6 +79,7 @@ Item {
         spacing: 16
 
         Behavior on spacing {
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration
                 easing.type: Easing.OutBack
@@ -128,6 +131,7 @@ Item {
             visible: height > 0
 
             Behavior on height {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -147,6 +151,7 @@ Item {
                 onIsNavigatingChanged: root.isNavigating = isNavigating
 
                 Behavior on anchors.leftMargin {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
@@ -154,6 +159,7 @@ Item {
                 }
 
                 Behavior on anchors.rightMargin {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
@@ -161,6 +167,7 @@ Item {
                 }
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart

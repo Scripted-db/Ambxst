@@ -32,6 +32,7 @@ Item {
     implicitHeight: Math.min(stack.currentItem ? stack.currentItem.implicitHeight : 368, 368)
 
     Behavior on implicitHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -106,12 +107,14 @@ Item {
                 height: Math.abs(idx1 - idx2) * (width + root.tabSpacing) + width
 
                 Behavior on idx1 {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 3
                         easing.type: Easing.OutSine
                     }
                 }
                 Behavior on idx2 {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutSine
@@ -152,6 +155,7 @@ Item {
                             verticalAlignment: Text.AlignVCenter
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic

@@ -235,6 +235,7 @@ FocusScope {
                     border.width: hasFocus ? 2 : 0
 
                     Behavior on radius {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutQuart
@@ -242,6 +243,7 @@ FocusScope {
                     }
 
                     Behavior on border.width {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 3
                             easing.type: Easing.OutQuart
@@ -272,6 +274,7 @@ FocusScope {
                                     opacity: isActive ? 1 : 0
 
                                     Behavior on opacity {
+                                        enabled: Config.animDuration > 0
                                         NumberAnimation {
                                             duration: Config.animDuration / 3
                                             easing.type: Easing.OutCubic
@@ -280,6 +283,7 @@ FocusScope {
                                 }
 
                                 Behavior on width {
+                                    enabled: Config.animDuration > 0
                                     NumberAnimation {
                                         duration: Config.animDuration / 3
                                         easing.type: Easing.OutCubic
@@ -295,6 +299,7 @@ FocusScope {
                                 color: isActive ? Colors.primary : Colors.overBackground
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 3
                                         easing.type: Easing.OutCubic
@@ -323,6 +328,7 @@ FocusScope {
                     }
 
                     Behavior on width {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 3
                             easing.type: Easing.OutCubic
@@ -330,6 +336,7 @@ FocusScope {
                     }
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutCubic

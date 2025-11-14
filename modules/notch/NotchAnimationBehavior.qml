@@ -14,6 +14,7 @@ Item {
     visible: opacity > 0
 
     Behavior on scale {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutBack
@@ -22,6 +23,7 @@ Item {
     }
 
     Behavior on opacity {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart

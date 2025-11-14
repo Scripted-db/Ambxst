@@ -18,6 +18,7 @@ Button {
         radius: Config.roundness
 
         Behavior on color {
+            enabled: Config.animDuration > 0
             ColorAnimation {
                 duration: Config.animDuration / 4
             }

@@ -28,6 +28,7 @@ BgRect {
     visible: opacity > 0
 
     Behavior on opacity {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -35,6 +36,7 @@ BgRect {
     }
 
     Behavior on Layout.preferredWidth {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -42,6 +44,7 @@ BgRect {
     }
 
     Behavior on Layout.preferredHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -83,6 +86,7 @@ BgRect {
             y: orientation === "vertical" ? currentIndex * (buttonSize + spacing) : 0
 
             Behavior on x {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                     easing.type: Easing.OutCubic
@@ -90,6 +94,7 @@ BgRect {
             }
 
             Behavior on y {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                     easing.type: Easing.OutCubic
@@ -140,6 +145,7 @@ BgRect {
                         verticalAlignment: Text.AlignVCenter
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -193,6 +199,7 @@ BgRect {
                         verticalAlignment: Text.AlignVCenter
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart

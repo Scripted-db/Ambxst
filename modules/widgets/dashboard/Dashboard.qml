@@ -149,12 +149,14 @@ NotchAnimationBehavior {
                 height: Math.abs(idx1 - idx2) * (width + root.tabSpacing) + width
 
                 Behavior on idx1 {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 3
                         easing.type: Easing.OutSine
                     }
                 }
                 Behavior on idx2 {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutSine
@@ -198,6 +200,7 @@ NotchAnimationBehavior {
                             verticalAlignment: Text.AlignVCenter
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration
                                     easing.type: Easing.OutCubic
@@ -419,6 +422,7 @@ NotchAnimationBehavior {
     onImplicitHeightChanged: animatedHeight = implicitHeight
 
     Behavior on animatedWidth {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutBack
@@ -427,6 +431,7 @@ NotchAnimationBehavior {
     }
 
     Behavior on animatedHeight {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutBack

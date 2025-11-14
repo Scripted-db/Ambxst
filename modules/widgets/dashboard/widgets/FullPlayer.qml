@@ -82,6 +82,7 @@ PaneRect {
                 opacity: 1.0
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
@@ -115,6 +116,7 @@ PaneRect {
             opacity: (MprisController.activePlayer?.trackArtUrl ?? "") !== "" ? 1.0 : 0.0
 
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -204,6 +206,7 @@ PaneRect {
                     opacity: MprisController.canTogglePlaying ? 1.0 : 0.3
 
                     Behavior on radius {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutBack
@@ -212,6 +215,7 @@ PaneRect {
                     }
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -256,6 +260,7 @@ PaneRect {
                     opacity: MprisController.canGoPrevious ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -292,6 +297,7 @@ PaneRect {
                     opacity: MprisController.canGoNext ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -337,6 +343,7 @@ PaneRect {
                     }
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -392,6 +399,7 @@ PaneRect {
                     opacity: MprisController.activePlayer ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart

@@ -240,6 +240,7 @@ Rectangle {
     }
 
     Behavior on height {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -652,6 +653,7 @@ Rectangle {
                         x: isInRenameMode ? 0 : 80
 
                         Behavior on x {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutQuart
@@ -660,6 +662,7 @@ Rectangle {
                     }
 
                     Behavior on opacity {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutQuart
@@ -692,12 +695,14 @@ Rectangle {
                         height: 32 - activeButtonMargin * 2
 
                         Behavior on idx1X {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 3
                                 easing.type: Easing.OutSine
                             }
                         }
                         Behavior on idx2X {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutSine
@@ -742,6 +747,7 @@ Rectangle {
                                 textFormat: Text.RichText
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -779,6 +785,7 @@ Rectangle {
                                 textFormat: Text.RichText
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -797,6 +804,7 @@ Rectangle {
                         spacing: 8
 
                         Behavior on anchors.rightMargin {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutQuart
@@ -822,6 +830,7 @@ Rectangle {
                         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -859,6 +868,7 @@ Rectangle {
                             textFormat: Text.RichText
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration / 2
                                     easing.type: Easing.OutQuart
@@ -899,6 +909,7 @@ Rectangle {
                                 elide: Text.ElideRight
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -963,6 +974,7 @@ Rectangle {
                         x: isInDeleteMode ? 0 : 80
 
                         Behavior on x {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutQuart
@@ -971,6 +983,7 @@ Rectangle {
                     }
 
                     Behavior on opacity {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutQuart
@@ -1003,12 +1016,14 @@ Rectangle {
                         height: 32 - activeButtonMargin * 2
 
                         Behavior on idx1X {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 3
                                 easing.type: Easing.OutSine
                             }
                         }
                         Behavior on idx2X {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutSine
@@ -1053,6 +1068,7 @@ Rectangle {
                                 textFormat: Text.RichText
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -1090,6 +1106,7 @@ Rectangle {
                                 textFormat: Text.RichText
 
                                 Behavior on color {
+                                    enabled: Config.animDuration > 0
                                     ColorAnimation {
                                         duration: Config.animDuration / 2
                                         easing.type: Easing.OutQuart
@@ -1115,6 +1132,7 @@ Rectangle {
                 visible: root.selectedIndex >= 0 && (root.optionsMenuOpen ? root.selectedIndex === root.menuItemIndex : true)
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutQuart
@@ -1122,6 +1140,7 @@ Rectangle {
                 }
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutQuart
@@ -1129,7 +1148,7 @@ Rectangle {
                 }
             }
 
-             highlightMoveDuration: Config.animDuration / 2
+             highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration : 0 > 0 ? Config.animDuration / 2 : 0
              highlightMoveVelocity: -1
 
              MouseArea {

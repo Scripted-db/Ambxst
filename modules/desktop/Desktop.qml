@@ -71,7 +71,7 @@ PanelWindow {
                 visible: !isPlaceholder
 
                 Behavior on x {
-                    enabled: !dragHandler.active
+                    enabled: !dragHandler.active && Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutCubic
@@ -79,7 +79,7 @@ PanelWindow {
                 }
 
                 Behavior on y {
-                    enabled: !dragHandler.active
+                    enabled: !dragHandler.active && Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutCubic
@@ -135,6 +135,7 @@ PanelWindow {
                     opacity: dragHandler.active ? 0.3 : 1.0
 
                     Behavior on opacity {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration / 2
                             easing.type: Easing.OutCubic

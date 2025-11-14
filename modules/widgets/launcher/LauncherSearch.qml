@@ -35,6 +35,7 @@ Rectangle {
     color: "transparent"
 
     Behavior on height {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -247,7 +248,7 @@ Rectangle {
                 visible: root.selectedIndex >= 0
             }
 
-            highlightMoveDuration: Config.animDuration / 2
+            highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration / 2 : 0
             highlightMoveVelocity: -1
         }
     }

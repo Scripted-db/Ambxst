@@ -122,24 +122,28 @@ FocusScope {
             }
 
             Behavior on idx1X {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 3
                     easing.type: Easing.OutSine
                 }
             }
             Behavior on idx2X {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutSine
                 }
             }
             Behavior on idx1Y {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 3
                     easing.type: Easing.OutSine
                 }
             }
             Behavior on idx2Y {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutSine
@@ -193,6 +197,7 @@ FocusScope {
                         verticalAlignment: Text.AlignVCenter
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart

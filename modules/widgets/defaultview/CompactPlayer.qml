@@ -60,6 +60,7 @@ Item {
             visible: compactPlayer.player === null
             opacity: 1.0
             Behavior on color {
+                enabled: Config.animDuration > 0
                 ColorAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -90,6 +91,7 @@ Item {
             blur: 0.75
             opacity: hasArtwork ? 1.0 : 0.0 // Simplificado con hasArtwork
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -106,6 +108,7 @@ Item {
             layer.effect: BgShadow {}
             visible: compactPlayer.player !== null
             Behavior on spacing {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -122,6 +125,7 @@ Item {
                     radius: compactPlayer.isPlaying ? (Config.roundness > 0 ? Math.max(Config.roundness - 8, 0) : 0) : (Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0)
                     color: "transparent"
                     Behavior on radius {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutBack
@@ -146,6 +150,7 @@ Item {
                         blur: 0.75
                         opacity: hasArtwork ? 1.0 : 0.0 // Simplificado
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutQuart
@@ -165,12 +170,14 @@ Item {
                         layer.enabled: true
                         layer.effect: BgShadow {}
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutQuart
                             }
                         }
                         Behavior on scale {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
                                 easing.type: Easing.OutBack
@@ -214,18 +221,21 @@ Item {
                 readonly property real naturalWidth: implicitWidth
                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on scale {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutBack
@@ -279,18 +289,21 @@ Item {
                 readonly property real naturalWidth: implicitWidth
                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on scale {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutBack
@@ -349,18 +362,21 @@ Item {
                 readonly property real naturalWidth: implicitWidth
                 Layout.preferredWidth: (compactPlayer.player !== null && compactPlayer.notchHovered) ? naturalWidth : 0
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on scale {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutBack
@@ -424,18 +440,21 @@ Item {
                 Layout.preferredWidth: compactPlayer.player !== null ? implicitWidth : 0
                 Layout.rightMargin: compactPlayer.player !== null ? 4 : 0
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on Layout.rightMargin {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
                     }
                 }
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart

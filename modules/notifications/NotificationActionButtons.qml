@@ -40,6 +40,7 @@ Item {
                     radius: Config.roundness > 0 ? Config.roundness + 4 : 0
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                         }
@@ -55,6 +56,7 @@ Item {
                     elide: Text.ElideRight
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                         }

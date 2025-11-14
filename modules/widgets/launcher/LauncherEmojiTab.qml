@@ -268,6 +268,7 @@ Rectangle {
     color: "transparent"
 
     Behavior on height {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -451,6 +452,7 @@ Rectangle {
                 activeFocusOnTab: true
 
                 Behavior on color {
+                    enabled: Config.animDuration > 0
                     ColorAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutQuart
@@ -458,6 +460,7 @@ Rectangle {
                 }
 
                 Behavior on Layout.preferredWidth {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration
                         easing.type: Easing.OutQuart
@@ -503,6 +506,7 @@ Rectangle {
                         textFormat: Text.RichText
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -521,6 +525,7 @@ Rectangle {
                         visible: opacity > 0
 
                         Behavior on opacity {
+                            enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -592,6 +597,7 @@ Rectangle {
                         radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
                         Behavior on color {
+                            enabled: Config.animDuration > 0
                             ColorAnimation {
                                 duration: Config.animDuration / 2
                                 easing.type: Easing.OutQuart
@@ -635,7 +641,7 @@ Rectangle {
                         visible: root.isRecentFocused
                     }
 
-                    highlightMoveDuration: Config.animDuration / 2
+                    highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration : 0 > 0 ? Config.animDuration / 2 : 0
                     highlightMoveVelocity: -1
                 }
             }
@@ -698,6 +704,7 @@ Rectangle {
                             color: root.selectedIndex === index && !root.isRecentFocused ? Colors.overPrimary : Colors.surface
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration / 2
                                     easing.type: Easing.OutCubic
@@ -727,6 +734,7 @@ Rectangle {
                             elide: Text.ElideRight
 
                             Behavior on color {
+                                enabled: Config.animDuration > 0
                                 ColorAnimation {
                                     duration: Config.animDuration / 2
                                     easing.type: Easing.OutCubic
@@ -742,7 +750,7 @@ Rectangle {
                     visible: root.selectedIndex >= 0 && !root.isRecentFocused
                 }
 
-                highlightMoveDuration: Config.animDuration / 2
+                highlightMoveDuration: Config.animDuration > 0 ? Config.animDuration : 0 > 0 ? Config.animDuration / 2 : 0
                 highlightMoveVelocity: -1
             }
         }

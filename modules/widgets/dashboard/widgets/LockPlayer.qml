@@ -61,6 +61,7 @@ BgRect {
             opacity: 1.0
 
             Behavior on color {
+                enabled: Config.animDuration > 0
                 ColorAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -113,6 +114,7 @@ BgRect {
                     blur: playPauseHover.hovered ? 0.75 : 0
 
                     Behavior on brightness {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -120,6 +122,7 @@ BgRect {
                     }
 
                     Behavior on contrast {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -127,6 +130,7 @@ BgRect {
                     }
 
                     Behavior on saturation {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -134,6 +138,7 @@ BgRect {
                     }
 
                     Behavior on blur {
+                        enabled: Config.animDuration > 0
                         NumberAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -154,6 +159,7 @@ BgRect {
                 visible: MprisController.canTogglePlaying
 
                 Behavior on opacity {
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutQuart
@@ -227,6 +233,7 @@ BgRect {
                     opacity: MprisController.canGoPrevious ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -266,6 +273,7 @@ BgRect {
                     opacity: MprisController.canGoNext ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -311,6 +319,7 @@ BgRect {
                     }
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart
@@ -366,6 +375,7 @@ BgRect {
                     opacity: MprisController.activePlayer ? 1.0 : 0.3
 
                     Behavior on color {
+                        enabled: Config.animDuration > 0
                         ColorAnimation {
                             duration: Config.animDuration
                             easing.type: Easing.OutQuart

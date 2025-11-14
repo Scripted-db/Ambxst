@@ -52,7 +52,7 @@ Item {
 
     property real animatedProgress: progressRatio
     Behavior on animatedProgress {
-        enabled: root.smoothDrag
+        enabled: root.smoothDrag && Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -60,24 +60,28 @@ Item {
     }
 
     Behavior on wavyAmplitude {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on wavyFrequency {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on heightMultiplier {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
         }
     }
     Behavior on size {
+        enabled: Config.animDuration > 0
         NumberAnimation {
             duration: Config.animDuration
             easing.type: Easing.OutQuart
@@ -100,6 +104,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             opacity: root.sliderVisible ? 1 : 0
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
@@ -197,6 +202,7 @@ Item {
             Layout.alignment: Qt.AlignHCenter
             opacity: root.sliderVisible ? 1 : 0
             Behavior on opacity {
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration
                     easing.type: Easing.OutQuart
