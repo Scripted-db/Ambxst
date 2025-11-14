@@ -44,6 +44,10 @@ QtObject {
             const dispatcher = keybind.dispatcher;
             const argument = keybind.argument || "";
             const bindKeyword = flags ? `bind${flags}` : "bind";
+            // Para bindm no se incluye argumento si está vacío
+            if (flags === "m" && !argument) {
+                return `keyword ${bindKeyword} ${mods},${key},${dispatcher}`;
+            }
             return `keyword ${bindKeyword} ${mods},${key},${dispatcher},${argument}`;
         }
 
