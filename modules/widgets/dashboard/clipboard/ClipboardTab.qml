@@ -1173,7 +1173,9 @@ Item {
                                     var content = root.currentFullContent || previewPanel.currentItem.preview;
                                     if (content.startsWith("file://")) {
                                         var filePath = content.substring(7).trim();
-                                        return filePath.split('/').pop();
+                                        var fileName = filePath.split('/').pop();
+                                        // Decode URL encoding (e.g., %20 -> space)
+                                        return decodeURIComponent(fileName);
                                     }
                                     return content;
                                 }
@@ -1194,7 +1196,11 @@ Item {
                                         var filePath = content.substring(7).trim();
                                         var parts = filePath.split('/');
                                         parts.pop(); // Remove filename
-                                        return parts.join('/');
+                                        // Decode each part of the path
+                                        var decodedParts = parts.map(function(part) {
+                                            return decodeURIComponent(part);
+                                        });
+                                        return decodedParts.join('/');
                                     }
                                     return "";
                                 }

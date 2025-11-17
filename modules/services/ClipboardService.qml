@@ -133,6 +133,8 @@ QtObject {
                             if (uriContent.startsWith("file://")) {
                                 var filePath = uriContent.substring(7); // Remove "file://"
                                 var fileName = filePath.split('/').pop();
+                                // Decode URL encoding (e.g., %20 -> space)
+                                fileName = root.decodeUriString(fileName);
                                 preview = "[File] " + fileName;
                             }
                         } else if (item.is_image === 1) {
@@ -291,6 +293,16 @@ QtObject {
     }
 
     signal fullContentRetrieved(string itemId, string content)
+    
+    // Function to decode URL-encoded strings
+    function decodeUriString(str) {
+        try {
+            return decodeURIComponent(str);
+        } catch (e) {
+            // If decoding fails, return original string
+            return str;
+        }
+    }
 
     function initialize() {
         initDbProcess.command = ["sh", "-c", "sqlite3 " + dbPath + " < " + schemaPath];
