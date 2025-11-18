@@ -16,6 +16,7 @@ BgRect {
     property real length: MprisController.activePlayer?.length ?? 1.0
     property bool hasArtwork: (MprisController.activePlayer?.trackArtUrl ?? "") !== ""
 
+    visible: MprisController.activePlayer !== null
     height: 96
     radius: Config.roundness > 0 ? (height / 2) * (Config.roundness / 16) : 0
 

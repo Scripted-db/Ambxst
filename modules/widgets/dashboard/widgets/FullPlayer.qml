@@ -15,6 +15,7 @@ PaneRect {
     property real playerRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
     property bool playersListExpanded: false
     
+    visible: MprisController.activePlayer !== null
     radius: playerRadius
     
     implicitHeight: {
