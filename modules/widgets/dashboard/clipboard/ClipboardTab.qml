@@ -1172,7 +1172,6 @@ Item {
             id: previewPanel
             width: parent.width - parent.spacing * 2 - 2 - (parent.width * 0.35)
             height: parent.height
-            visible: ClipboardService.items.length > 0
 
             property var currentItem: root.selectedIndex >= 0 && root.selectedIndex < root.allItems.length ? root.allItems[root.selectedIndex] : null
 
@@ -2014,7 +2013,7 @@ Item {
                 visible: !previewPanel.currentItem
 
                 Text {
-                    text: Icons.clipboard
+                    text: Icons.cactus
                     font.family: Icons.font
                     font.pixelSize: 48
                     color: Colors.surfaceBright
