@@ -52,14 +52,53 @@ Item {
     }
 
     // Corner fills (keep for shape background). Their previous per-corner stroke canvases were removed.
-    RoundCorner {
+    Item {
         id: leftCorner
         visible: Config.notchTheme === "default"
         anchors.top: parent.top
         anchors.right: notchRect.left
-        corner: RoundCorner.CornerEnum.TopRight
-        size: Config.roundness > 0 ? Config.roundness + 4 : 0
-        color: Colors.background
+        width: size
+        height: size
+        property int size: Config.roundness > 0 ? Config.roundness + 4 : 0
+        clip: true
+
+        BgRect {
+            id: leftCornerBg
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: parent.width
+            height: notchRect.height
+            radius: 0
+            border.width: 0
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: leftCornerMask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 0.0
+            }
+        }
+
+        Item {
+            id: leftCornerMask
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: parent.width
+            height: notchRect.height
+            visible: false
+            layer.enabled: true
+            layer.smooth: true
+
+            RoundCorner {
+                anchors.top: parent.top
+                anchors.left: parent.left
+                width: parent.width
+                height: parent.width
+                corner: RoundCorner.CornerEnum.TopRight
+                size: parent.width
+                color: "white"
+            }
+        }
     }
 
     BgRect {
@@ -261,14 +300,53 @@ Item {
     property bool isShowingNotifications: false
     property bool isShowingDefault: false
 
-    RoundCorner {
+    Item {
         id: rightCorner
         visible: Config.notchTheme === "default"
         anchors.top: parent.top
         anchors.left: notchRect.right
-        corner: RoundCorner.CornerEnum.TopLeft
-        size: Config.roundness > 0 ? Config.roundness + 4 : 0
-        color: Colors.background
+        width: size
+        height: size
+        property int size: Config.roundness > 0 ? Config.roundness + 4 : 0
+        clip: true
+
+        BgRect {
+            id: rightCornerBg
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.width
+            height: notchRect.height
+            radius: 0
+            border.width: 0
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: rightCornerMask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 0.0
+            }
+        }
+
+        Item {
+            id: rightCornerMask
+            anchors.top: parent.top
+            anchors.right: parent.right
+            width: parent.width
+            height: notchRect.height
+            visible: false
+            layer.enabled: true
+            layer.smooth: true
+
+            RoundCorner {
+                anchors.top: parent.top
+                anchors.right: parent.right
+                width: parent.width
+                height: parent.width
+                corner: RoundCorner.CornerEnum.TopLeft
+                size: parent.width
+                color: "white"
+            }
+        }
     }
 
     // Unified outline canvas (single continuous stroke around silhouette)

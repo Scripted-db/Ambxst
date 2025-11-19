@@ -9,8 +9,18 @@ import qs.modules.corners
 import qs.config
 
 Item {
+    id: root
     property var cascadeItems: []
     property int cascadeIndex: -1
+
+    readonly property color headerColor: {
+        const stopData = Config.theme.paneColor[0] || ["surface", 0.0]
+        const colorValue = stopData[0]
+        if (colorValue.startsWith("#") || colorValue.startsWith("rgba") || colorValue.startsWith("rgb")) {
+            return colorValue
+        }
+        return Colors[colorValue] || colorValue
+    }
 
     function discardAllWithAnimation() {
         const children = notificationList.contentItem.children;
@@ -77,7 +87,7 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
-                color: Colors.surface
+                color: root.headerColor
                 topLeftRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 topRightRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
                 Rectangle {
@@ -109,14 +119,14 @@ Item {
                     anchors.left: parent.left
                     size: Config.roundness > 0 ? Config.roundness + 4 : 0
                     corner: RoundCorner.CornerEnum.BottomLeft
-                    color: Colors.surface
+                    color: root.headerColor
                 }
 
                 Rectangle {
                     id: dndToggle
                     radius: Notifications.silent ? (Config.roundness > 4 ? Config.roundness - 4 : 0) : Config.roundness
                     bottomLeftRadius: Config.roundness
-                    color: Notifications.silent ? (dndHover.containsMouse ? Colors.overBackground : Colors.primary) : (dndHover.containsMouse ? Colors.surfaceBright : Colors.surface)
+                    color: Notifications.silent ? (dndHover.containsMouse ? Colors.overBackground : Colors.primary) : (dndHover.containsMouse ? Colors.surfaceBright : root.headerColor)
                     width: 36
                     height: 36
                     anchors.top: parent.top
@@ -167,7 +177,7 @@ Item {
                 Layout.preferredHeight: 36
                 Layout.bottomMargin: 4
                 radius: broomHover.pressed ? Config.roundness : (broomHover.containsMouse ? (Config.roundness > 4 ? Config.roundness - 4 : 0) : Config.roundness)
-                color: broomHover.pressed ? Colors.error : (broomHover.containsMouse ? Colors.overError : Colors.surface)
+                color: broomHover.pressed ? Colors.error : (broomHover.containsMouse ? Colors.overError : root.headerColor)
 
                 Behavior on color {
                     enabled: Config.animDuration > 0
