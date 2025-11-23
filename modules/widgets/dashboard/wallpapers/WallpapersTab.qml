@@ -85,6 +85,24 @@ FocusScope {
         }
     }
 
+    // Función para posicionar el wallpaper actual centrado verticalmente
+    function centerCurrentWallpaper() {
+        const currentIndex = findCurrentWallpaperIndex();
+        if (currentIndex !== -1) {
+            GlobalStates.wallpaperSelectedIndex = currentIndex;
+            selectedIndex = currentIndex;
+            wallpaperGrid.currentIndex = currentIndex;
+            
+            // Calcular la fila del wallpaper actual
+            const currentRow = Math.floor(currentIndex / gridColumns);
+            // Calcular el índice del primer item de esa fila
+            const rowStartIndex = currentRow * gridColumns;
+            
+            // Posicionar para que la fila esté centrada verticalmente
+            wallpaperGrid.positionViewAtIndex(rowStartIndex, GridView.Center);
+        }
+    }
+
     // Función para encontrar el índice del wallpaper actual en la lista filtrada
     function findCurrentWallpaperIndex() {
         if (!GlobalStates.wallpaperManager || !GlobalStates.wallpaperManager.currentWallpaper) {
@@ -97,19 +115,7 @@ FocusScope {
 
     // Llama a focusSearch una vez que el componente se ha completado.
     Component.onCompleted: {
-        Qt.callLater(() => {
-            // Primero intentar encontrar el wallpaper actual
-            const currentIndex = findCurrentWallpaperIndex();
-            if (currentIndex !== -1) {
-                GlobalStates.wallpaperSelectedIndex = currentIndex;
-                selectedIndex = currentIndex;
-                wallpaperGrid.currentIndex = currentIndex;
-                // Posicionar la vista en el wallpaper actual
-                wallpaperGrid.positionViewAtIndex(currentIndex, GridView.Center);
-            }
-
-            focusSearch();
-        });
+        centerTimer.start();
     }
 
     // Actualizar subcarpetas cuando la pestaña se haga visible
@@ -119,10 +125,19 @@ FocusScope {
                 console.log("WallpapersTab became visible, updating subfolders");
                 GlobalStates.wallpaperManager.scanSubfolders();
             }
-            // Forzar foco cuando se hace visible
-            Qt.callLater(() => {
-                focusSearch();
-            });
+            // Reposicionar al wallpaper actual cuando se hace visible
+            centerTimer.restart();
+        }
+    }
+
+    // Timer para asegurar que el centrado ocurre después de que el GridView esté listo
+    Timer {
+        id: centerTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            centerCurrentWallpaper();
+            focusSearch();
         }
     }
 
