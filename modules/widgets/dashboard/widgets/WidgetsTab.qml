@@ -44,13 +44,18 @@ Rectangle {
 
     // Handle prefix detection in launcher
     function detectPrefix(text) {
+        let clipPrefix = Config.prefix.clipboard + " ";
+        let emojiPrefix = Config.prefix.emoji + " ";
+        let tmuxPrefix = Config.prefix.tmux + " ";
+        let wallPrefix = Config.prefix.wallpapers + " ";
+
         // If prefix was manually disabled, don't re-enable until conditions are met
         if (prefixDisabled) {
             // Only re-enable prefix if user deletes the prefix text or adds valid content
-            if (text === "clip " || text === "emoji " || text === "tmux " || text === "wall ") {
+            if (text === clipPrefix || text === emojiPrefix || text === tmuxPrefix || text === wallPrefix) {
                 // Still at exact prefix - keep disabled
                 return 0;
-            } else if (!text.startsWith("clip ") && !text.startsWith("emoji ") && !text.startsWith("tmux ") && !text.startsWith("wall ")) {
+            } else if (!text.startsWith(clipPrefix) && !text.startsWith(emojiPrefix) && !text.startsWith(tmuxPrefix) && !text.startsWith(wallPrefix)) {
                 // User deleted the prefix - re-enable detection
                 prefixDisabled = false;
                 return 0;
@@ -61,13 +66,13 @@ Rectangle {
         }
 
         // Normal prefix detection - only activate if exactly "prefix " (nothing after)
-        if (text === "clip ") {
+        if (text === clipPrefix) {
             return 1;
-        } else if (text === "emoji ") {
+        } else if (text === emojiPrefix) {
             return 2;
-        } else if (text === "tmux ") {
+        } else if (text === tmuxPrefix) {
             return 3;
-        } else if (text === "wall ") {
+        } else if (text === wallPrefix) {
             return 4;
         }
         return 0;
@@ -116,14 +121,14 @@ Rectangle {
 
                         // Extract the text after the prefix
                         let prefixLength = 0;
-                        if (searchText.startsWith("clip "))
-                            prefixLength = 5;
-                        else if (searchText.startsWith("emoji "))
-                            prefixLength = 6;
-                        else if (searchText.startsWith("tmux "))
-                            prefixLength = 5;
-                        else if (searchText.startsWith("wall "))
-                            prefixLength = 5;
+                        if (searchText.startsWith(Config.prefix.clipboard + " "))
+                            prefixLength = Config.prefix.clipboard.length + 1;
+                        else if (searchText.startsWith(Config.prefix.emoji + " "))
+                            prefixLength = Config.prefix.emoji.length + 1;
+                        else if (searchText.startsWith(Config.prefix.tmux + " "))
+                            prefixLength = Config.prefix.tmux.length + 1;
+                        else if (searchText.startsWith(Config.prefix.wallpapers + " "))
+                            prefixLength = Config.prefix.wallpapers.length + 1;
 
                         let remainingText = searchText.substring(prefixLength);
 
@@ -519,63 +524,71 @@ Rectangle {
             visible: currentTab !== 0
             currentIndex: currentTab - 1  // Subtract 1 because launcher is now separate
 
-            // Tab 1: Clipboard (with prefix "clip ")
+            // Tab 1: Clipboard (with prefix from config)
             Loader {
                 id: clipboardLoader
                 active: true
-                sourceComponent: ClipboardTab {
-                    prefixText: "clip "
-                    onBackspaceOnEmpty: {
-                        // Return to launcher with prefix text + space
-                        prefixDisabled = true;
-                        currentTab = 0;
-                        GlobalStates.launcherSearchText = "clip ";
-                        appLauncher.focusSearchInput();
+                sourceComponent: Component {
+                    ClipboardTab {
+                        prefixText: Config.prefix.clipboard + " "
+                        onBackspaceOnEmpty: {
+                            // Return to launcher with prefix text + space
+                            prefixDisabled = true;
+                            currentTab = 0;
+                            GlobalStates.launcherSearchText = Config.prefix.clipboard + " ";
+                            appLauncher.focusSearchInput();
+                        }
                     }
                 }
             }
 
-            // Tab 2: Emoji (with prefix "emoji ")
+            // Tab 2: Emoji (with prefix from config)
             Loader {
                 id: emojiLoader
                 active: true
-                sourceComponent: EmojiTab {
-                    prefixText: "emoji "
-                    onBackspaceOnEmpty: {
-                        prefixDisabled = true;
-                        currentTab = 0;
-                        GlobalStates.launcherSearchText = "emoji ";
-                        appLauncher.focusSearchInput();
+                sourceComponent: Component {
+                    EmojiTab {
+                        prefixText: Config.prefix.emoji + " "
+                        onBackspaceOnEmpty: {
+                            prefixDisabled = true;
+                            currentTab = 0;
+                            GlobalStates.launcherSearchText = Config.prefix.emoji + " ";
+                            appLauncher.focusSearchInput();
+                        }
                     }
                 }
             }
 
-            // Tab 3: Tmux (with prefix "tmux ")
+            // Tab 3: Tmux (with prefix from config)
             Loader {
                 id: tmuxLoader
                 active: true
-                sourceComponent: TmuxTab {
-                    prefixText: "tmux "
-                    onBackspaceOnEmpty: {
-                        prefixDisabled = true;
-                        currentTab = 0;
-                        GlobalStates.launcherSearchText = "tmux ";
-                        appLauncher.focusSearchInput();
+                sourceComponent: Component {
+                    TmuxTab {
+                        prefixText: Config.prefix.tmux + " "
+                        onBackspaceOnEmpty: {
+                            prefixDisabled = true;
+                            currentTab = 0;
+                            GlobalStates.launcherSearchText = Config.prefix.tmux + " ";
+                            appLauncher.focusSearchInput();
+                        }
                     }
                 }
             }
 
-            // Tab 4: Wallpapers (with prefix "wall ")
+            // Tab 4: Wallpapers (with prefix from config)
             Loader {
                 id: wallpapersLoader
                 active: true
-                sourceComponent: WallpapersTab {
-                    prefixText: "wall "
-                    onBackspaceOnEmpty: {
-                        prefixDisabled = true;
-                        currentTab = 0;
-                        GlobalStates.launcherSearchText = "wall ";
-                        appLauncher.focusSearchInput();
+                sourceComponent: Component {
+                    WallpapersTab {
+                        prefixText: Config.prefix.wallpapers + " "
+                        onBackspaceOnEmpty: {
+                            prefixDisabled = true;
+                            currentTab = 0;
+                            GlobalStates.launcherSearchText = Config.prefix.wallpapers + " ";
+                            appLauncher.focusSearchInput();
+                        }
                     }
                 }
             }

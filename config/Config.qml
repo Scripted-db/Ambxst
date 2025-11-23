@@ -179,6 +179,13 @@ Singleton {
             property JsonObject lockscreen: JsonObject {
                 property string position: "bottom"
             }
+
+            property JsonObject prefix: JsonObject {
+                property string clipboard: "clp"
+                property string emoji: "emo"
+                property string tmux: "tmx"
+                property string wallpapers: "wpp"
+            }
         }
     }
 
@@ -681,4 +688,7 @@ Singleton {
 
     // Lockscreen configuration
     property QtObject lockscreen: loader.adapter.lockscreen
+
+    // Prefix configuration
+    property QtObject prefix: loader.adapter.prefix
 }
