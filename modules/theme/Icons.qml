@@ -138,4 +138,8 @@ QtObject {
     readonly property string folder: ""
     readonly property string cactus: ""
     readonly property string countdown: ""
+    readonly property string arrowUp: ""
+    readonly property string arrowDown: ""
+    readonly property string arrowLeft: ""
+    readonly property string arrowRight: ""
 }
