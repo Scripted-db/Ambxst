@@ -348,30 +348,40 @@ Rectangle {
         }
     }
 
-    ColumnLayout {
+    Row {
         id: mainLayout
         anchors.fill: parent
         spacing: 8
 
         // Contenedor de listas de emojis (layout horizontal)
-        RowLayout {
-            Layout.fillWidth: true
+        Row {
+            width: parent.width
+            height: parent.height
             spacing: 8
 
             // Columna izquierda: Search + Lista normal de emojis
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
+            Column {
+                width: {
+                    var remainingWidth = parent.width - parent.spacing * 2 - 2; // Total - separators - separator width
+                    var gridRows = 3;
+                    var gridColumns = 5;
+                    var wallpaperHeight = (parent.height + 4 * 2) / gridRows;
+                    var rightPanelWidth = (wallpaperHeight * gridColumns) - 8;
+                    return remainingWidth - rightPanelWidth;
+                }
+                height: parent.height
                 spacing: 8
 
                 // Barra de búsqueda con botón de limpiar
-                RowLayout {
-                    Layout.fillWidth: true
+                Row {
+                    width: parent.width
+                    height: 48
                     spacing: 8
 
                     SearchInput {
                         id: searchInput
-                        Layout.fillWidth: true
+                        width: parent.width - clearButton.width - parent.spacing
+                        height: parent.height
                         text: root.searchText
                         placeholderText: "Search emojis..."
                         prefixIcon: root.prefixIcon
@@ -426,8 +436,8 @@ Rectangle {
                     // Botón de limpiar recientes
                     ClippingRectangle {
                         id: clearButton
-                        Layout.preferredWidth: root.clearButtonConfirmState ? clearButtonContent.implicitWidth + 32 : 48
-                        Layout.preferredHeight: 48
+                        width: root.clearButtonConfirmState ? clearButtonContent.implicitWidth + 32 : 48
+                        height: 48
                         radius: searchInput.radius
                         color: {
                             if (root.clearButtonConfirmState) {
@@ -449,7 +459,7 @@ Rectangle {
                             }
                         }
 
-                        Behavior on Layout.preferredWidth {
+                        Behavior on width {
                             enabled: Config.animDuration > 0
                             NumberAnimation {
                                 duration: Config.animDuration
@@ -480,19 +490,21 @@ Rectangle {
                             }
                         }
 
-                        RowLayout {
+                        Row {
                             id: clearButtonContent
                             anchors.fill: parent
                             anchors.margins: 8
                             spacing: 8
 
                             Text {
-                                Layout.preferredWidth: 32
+                                width: 32
+                                height: parent.height
                                 text: root.clearButtonConfirmState ? Icons.xeyes : Icons.broom
                                 font.family: Icons.font
                                 font.pixelSize: 20
                                 color: root.clearButtonConfirmState ? Colors.overError : Colors.primary
                                 horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment: Text.AlignVCenter
                                 textFormat: Text.RichText
 
                                 Behavior on color {
@@ -505,7 +517,8 @@ Rectangle {
                             }
 
                             Text {
-                                Layout.fillWidth: true
+                                width: parent.width - 32 - parent.spacing
+                                height: parent.height
                                 text: "Clear recent?"
                                 font.family: Config.theme.font
                                 font.weight: Font.Bold
@@ -513,6 +526,7 @@ Rectangle {
                                 color: Colors.overError
                                 opacity: root.clearButtonConfirmState ? 1.0 : 0.0
                                 visible: opacity > 0
+                                verticalAlignment: Text.AlignVCenter
 
                                 Behavior on opacity {
                                     enabled: Config.animDuration > 0
@@ -550,8 +564,8 @@ Rectangle {
                 // Emoji list (7 filas)
                 ListView {
                     id: emojiList
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 7 * 48
+                    width: parent.width
+                    height: 7 * 48
                     clip: true
                     cacheBuffer: 96
                     reuseItems: true
@@ -595,14 +609,14 @@ Rectangle {
                             }
                         }
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.margins: 8
                             spacing: 8
 
                             Rectangle {
-                                Layout.preferredWidth: emojiIcon.implicitWidth + 6 // Ancho variable basado en el emoji
-                                Layout.preferredHeight: 32
+                                width: emojiIcon.implicitWidth + 6 // Ancho variable basado en el emoji
+                                height: 32
                                 radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                 color: root.selectedIndex === index && !root.isRecentFocused ? Colors.overPrimary : Colors.surface
 
@@ -626,7 +640,7 @@ Rectangle {
                             }
 
                             Text {
-                                Layout.fillWidth: true
+                                width: parent.width - emojiIcon.implicitWidth - 6 - parent.spacing - 16
                                 text: modelData.search
                                 color: root.selectedIndex === index && !root.isRecentFocused ? Colors.overPrimary : Colors.overBackground
                                 font.family: Config.theme.font
@@ -658,22 +672,21 @@ Rectangle {
 
             // Separator
             Rectangle {
-                Layout.preferredWidth: 2
-                Layout.preferredHeight: 7 * 48 + 56  // altura de listas + search bar
+                width: 2
+                height: parent.height
                 radius: Config.roundness
                 color: Colors.surface
             }
 
             // Recent emojis vertical list
             Item {
-                Layout.fillWidth: false
-                Layout.preferredWidth: {
+                width: {
                     var gridRows = 3;
                     var gridColumns = 5;
                     var wallpaperHeight = (parent.height + 4 * 2) / gridRows;
                     return (wallpaperHeight * gridColumns) - 8;
                 }
-                Layout.preferredHeight: 7 * 48 + 56  // misma altura total que la columna izquierda
+                height: parent.height
                 visible: recentEmojis.length > 0 && searchText.length === 0
 
                 ListView {
@@ -734,14 +747,14 @@ Rectangle {
                             }
                         }
 
-                        RowLayout {
+                        Row {
                             anchors.fill: parent
                             anchors.margins: 8
                             spacing: 8
 
                             Rectangle {
-                                Layout.preferredWidth: recentEmojiIcon.implicitWidth + 6
-                                Layout.preferredHeight: 32
+                                width: recentEmojiIcon.implicitWidth + 6
+                                height: 32
                                 radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
                                 color: root.selectedRecentIndex === index && root.isRecentFocused ? Colors.overPrimary : Colors.surface
 
@@ -765,7 +778,7 @@ Rectangle {
                             }
 
                             Text {
-                                Layout.fillWidth: true
+                                width: parent.width - recentEmojiIcon.implicitWidth - 6 - parent.spacing - 16
                                 text: modelData.search
                                 color: root.selectedRecentIndex === index && root.isRecentFocused ? Colors.overPrimary : Colors.overBackground
                                 font.family: Config.theme.font
@@ -797,14 +810,13 @@ Rectangle {
 
             // Placeholder cuando no hay recientes
             Item {
-                Layout.fillWidth: false
-                Layout.preferredWidth: {
+                width: {
                     var gridRows = 3;
                     var gridColumns = 5;
                     var wallpaperHeight = (parent.height + 4 * 2) / gridRows;
                     return (wallpaperHeight * gridColumns) - 8;
                 }
-                Layout.preferredHeight: 7 * 48 + 56  // misma altura total que la columna izquierda
+                height: parent.height
                 visible: recentEmojis.length === 0 && searchText.length === 0
 
                 Column {
