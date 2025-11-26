@@ -768,6 +768,51 @@ QtObject {
             }
         }
     }
+    
+    // Emoji paste process - persists even when dashboard closes
+    property Process emojiTypeProcess: Process {
+        property string emojiText: ""
+        running: false
+        
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) {
+                    console.warn("ClipboardService: emojiTypeProcess stderr:", text);
+                }
+            }
+        }
+        
+        onExited: function(code) {
+            if (code !== 0) {
+                console.warn("ClipboardService: emojiTypeProcess failed with code:", code);
+            }
+        }
+    }
+    
+    property Timer emojiTypeTimer: Timer {
+        interval: 250
+        repeat: false
+        onTriggered: {
+            if (emojiTypeProcess.emojiText.length > 0) {
+                emojiTypeProcess.command = ["wtype", emojiTypeProcess.emojiText];
+                emojiTypeProcess.running = true;
+                emojiTypeProcess.emojiText = "";
+            }
+        }
+    }
+    
+    // Function to copy and type emoji
+    function copyAndTypeEmoji(emojiText) {
+        // Copy to clipboard
+        var copyCmd = ["bash", "-c", "echo -n '" + emojiText.replace(/'/g, "'\\''") + "' | wl-copy"];
+        var copyProc = Qt.createQmlObject('import Quickshell.Io; Process {}', root);
+        copyProc.command = copyCmd;
+        copyProc.running = true;
+        
+        // Schedule typing
+        emojiTypeProcess.emojiText = emojiText;
+        emojiTypeTimer.start();
+    }
 
     Component.onCompleted: {
         initialize();

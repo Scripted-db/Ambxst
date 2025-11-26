@@ -151,16 +151,15 @@ Rectangle {
     }
 
     function copyEmoji(emoji) {
-        // Cerrar el dashboard primero para que el paste vaya a la aplicación activa
+        // Guardar en recientes primero
+        root.addToRecent(emoji);
+        
+        // Cerrar el dashboard
         Visibilities.setActiveModule("");
-
-        // Copiar el emoji al clipboard
-        copyProcess.command = ["bash", "-c", "echo -n '" + emoji.emoji.replace(/'/g, "'\\''") + "' | wl-copy"];
-        copyProcess.running = true;
-        addToRecent(emoji);
-
-        // Iniciar timers para paste automático
-        pasteTimer.start();
+        
+        // Usar el servicio de clipboard para copiar y escribir el emoji
+        // El servicio persiste incluso cuando se cierra el dashboard
+        ClipboardService.copyAndTypeEmoji(emoji.emoji);
     }
 
     function onDownPressed() {
@@ -327,27 +326,6 @@ Rectangle {
         running: false
     }
 
-    // Copy emoji
-    Process {
-        id: copyProcess
-        running: false
-    }
-
-    // Paste emoji
-    Process {
-        id: pasteProcess
-        command: ["wtype", "-M", "ctrl", "-k", "v"]
-        running: false
-    }
-
-    Timer {
-        id: pasteTimer
-        interval: 200 // Delay aumentado para asegurar que el emoji esté en el clipboard
-        onTriggered: {
-            pasteProcess.running = true;
-        }
-    }
-
     Row {
         id: mainLayout
         anchors.fill: parent
@@ -429,7 +407,7 @@ Rectangle {
                     // Botón de limpiar recientes
                     ClippingRectangle {
                         id: clearButton
-                        width: root.clearButtonConfirmState ? clearButtonContent.implicitWidth + 32 : 48
+                        width: root.clearButtonConfirmState ? 140 : 48
                         height: 48
                         radius: searchInput.radius
                         color: {
