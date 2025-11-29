@@ -465,7 +465,7 @@ Rectangle {
                                 text: root.clearButtonConfirmState ? Icons.xeyes : Icons.broom
                                 font.family: Icons.font
                                 font.pixelSize: 20
-                                color: clearButton.itemColor
+                                color: root.clearButtonConfirmState ? clearButton.itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
                                 horizontalAlignment: Text.AlignHCenter
                                 verticalAlignment: Text.AlignVCenter
                                 textFormat: Text.RichText

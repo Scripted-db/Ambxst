@@ -710,7 +710,7 @@ Item {
                             textFormat: Text.RichText
                             font.family: Icons.font
                             font.pixelSize: 20
-                            color: clearButton.itemColor
+                            color: root.clearButtonConfirmState ? clearButton.itemColor : Config.resolveColor(Config.theme.srOverPrimary.itemColor)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                         }
@@ -1640,101 +1640,105 @@ Item {
                                 }
                             }
 
-                            StyledRect {
-                                id: iconBackground
+                            Item {
                                 Layout.preferredWidth: 32
                                 Layout.preferredHeight: 32
                                 Layout.alignment: Qt.AlignTop
-                                variant: {
-                                    if (isInDeleteMode) {
-                                        return "overerror";
-                                    } else if (isInAliasMode) {
-                                        return "oversecondary";
-                                    } else if (isExpanded) {
-                                        return "primary";
-                                    } else if (isSelected) {
-                                        return "overprimary";
-                                    } else {
-                                        return "common";
-                                    }
-                                }
-                                radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
 
-                                property string iconType: {
-                                    if (isInDeleteMode) {
-                                        return "trash";
-                                    } else if (isInAliasMode) {
-                                        return "edit";
-                                    }
-                                    return root.getIconForItem(modelData);
-                                }
-
-                                property string faviconUrl: {
-                                    if (iconType !== "link")
-                                        return "";
-                                    var url = root.getFaviconUrl(modelData);
-                                    return (url && url !== "") ? url : "";
-                                }
-
-                                property bool faviconLoaded: false
-
-                                // Favicon for URLs
-                                Image {
-                                    id: faviconImage
-                                    anchors.centerIn: parent
-                                    width: 20
-                                    height: 20
-                                    visible: iconBackground.iconType === "link" && iconBackground.faviconLoaded && status === Image.Ready
-                                    fillMode: Image.PreserveAspectFit
-                                    asynchronous: true
-                                    cache: true
-
-                                    onStatusChanged: {
-                                        if (status === Image.Ready) {
-                                            iconBackground.faviconLoaded = true;
-                                        } else if (status === Image.Error || status === Image.Null || status === Image.Loading) {
-                                            iconBackground.faviconLoaded = false;
-                                        }
-                                    }
-                                }
-
-                                Timer {
-                                    id: faviconLoader
-                                    interval: 1
-                                    running: iconBackground.iconType === "link" && iconBackground.faviconUrl !== ""
-                                    onTriggered: {
-                                        if (iconBackground.faviconUrl !== "") {
-                                            faviconImage.source = iconBackground.faviconUrl;
-                                        }
-                                    }
-                                }
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    visible: (iconBackground.iconType !== "link") || (iconBackground.iconType === "link" && !iconBackground.faviconLoaded)
-                                    text: {
+                                StyledRect {
+                                    id: iconBackground
+                                    anchors.fill: parent
+                                    variant: {
                                         if (isInDeleteMode) {
-                                            return Icons.trash;
+                                            return "overerror";
                                         } else if (isInAliasMode) {
-                                            return Icons.edit;
+                                            return "oversecondary";
+                                        } else if (isExpanded) {
+                                            return "primary";
+                                        } else if (isSelected) {
+                                            return "overprimary";
+                                        } else {
+                                            return "common";
                                         }
-                                        var iconStr = iconBackground.iconType;
-                                        // Fallback to Icons object
-                                        if (iconStr === "image")
-                                            return Icons.image;
-                                        if (iconStr === "file")
-                                            return Icons.file;
-                                        if (iconStr === "link")
-                                            return Icons.globe; // Fallback for URLs (failed favicon or no favicon)
-                                        return Icons.clip;
                                     }
-                                    color: iconBackground.itemColor
-                                    font.family: Icons.font
-                                    font.pixelSize: 16
-                                    textFormat: Text.RichText
+                                    radius: Config.roundness > 0 ? Math.max(Config.roundness - 4, 0) : 0
+
+                                    property string iconType: {
+                                        if (isInDeleteMode) {
+                                            return "trash";
+                                        } else if (isInAliasMode) {
+                                            return "edit";
+                                        }
+                                        return root.getIconForItem(modelData);
+                                    }
+
+                                    property string faviconUrl: {
+                                        if (iconType !== "link")
+                                            return "";
+                                        var url = root.getFaviconUrl(modelData);
+                                        return (url && url !== "") ? url : "";
+                                    }
+
+                                    property bool faviconLoaded: false
+
+                                    // Favicon for URLs
+                                    Image {
+                                        id: faviconImage
+                                        anchors.centerIn: parent
+                                        width: 20
+                                        height: 20
+                                        visible: iconBackground.iconType === "link" && iconBackground.faviconLoaded && status === Image.Ready
+                                        fillMode: Image.PreserveAspectFit
+                                        asynchronous: true
+                                        cache: true
+
+                                        onStatusChanged: {
+                                            if (status === Image.Ready) {
+                                                iconBackground.faviconLoaded = true;
+                                            } else if (status === Image.Error || status === Image.Null || status === Image.Loading) {
+                                                iconBackground.faviconLoaded = false;
+                                            }
+                                        }
+                                    }
+
+                                    Timer {
+                                        id: faviconLoader
+                                        interval: 1
+                                        running: iconBackground.iconType === "link" && iconBackground.faviconUrl !== ""
+                                        onTriggered: {
+                                            if (iconBackground.faviconUrl !== "") {
+                                                faviconImage.source = iconBackground.faviconUrl;
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        visible: (iconBackground.iconType !== "link") || (iconBackground.iconType === "link" && !iconBackground.faviconLoaded)
+                                        text: {
+                                            if (isInDeleteMode) {
+                                                return Icons.trash;
+                                            } else if (isInAliasMode) {
+                                                return Icons.edit;
+                                            }
+                                            var iconStr = iconBackground.iconType;
+                                            // Fallback to Icons object
+                                            if (iconStr === "image")
+                                                return Icons.image;
+                                            if (iconStr === "file")
+                                                return Icons.file;
+                                            if (iconStr === "link")
+                                                return Icons.globe; // Fallback for URLs (failed favicon or no favicon)
+                                            return Icons.clip;
+                                        }
+                                        color: iconBackground.itemColor
+                                        font.family: Icons.font
+                                        font.pixelSize: 16
+                                        textFormat: Text.RichText
+                                    }
                                 }
 
-                                // Pin indicator badge
+                                // Pin indicator badge (outside StyledRect to avoid clipping)
                                 Rectangle {
                                     anchors.top: parent.top
                                     anchors.right: parent.right
@@ -2760,7 +2764,7 @@ Item {
                                         text: previewPanel.currentItem ? previewPanel.currentItem.mime : ""
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
-                                        font.weight: Font.Bold
+                                        font.weight: Font.Normal
                                         color: Colors.overBackground
                                         elide: Text.ElideRight
                                         width: parent.width
@@ -2792,7 +2796,7 @@ Item {
                                         }
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
-                                        font.weight: Font.Bold
+                                        font.weight: Font.Normal
                                         color: Colors.overBackground
                                     }
                                 }
@@ -2824,7 +2828,7 @@ Item {
                                         }
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
-                                        font.weight: Font.Bold
+                                        font.weight: Font.Normal
                                         color: Colors.overBackground
                                     }
                                 }
@@ -2854,7 +2858,7 @@ Item {
                                         }
                                         font.family: Config.theme.font
                                         font.pixelSize: Config.theme.fontSize
-                                        font.weight: Font.Bold
+                                        font.weight: Font.Normal
                                         color: Colors.overBackground
                                         elide: Text.ElideMiddle
                                         width: parent.width

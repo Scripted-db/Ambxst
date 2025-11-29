@@ -162,4 +162,5 @@ QtObject {
     readonly property string cactus: ""
     readonly property string countdown: ""
     readonly property string temperature: ""
+    readonly property string sync: ""
 }
