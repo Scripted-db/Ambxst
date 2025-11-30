@@ -147,6 +147,96 @@ ClippingRectangle {
                 position: stopData[1]
                 color: Config.resolveColor(stopData[0])
             }
+
+            GradientStop {
+                property var stopData: gradientStops[5] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[6] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[7] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[8] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[9] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[10] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[11] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[12] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[13] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[14] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[15] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[16] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[17] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[18] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
+
+            GradientStop {
+                property var stopData: gradientStops[19] || gradientStops[gradientStops.length - 1]
+                position: stopData[1]
+                color: Config.resolveColor(stopData[0])
+            }
         }
     }
 
@@ -204,6 +294,96 @@ ClippingRectangle {
 
                 GradientStop {
                     property var stopData: gradientStops[4] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[5] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[6] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[7] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[8] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[9] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[10] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[11] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[12] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[13] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[14] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[15] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[16] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[17] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[18] || gradientStops[gradientStops.length - 1]
+                    position: stopData[1]
+                    color: Config.resolveColor(stopData[0])
+                }
+
+                GradientStop {
+                    property var stopData: gradientStops[19] || gradientStops[gradientStops.length - 1]
                     position: stopData[1]
                     color: Config.resolveColor(stopData[0])
                 }
