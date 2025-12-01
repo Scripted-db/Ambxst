@@ -785,6 +785,22 @@ Rectangle {
                         }
                         color: "transparent"
                         radius: 16
+
+                        Behavior on y {
+                            enabled: Config.animDuration > 0
+                            NumberAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        Behavior on height {
+                            enabled: Config.animDuration > 0
+                            NumberAnimation {
+                                duration: Config.animDuration
+                                easing.type: Easing.OutQuart
+                            }
+                        }
                         
                         property color textColor: {
                             if (root.selectedIndex === index && !root.isRecentFocused) {
