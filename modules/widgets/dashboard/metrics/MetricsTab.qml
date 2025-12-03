@@ -30,6 +30,9 @@ Rectangle {
 
     // Load refresh interval from state
     Component.onCompleted: {
+        // Always store maximum (250 points) to allow smooth zooming
+        SystemResources.maxHistoryPoints = 250;
+        
         const savedInterval = StateService.get("metricsRefreshInterval", 2000);
         SystemResources.updateInterval = Math.max(100, savedInterval);
         const savedZoom = StateService.get("metricsChartZoom", 1.0);
@@ -273,21 +276,24 @@ Rectangle {
                             if (SystemResources.cpuHistory.length < 2)
                                 return;
 
+                            // === COORDINATE SYSTEM SETUP ===
                             // Apply zoom to visible points
-                            // Zoom is proportional across the entire range
-                            // zoom 0.2 = 250 points (50 / 0.2)
-                            // zoom 0.5 = 100 points (50 / 0.5)
-                            // zoom 1.0 = 50 points
-                            // zoom 2.0 = 25 points (50 / 2.0)
-                            // zoom 3.0 = ~17 points (50 / 3.0)
                             const basePoints = 50;
                             const zoomedMaxPoints = Math.max(10, Math.floor(basePoints / root.chartZoom));
 
-                            // Draw background grid (solid lines) - adjust to zoom
+                            // Core spacing: each data point gets this many pixels
+                            const pointSpacing = w / (zoomedMaxPoints - 1);
+                            
+                            // Calculate offset to align graph to the right
+                            const actualPoints = Math.min(zoomedMaxPoints, SystemResources.cpuHistory.length);
+                            const graphOffset = w - ((actualPoints - 1) * pointSpacing);
+
+                            // === GRID RENDERING ===
+                            // Grid now uses the SAME coordinate system as the data
                             ctx.strokeStyle = Colors.surface;
                             ctx.lineWidth = 1;
 
-                            // Horizontal grid lines (8 lines)
+                            // Horizontal grid lines (percentage-based, fixed at 8 divisions)
                             for (let i = 1; i < 8; i++) {
                                 const y = h * (i / 8);
                                 ctx.beginPath();
@@ -296,19 +302,36 @@ Rectangle {
                                 ctx.stroke();
                             }
 
-                            // Vertical grid lines - adjust density based on zoom
-                            // More zoom (fewer points) = fewer lines
-                            // Less zoom (more points) = more lines
-                            const baseVerticalLines = 10;
-                            const verticalLines = Math.max(5, Math.floor(baseVerticalLines / root.chartZoom));
-                            for (let i = 1; i < verticalLines; i++) {
-                                const x = w * (i / verticalLines);
-                                ctx.beginPath();
-                                ctx.moveTo(x, 0);
-                                ctx.lineTo(x, h);
-                                ctx.stroke();
+                            // Vertical grid lines every 10 points
+                            ctx.strokeStyle = Colors.surface;
+                            ctx.lineWidth = 2;
+                            
+                            // Use the absolute data point counter for infinite scrolling
+                            const totalDataPoints = SystemResources.totalDataPoints;
+                            
+                            // Calculate where the visible window starts in absolute terms
+                            const windowStartIndex = totalDataPoints - actualPoints;
+                            
+                            // Find the first grid line (multiple of 10) that should appear
+                            const firstGridLine = Math.floor(windowStartIndex / 10) * 10;
+                            
+                            // Draw vertical lines every 10 data points
+                            // Continue until we pass the right edge of the canvas
+                            for (let absoluteIndex = firstGridLine; absoluteIndex <= totalDataPoints + 10; absoluteIndex += 10) {
+                                // Convert absolute index to position within visible window
+                                const visibleIndex = absoluteIndex - windowStartIndex;
+                                
+                                // Only draw if within visible range
+                                if (visibleIndex >= 0 && visibleIndex < actualPoints) {
+                                    const x = graphOffset + (visibleIndex * pointSpacing);
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, 0);
+                                    ctx.lineTo(x, h);
+                                    ctx.stroke();
+                                }
                             }
 
+                            // === DATA RENDERING ===
                             // Helper function to draw a line chart with gradient fill
                             function drawLine(history, color) {
                                 if (history.length < 2)
@@ -318,19 +341,11 @@ Rectangle {
                                 const visiblePoints = Math.min(zoomedMaxPoints, history.length);
                                 const recentHistory = history.slice(-visiblePoints);
                                 
-                                // Calculate spacing to always fill the width with visible points
-                                const pointSpacing = w / (zoomedMaxPoints - 1);
-                                
-                                // Calculate offset to align to the right
-                                // If we have fewer points than zoomedMaxPoints, start from the right
-                                const offset = w - ((recentHistory.length - 1) * pointSpacing);
+                                // Use same offset as grid for perfect alignment
+                                const dataOffset = graphOffset;
 
                                 // Create gradient from top to bottom
                                 const gradient = ctx.createLinearGradient(0, 0, 0, h);
-                                
-                                // Parse the color to create gradient stops
-                                // Gradient fades from the color with alpha to transparent at bottom
-                                const colorStr = color.toString();
                                 gradient.addColorStop(0, Qt.rgba(color.r, color.g, color.b, 0.4));
                                 gradient.addColorStop(0.5, Qt.rgba(color.r, color.g, color.b, 0.2));
                                 gradient.addColorStop(1, Qt.rgba(color.r, color.g, color.b, 0.0));
@@ -340,7 +355,7 @@ Rectangle {
                                 ctx.beginPath();
 
                                 // Start from bottom at first point position
-                                const firstX = offset;
+                                const firstX = dataOffset;
                                 ctx.moveTo(firstX, h);
 
                                 // Draw line to first data point
@@ -349,13 +364,13 @@ Rectangle {
 
                                 // Draw through all data points
                                 for (let i = 1; i < recentHistory.length; i++) {
-                                    const x = offset + (i * pointSpacing);
+                                    const x = dataOffset + (i * pointSpacing);
                                     const y = h - (recentHistory[i] * h);
                                     ctx.lineTo(x, y);
                                 }
 
                                 // Close path along bottom
-                                const lastX = offset + ((recentHistory.length - 1) * pointSpacing);
+                                const lastX = dataOffset + ((recentHistory.length - 1) * pointSpacing);
                                 ctx.lineTo(lastX, h);
                                 ctx.closePath();
                                 ctx.fill();
@@ -368,7 +383,7 @@ Rectangle {
                                 ctx.beginPath();
 
                                 for (let i = 0; i < recentHistory.length; i++) {
-                                    const x = offset + (i * pointSpacing);
+                                    const x = dataOffset + (i * pointSpacing);
                                     const y = h - (recentHistory[i] * h);
 
                                     if (i === 0) {

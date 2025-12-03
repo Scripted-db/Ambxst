@@ -42,6 +42,9 @@ Singleton {
     property var ramHistory: []
     property var gpuHistory: []
     property int maxHistoryPoints: 50
+    
+    // Total data points collected (continues incrementing forever)
+    property int totalDataPoints: 0
 
     Component.onCompleted: {
         detectGPU();
@@ -89,6 +92,9 @@ Singleton {
 
     // Update history arrays with current values
     function updateHistory() {
+        // Increment total data points counter
+        totalDataPoints++;
+        
         // Add CPU history
         let newCpuHistory = cpuHistory.slice();
         newCpuHistory.push(cpuUsage / 100);
