@@ -134,6 +134,7 @@
 
         # Fonts
         roboto
+        barlow
         terminus_font
         terminus_font_ttf
         nerd-fonts.symbols-only
