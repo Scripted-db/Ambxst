@@ -30,10 +30,10 @@ if [ -f /etc/NIXOS ]; then
   echo "🔁 Checking if Ambxst is already in the Nix profile..."
   if profile_has_ambxst; then
     echo "🔼 Updating Ambxst..."
-    nix profile upgrade Ambxst --impure
+    nix profile upgrade Ambxst
   else
     echo "✨ Installing Ambxst..."
-    nix profile add "$FLAKE_URI" --impure
+    nix profile add "$FLAKE_URI"
   fi
 
   echo "🎉 Done!"
