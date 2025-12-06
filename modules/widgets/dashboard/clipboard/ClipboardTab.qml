@@ -2207,12 +2207,9 @@ Item {
             }
         }
 
-        // Separator
-        Rectangle {
+        Separator {
             Layout.preferredWidth: 2
             Layout.fillHeight: true
-            radius: Styling.radius(0)
-            color: Colors.surface
         }
 
         // Preview panel (toda la altura, resto del ancho)
@@ -2969,8 +2966,6 @@ Item {
                     anchors.right: parent.right
                     height: 2
                     vert: false
-                    gradient: null
-                    color: Colors.surface
                 }
 
                 // Metadata section

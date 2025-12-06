@@ -307,8 +307,6 @@ Rectangle {
                     Separator {
                         Layout.preferredHeight: 2
                         Layout.fillWidth: true
-                        gradient: null
-                        color: Colors.surface
                     }
 
                     Text {
@@ -321,8 +319,6 @@ Rectangle {
                     Separator {
                         Layout.preferredHeight: 2
                         Layout.fillWidth: true
-                        gradient: null
-                        color: Colors.surface
                     }
                 }
 
@@ -368,8 +364,6 @@ Rectangle {
                                 Separator {
                                     Layout.preferredHeight: 2
                                     Layout.fillWidth: true
-                                    gradient: null
-                                    color: Colors.surface
                                 }
 
                                 Text {
@@ -431,8 +425,6 @@ Rectangle {
                                 Separator {
                                     Layout.preferredHeight: 2
                                     Layout.fillWidth: true
-                                    gradient: null
-                                    color: Colors.surface
                                 }
 
                                 Text {
@@ -504,8 +496,6 @@ Rectangle {
                                     Separator {
                                         Layout.preferredHeight: 2
                                         Layout.fillWidth: true
-                                        gradient: null
-                                        color: Colors.surface
                                     }
 
                                     Text {
@@ -591,8 +581,6 @@ Rectangle {
                                     Separator {
                                         Layout.preferredHeight: 2
                                         Layout.fillWidth: true
-                                        gradient: null
-                                        color: Colors.surface
                                     }
 
                                     Text {
@@ -877,8 +865,6 @@ Rectangle {
                             Layout.topMargin: 4
                             Layout.bottomMargin: 4
                             vert: true
-                            gradient: null
-                            color: Colors.surface
                         }
 
                         // Decrease interval button

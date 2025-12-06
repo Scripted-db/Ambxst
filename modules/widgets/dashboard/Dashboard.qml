@@ -263,8 +263,6 @@ NotchAnimationBehavior {
             width: 2
             height: parent.height
             vert: true
-            gradient: null
-            color: Colors.surface
         }
 
         // Content area

@@ -98,12 +98,9 @@ Singleton {
                 property bool oledMode: false
                 property bool lightMode: false
                 property int roundness: 16
-                property int borderSize: 0
-                property string borderColor: "surfaceBright"
                 property string font: "Roboto Condensed"
                 property int fontSize: 14
                 property bool tintIcons: false
-                property string currentTheme: "default"
                 property bool enableCorners: true
                 property int animDuration: 300
                 property real shadowOpacity: 0.5
@@ -111,11 +108,6 @@ Singleton {
                 property int shadowXOffset: 0
                 property int shadowYOffset: 0
                 property real shadowBlur: 1
-                property list<var> bgColor: [["background", 0.0]]
-                property string bgOrientation: "vertical"
-                property list<var> paneColor: [["surface", 0.0]]
-                property string paneOrientation: "vertical"
-                property list<var> separatorColor: [["surfaceBright", 0.0]]
 
                 // StyledRect variant configurations
                 // Each variant (bg, pane, common, focus, primary, etc.) contains:
@@ -430,7 +422,6 @@ Singleton {
                 property int launcherIconSize: 24
                 property bool showBackground: false
                 property real bgOpacity: 0.5
-                property bool verbose: true
                 property list<string> screenList: []
                 property bool enableFirefoxPlayer: false
                 property list<var> barColor: [["surface", 0.0]]
@@ -982,7 +973,6 @@ Singleton {
 
     property int roundness: theme.roundness
     property string defaultFont: theme.font
-    property string currentTheme: theme.currentTheme
     property int animDuration: Services.GameModeService.toggled ? 0 : theme.animDuration
     property bool tintIcons: theme.tintIcons
 
@@ -1016,8 +1006,8 @@ Singleton {
     // Hyprland configuration
     property QtObject hyprland: loader.adapter.hyprland
     property int hyprlandRounding: hyprland.syncRoundness ? Math.max(0, roundness - (hyprland.gapsOut - hyprlandBorderSize)) : Math.max(0, hyprland.rounding - hyprlandBorderSize)
-    property int hyprlandBorderSize: hyprland.syncBorderWidth ? theme.borderSize : hyprland.borderSize
-    property string hyprlandBorderColor: hyprland.syncBorderColor ? theme.borderColor : (hyprland.activeBorderColor.length > 0 ? hyprland.activeBorderColor[0] : "primary")
+    property int hyprlandBorderSize: hyprland.syncBorderWidth ? (theme.srBg.border[1] || 0) : hyprland.borderSize
+    property string hyprlandBorderColor: hyprland.syncBorderColor ? (theme.srBg.border[0] || "primary") : (hyprland.activeBorderColor.length > 0 ? hyprland.activeBorderColor[0] : "primary")
     property real hyprlandShadowOpacity: hyprland.syncShadowOpacity ? theme.shadowOpacity : hyprland.shadowOpacity
     property string hyprlandShadowColor: hyprland.syncShadowColor ? theme.shadowColor : hyprland.shadowColor
 

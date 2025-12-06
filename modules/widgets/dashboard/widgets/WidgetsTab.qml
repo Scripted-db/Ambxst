@@ -1084,8 +1084,6 @@ Rectangle {
             Layout.preferredWidth: 2
             Layout.fillHeight: true
             vert: true
-            gradient: null
-            color: Colors.surface
             visible: currentTab === 0
         }
 
