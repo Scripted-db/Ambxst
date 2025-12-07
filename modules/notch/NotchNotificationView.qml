@@ -16,7 +16,7 @@ Item {
     id: root
 
     implicitWidth: hovered ? 420 : 320
-    implicitHeight: hovered ? mainColumn.implicitHeight - 16 : mainColumn.implicitHeight
+    implicitHeight: mainColumn.implicitHeight
 
     Behavior on implicitWidth {
         enabled: Config.animDuration > 0

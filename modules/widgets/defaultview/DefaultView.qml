@@ -9,17 +9,38 @@ import qs.config
 Item {
     id: root
     anchors.top: parent.top
-
     focus: false
 
-    Component.onCompleted: {
-        // Removed forceActiveFocus to prevent shell from taking focus on startup
+    // Layout constants
+    readonly property int notificationPadding: 16
+
+    // State
+    readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
+    readonly property MprisPlayer activePlayer: MprisController.activePlayer
+    property bool notchHovered: false
+    property bool isNavigating: false
+
+    HoverHandler {
+        id: contentHoverHandler
     }
 
-    readonly property real mainRowContentWidth: 200 + userInfo.width + separator1.width + separator2.width + notifIndicator.width + (mainRow.spacing * 4) + 16
+    readonly property bool expandedState: contentHoverHandler.hovered || notchHovered || isNavigating || Visibilities.playerMenuOpen
 
-    implicitWidth: Math.round(hasActiveNotifications ? Math.max(expandedState ? 360 + 16 : 320 + 16, mainRowContentWidth) : mainRowContentWidth)
-    implicitHeight: hasActiveNotifications ? (mainRow.height + (expandedState ? notificationView.implicitHeight + (Config.notchTheme === "island" ? 56 : 52) : notificationView.implicitHeight + (Config.notchTheme === "island" ? 40 : 36))) : mainRow.height
+    // Computed dimensions
+    readonly property real mainRowContentWidth: 200 + userInfo.width + separator1.width + separator2.width + notifIndicator.width + (mainRow.spacing * 4) + 16
+    readonly property real mainRowHeight: Config.bar.showBackground
+        ? (Config.notchTheme === "island" ? 36 : 44)
+        : (Config.notchTheme === "island" ? 36 : 40)
+    readonly property real notificationMinWidth: expandedState ? 420 : 320
+    readonly property real notificationContainerHeight: notificationView.implicitHeight + (notificationPadding * 2)
+
+    implicitWidth: Math.round(hasActiveNotifications
+        ? Math.max(notificationMinWidth + (notificationPadding * 2), mainRowContentWidth)
+        : mainRowContentWidth)
+
+    implicitHeight: hasActiveNotifications
+        ? mainRowHeight + notificationContainerHeight
+        : mainRowHeight
 
     Behavior on implicitHeight {
         enabled: Config.animDuration > 0
@@ -37,17 +58,6 @@ Item {
             easing.overshoot: 1.2
         }
     }
-
-    readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
-    readonly property MprisPlayer activePlayer: MprisController.activePlayer
-    property bool notchHovered: false
-    property bool isNavigating: false
-
-    HoverHandler {
-        id: contentHoverHandler
-    }
-
-    readonly property bool expandedState: contentHoverHandler.hovered || notchHovered || isNavigating || Visibilities.playerMenuOpen
 
     Keys.onPressed: event => {
         if (expandedState && activePlayer) {
@@ -72,24 +82,14 @@ Item {
 
     Column {
         anchors.fill: parent
-        // anchors.topMargin: hasActiveNotifications ? 0 : ((parent.height - mainRow.height) / 2)
-        // spacing: hasActiveNotifications ? 4 : 0
-        spacing: 16
+        spacing: 0
 
-        Behavior on spacing {
-            enabled: Config.animDuration > 0
-            NumberAnimation {
-                duration: Config.animDuration
-                easing.type: Easing.OutBack
-                easing.overshoot: 1.2
-            }
-        }
-
+        // mainRow container
         Row {
             id: mainRow
             anchors.horizontalCenter: parent.horizontalCenter
             width: parent.width - 16
-            height: Config.bar.showBackground ? (Config.notchTheme === "island" ? 36 : 44) : (Config.notchTheme === "island" ? 36 : 40)
+            height: mainRowHeight
             spacing: 4
 
             UserInfo {
@@ -121,12 +121,12 @@ Item {
             }
         }
 
+        // Notification container with its own padding
         Item {
-            anchors.horizontalCenter: parent.horizontalCenter
+            id: notificationContainer
             width: parent.width
-            height: hasActiveNotifications ? notificationView.implicitHeight : 0
-            clip: false
-            visible: height > 0
+            height: hasActiveNotifications ? notificationContainerHeight : 0
+            visible: hasActiveNotifications
 
             Behavior on height {
                 enabled: Config.animDuration > 0
@@ -138,31 +138,11 @@ Item {
 
             NotchNotificationView {
                 id: notificationView
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.leftMargin: Config.notchTheme === "island" && hasActiveNotifications ? 8 : 24
-                anchors.rightMargin: Config.notchTheme === "island" && hasActiveNotifications ? 8 : 24
-                anchors.bottomMargin: 8
+                anchors.fill: parent
+                anchors.margins: notificationPadding
                 opacity: hasActiveNotifications ? 1 : 0
                 notchHovered: expandedState
                 onIsNavigatingChanged: root.isNavigating = isNavigating
-
-                Behavior on anchors.leftMargin {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation {
-                        duration: Config.animDuration
-                        easing.type: Easing.OutQuart
-                    }
-                }
-
-                Behavior on anchors.rightMargin {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation {
-                        duration: Config.animDuration
-                        easing.type: Easing.OutQuart
-                    }
-                }
 
                 Behavior on opacity {
                     enabled: Config.animDuration > 0
