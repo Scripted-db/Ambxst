@@ -37,27 +37,6 @@ NotchAnimationBehavior {
 
     focus: true
 
-    Keys.onPressed: event => {
-        if (state.currentTab === 0 && MprisController.activePlayer) {
-            if (event.key === Qt.Key_Space) {
-                MprisController.togglePlaying();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Left && MprisController.activePlayer.canSeek) {
-                MprisController.activePlayer.position = Math.max(0, MprisController.activePlayer.position - 10);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Right && MprisController.activePlayer.canSeek) {
-                MprisController.activePlayer.position = Math.min(MprisController.activePlayer.length, MprisController.activePlayer.position + 10);
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Up && MprisController.canGoPrevious) {
-                MprisController.previous();
-                event.accepted = true;
-            } else if (event.key === Qt.Key_Down && MprisController.canGoNext) {
-                MprisController.next();
-                event.accepted = true;
-            }
-        }
-    }
-
     // Usar el comportamiento estándar de animaciones del notch
     isVisible: GlobalStates.dashboardOpen
 

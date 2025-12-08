@@ -216,6 +216,182 @@ Item {
         preFormatFontSize = null;
     }
 
+    // --- Markdown formatting functions ---
+    
+    // Property to track current heading level at cursor
+    property string mdCurrentHeading: "P"
+
+    // Wrap selected text with markers, or insert markers at cursor
+    function mdWrapSelection(prefix, suffix) {
+        if (!mdEditor) return;
+        
+        let start = mdEditor.selectionStart;
+        let end = mdEditor.selectionEnd;
+        let text = mdEditor.text;
+        
+        if (start === end) {
+            // No selection - insert markers and place cursor between them
+            let newText = text.substring(0, start) + prefix + suffix + text.substring(end);
+            mdEditor.text = newText;
+            mdEditor.cursorPosition = start + prefix.length;
+        } else {
+            // Has selection - check if already wrapped
+            let selectedText = text.substring(start, end);
+            let beforeStart = text.substring(Math.max(0, start - prefix.length), start);
+            let afterEnd = text.substring(end, Math.min(text.length, end + suffix.length));
+            
+            if (beforeStart === prefix && afterEnd === suffix) {
+                // Already wrapped - unwrap
+                let newText = text.substring(0, start - prefix.length) + selectedText + text.substring(end + suffix.length);
+                mdEditor.text = newText;
+                mdEditor.select(start - prefix.length, end - prefix.length);
+            } else if (selectedText.startsWith(prefix) && selectedText.endsWith(suffix)) {
+                // Selection includes markers - remove them
+                let unwrapped = selectedText.substring(prefix.length, selectedText.length - suffix.length);
+                let newText = text.substring(0, start) + unwrapped + text.substring(end);
+                mdEditor.text = newText;
+                mdEditor.select(start, start + unwrapped.length);
+            } else {
+                // Wrap selection
+                let newText = text.substring(0, start) + prefix + selectedText + suffix + text.substring(end);
+                mdEditor.text = newText;
+                mdEditor.select(start + prefix.length, end + prefix.length);
+            }
+        }
+        mdEditor.forceActiveFocus();
+    }
+
+    function mdToggleBold() {
+        mdWrapSelection("**", "**");
+    }
+
+    function mdToggleItalic() {
+        mdWrapSelection("*", "*");
+    }
+
+    function mdToggleUnderline() {
+        mdWrapSelection("__", "__");
+    }
+
+    function mdToggleStrikethrough() {
+        mdWrapSelection("~~", "~~");
+    }
+
+    function mdToggleCode() {
+        mdWrapSelection("`", "`");
+    }
+
+    function mdInsertLink() {
+        if (!mdEditor) return;
+        
+        let start = mdEditor.selectionStart;
+        let end = mdEditor.selectionEnd;
+        let text = mdEditor.text;
+        
+        if (start === end) {
+            // No selection - insert link template
+            let linkTemplate = "[text](url)";
+            let newText = text.substring(0, start) + linkTemplate + text.substring(end);
+            mdEditor.text = newText;
+            // Select "text" for easy replacement
+            mdEditor.select(start + 1, start + 5);
+        } else {
+            // Use selection as link text
+            let selectedText = text.substring(start, end);
+            let linkText = "[" + selectedText + "](url)";
+            let newText = text.substring(0, start) + linkText + text.substring(end);
+            mdEditor.text = newText;
+            // Select "url" for easy replacement
+            mdEditor.select(start + selectedText.length + 3, start + selectedText.length + 6);
+        }
+        mdEditor.forceActiveFocus();
+    }
+
+    // Get current line info
+    function mdGetCurrentLine() {
+        if (!mdEditor) return { start: 0, end: 0, text: "", lineNumber: 0 };
+        
+        let text = mdEditor.text;
+        let pos = mdEditor.cursorPosition;
+        
+        // Find line start
+        let lineStart = pos;
+        while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+            lineStart--;
+        }
+        
+        // Find line end
+        let lineEnd = pos;
+        while (lineEnd < text.length && text[lineEnd] !== '\n') {
+            lineEnd++;
+        }
+        
+        return {
+            start: lineStart,
+            end: lineEnd,
+            text: text.substring(lineStart, lineEnd)
+        };
+    }
+
+    // Get heading level of current line (0 = no heading, 1-6 = H1-H6)
+    function mdGetHeadingLevel(lineText) {
+        let match = lineText.match(/^(#{1,6})\s/);
+        if (match) {
+            return match[1].length;
+        }
+        return 0;
+    }
+
+    // Update heading display
+    function mdUpdateHeadingDisplay() {
+        let line = mdGetCurrentLine();
+        let level = mdGetHeadingLevel(line.text);
+        mdCurrentHeading = level > 0 ? ("H" + level) : "P";
+    }
+
+    function mdSetHeadingLevel(level) {
+        if (!mdEditor) return;
+        
+        let line = mdGetCurrentLine();
+        let text = mdEditor.text;
+        let currentLevel = mdGetHeadingLevel(line.text);
+        
+        // Remove existing heading markers
+        let lineContent = line.text.replace(/^#{1,6}\s*/, '');
+        
+        // Add new heading markers
+        let newLine;
+        if (level === 0) {
+            newLine = lineContent;
+        } else {
+            newLine = '#'.repeat(level) + ' ' + lineContent;
+        }
+        
+        let newText = text.substring(0, line.start) + newLine + text.substring(line.end);
+        let cursorOffset = level > 0 ? level + 1 : 0;
+        
+        mdEditor.text = newText;
+        mdEditor.cursorPosition = line.start + cursorOffset + lineContent.length;
+        mdUpdateHeadingDisplay();
+        mdEditor.forceActiveFocus();
+    }
+
+    function mdIncreaseHeading() {
+        let line = mdGetCurrentLine();
+        let currentLevel = mdGetHeadingLevel(line.text);
+        if (currentLevel < 6) {
+            mdSetHeadingLevel(currentLevel + 1);
+        }
+    }
+
+    function mdDecreaseHeading() {
+        let line = mdGetCurrentLine();
+        let currentLevel = mdGetHeadingLevel(line.text);
+        if (currentLevel > 0) {
+            mdSetHeadingLevel(currentLevel - 1);
+        }
+    }
+
     // Debounce timer for auto-save
     Timer {
         id: saveDebounceTimer
@@ -2479,56 +2655,66 @@ Item {
         }
 
         // Right panel: Markdown Editor (split view)
-        RowLayout {
+        ColumnLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
             spacing: 8
             visible: currentNoteId !== "" && currentNoteIsMarkdown
 
-            // Markdown Editor (left side)
+            // Markdown formatting toolbar
             Rectangle {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
+                Layout.preferredHeight: 40
                 color: "transparent"
 
-                ColumnLayout {
+                RowLayout {
                     anchors.fill: parent
+                    anchors.leftMargin: 8
+                    anchors.rightMargin: 8
                     spacing: 4
 
-                    // Header
+                    // Heading level controls
                     Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 32
+                        id: headingMinusButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
                         color: "transparent"
 
-                        RowLayout {
+                        property bool isHovered: headingMinusMouse.containsMouse
+
+                        StyledRect {
                             anchors.fill: parent
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
 
-                            Text {
-                                text: Icons.edit
-                                font.family: Icons.font
-                                font.pixelSize: 14
-                                color: Colors.overSurface
-                            }
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.minus
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            color: Colors.overSurface
+                        }
 
-                            Text {
-                                text: "Editor"
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize
-                                font.weight: Font.Bold
-                                color: Colors.overSurface
-                            }
+                        MouseArea {
+                            id: headingMinusMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdDecreaseHeading()
+                        }
 
-                            Item { Layout.fillWidth: true }
+                        StyledToolTip {
+                            tooltipText: "Decrease heading (Alt+Down)"
+                            visible: headingMinusMouse.containsMouse
                         }
                     }
 
-                    // Editor area
                     Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        width: 40
+                        height: 32
+                        radius: Styling.radius(-4)
                         color: "transparent"
 
                         StyledRect {
@@ -2537,161 +2723,473 @@ Item {
                             radius: Styling.radius(-4)
                         }
 
-                        Flickable {
-                            id: mdEditorFlickable
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            contentWidth: width
-                            contentHeight: mdEditor.contentHeight + 32
-                            clip: true
-                            boundsBehavior: Flickable.StopAtBounds
-
-                            // Sync scroll to preview
-                            onContentYChanged: {
-                                if (mdEditorFlickable.moving || mdEditorFlickable.dragging) {
-                                    let ratio = contentHeight > height ? contentY / (contentHeight - height) : 0;
-                                    let targetY = ratio * (mdPreviewFlickable.contentHeight - mdPreviewFlickable.height);
-                                    if (mdPreviewFlickable.contentHeight > mdPreviewFlickable.height) {
-                                        mdPreviewFlickable.contentY = Math.max(0, Math.min(targetY, mdPreviewFlickable.contentHeight - mdPreviewFlickable.height));
-                                    }
-                                }
-                            }
-
-                            TextArea.flickable: TextArea {
-                                id: mdEditor
-                                text: currentNoteContent
-                                textFormat: TextEdit.PlainText
-                                font.family: "monospace"
-                                font.pixelSize: Config.theme.fontSize
-                                color: Colors.overSurface
-                                wrapMode: TextEdit.Wrap
-                                selectByMouse: true
-                                placeholderText: "Write markdown here..."
-                                leftPadding: 8
-                                rightPadding: 8
-                                topPadding: 8
-                                bottomPadding: 8
-                                background: Rectangle {
-                                    color: "transparent"
-                                }
-
-                                onTextChanged: {
-                                    if (currentNoteId && !loadingNote && currentNoteIsMarkdown) {
-                                        editorDirty = true;
-                                        saveDebounceTimer.restart();
-                                    }
-                                }
-
-                                Keys.onEscapePressed: {
-                                    searchInput.focusInput();
-                                }
-                            }
-
-                            ScrollBar.vertical: ScrollBar {
-                                active: true
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Separator
-            Separator {
-                Layout.preferredWidth: 2
-                Layout.fillHeight: true
-                vert: true
-            }
-
-            // Markdown Preview (right side)
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                color: "transparent"
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 4
-
-                    // Header
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 32
-                        color: "transparent"
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 8
-                            anchors.rightMargin: 8
-
-                            Text {
-                                text: Icons.markdown
-                                font.family: Icons.font
-                                font.pixelSize: 14
-                                color: Colors.overSurface
-                            }
-
-                            Text {
-                                text: "Preview"
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize
-                                font.weight: Font.Bold
-                                color: Colors.overSurface
-                            }
-
-                            Item { Layout.fillWidth: true }
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.mdCurrentHeading || "P"
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.bold: true
+                            color: Colors.overSurface
                         }
                     }
 
-                    // Preview area
                     Rectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                        id: headingPlusButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
                         color: "transparent"
+
+                        property bool isHovered: headingPlusMouse.containsMouse
 
                         StyledRect {
                             anchors.fill: parent
-                            variant: "pane"
+                            variant: parent.isHovered ? "surface" : "transparent"
                             radius: Styling.radius(-4)
                         }
 
-                        Flickable {
-                            id: mdPreviewFlickable
-                            anchors.fill: parent
-                            anchors.margins: 4
-                            contentWidth: width
-                            contentHeight: mdPreviewText.contentHeight + 32
-                            clip: true
-                            boundsBehavior: Flickable.StopAtBounds
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.plus
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            color: Colors.overSurface
+                        }
 
-                            // Sync scroll to editor
-                            onContentYChanged: {
-                                if (mdPreviewFlickable.moving || mdPreviewFlickable.dragging) {
-                                    let ratio = contentHeight > height ? contentY / (contentHeight - height) : 0;
-                                    let targetY = ratio * (mdEditorFlickable.contentHeight - mdEditorFlickable.height);
-                                    if (mdEditorFlickable.contentHeight > mdEditorFlickable.height) {
-                                        mdEditorFlickable.contentY = Math.max(0, Math.min(targetY, mdEditorFlickable.contentHeight - mdEditorFlickable.height));
+                        MouseArea {
+                            id: headingPlusMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdIncreaseHeading()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Increase heading (Alt+Up)"
+                            visible: headingPlusMouse.containsMouse
+                        }
+                    }
+
+                    // Separator
+                    Rectangle {
+                        width: 1
+                        height: 24
+                        color: Colors.outline
+                        opacity: 0.3
+                    }
+
+                    // Bold button
+                    Rectangle {
+                        id: mdBoldButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdBoldMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "B"
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.bold: true
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdBoldMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdToggleBold()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Bold (Ctrl+B)"
+                            visible: mdBoldMouse.containsMouse
+                        }
+                    }
+
+                    // Italic button
+                    Rectangle {
+                        id: mdItalicButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdItalicMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "I"
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.italic: true
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdItalicMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdToggleItalic()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Italic (Ctrl+I)"
+                            visible: mdItalicMouse.containsMouse
+                        }
+                    }
+
+                    // Underline button
+                    Rectangle {
+                        id: mdUnderlineButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdUnderlineMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "U"
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.underline: true
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdUnderlineMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdToggleUnderline()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Underline (Ctrl+U)"
+                            visible: mdUnderlineMouse.containsMouse
+                        }
+                    }
+
+                    // Strikethrough button
+                    Rectangle {
+                        id: mdStrikeButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdStrikeMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "S"
+                            font.family: Config.theme.font
+                            font.pixelSize: 14
+                            font.strikeout: true
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdStrikeMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdToggleStrikethrough()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Strikethrough (Ctrl+D)"
+                            visible: mdStrikeMouse.containsMouse
+                        }
+                    }
+
+                    // Separator
+                    Rectangle {
+                        width: 1
+                        height: 24
+                        color: Colors.outline
+                        opacity: 0.3
+                    }
+
+                    // Code button
+                    Rectangle {
+                        id: mdCodeButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdCodeMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "<>"
+                            font.family: "monospace"
+                            font.pixelSize: 12
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdCodeMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdToggleCode()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Inline code (Ctrl+E)"
+                            visible: mdCodeMouse.containsMouse
+                        }
+                    }
+
+                    // Link button
+                    Rectangle {
+                        id: mdLinkButton
+                        width: 32
+                        height: 32
+                        radius: Styling.radius(-4)
+                        color: "transparent"
+
+                        property bool isHovered: mdLinkMouse.containsMouse
+
+                        StyledRect {
+                            anchors.fill: parent
+                            variant: parent.isHovered ? "surface" : "transparent"
+                            radius: Styling.radius(-4)
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.link
+                            font.family: Icons.font
+                            font.pixelSize: 14
+                            color: Colors.overSurface
+                        }
+
+                        MouseArea {
+                            id: mdLinkMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.mdInsertLink()
+                        }
+
+                        StyledToolTip {
+                            tooltipText: "Insert link (Ctrl+K)"
+                            visible: mdLinkMouse.containsMouse
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+                }
+            }
+
+            // Separator below toolbar
+            Separator {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 2
+            }
+
+            // Split view: Editor and Preview
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: 8
+
+                // Markdown Editor
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: "transparent"
+
+                    Flickable {
+                        id: mdEditorFlickable
+                        anchors.fill: parent
+                        contentWidth: width
+                        contentHeight: mdEditor.contentHeight + 32
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        // Sync scroll to preview
+                        onContentYChanged: {
+                            if (mdEditorFlickable.moving || mdEditorFlickable.dragging) {
+                                let ratio = contentHeight > height ? contentY / (contentHeight - height) : 0;
+                                let targetY = ratio * (mdPreviewFlickable.contentHeight - mdPreviewFlickable.height);
+                                if (mdPreviewFlickable.contentHeight > mdPreviewFlickable.height) {
+                                    mdPreviewFlickable.contentY = Math.max(0, Math.min(targetY, mdPreviewFlickable.contentHeight - mdPreviewFlickable.height));
+                                }
+                            }
+                        }
+
+                        TextArea.flickable: TextArea {
+                            id: mdEditor
+                            text: currentNoteContent
+                            textFormat: TextEdit.PlainText
+                            font.family: "monospace"
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overSurface
+                            wrapMode: TextEdit.Wrap
+                            selectByMouse: true
+                            placeholderText: "Write markdown here..."
+                            leftPadding: 8
+                            rightPadding: 8
+                            topPadding: 8
+                            bottomPadding: 8
+                            background: Rectangle {
+                                color: "transparent"
+                            }
+
+                            onTextChanged: {
+                                if (currentNoteId && !loadingNote && currentNoteIsMarkdown) {
+                                    editorDirty = true;
+                                    saveDebounceTimer.restart();
+                                }
+                                root.mdUpdateHeadingDisplay();
+                            }
+
+                            onCursorPositionChanged: {
+                                root.mdUpdateHeadingDisplay();
+                            }
+
+                            Keys.onEscapePressed: {
+                                searchInput.focusInput();
+                            }
+
+                            // Markdown formatting shortcuts
+                            Keys.onPressed: event => {
+                                if (event.modifiers & Qt.ControlModifier) {
+                                    switch (event.key) {
+                                        case Qt.Key_B:
+                                            root.mdToggleBold();
+                                            event.accepted = true;
+                                            break;
+                                        case Qt.Key_I:
+                                            root.mdToggleItalic();
+                                            event.accepted = true;
+                                            break;
+                                        case Qt.Key_U:
+                                            root.mdToggleUnderline();
+                                            event.accepted = true;
+                                            break;
+                                        case Qt.Key_D:
+                                            root.mdToggleStrikethrough();
+                                            event.accepted = true;
+                                            break;
+                                        case Qt.Key_E:
+                                            root.mdToggleCode();
+                                            event.accepted = true;
+                                            break;
+                                        case Qt.Key_K:
+                                            root.mdInsertLink();
+                                            event.accepted = true;
+                                            break;
+                                    }
+                                }
+                                if (event.modifiers & Qt.AltModifier) {
+                                    if (event.key === Qt.Key_Up) {
+                                        root.mdIncreaseHeading();
+                                        event.accepted = true;
+                                    } else if (event.key === Qt.Key_Down) {
+                                        root.mdDecreaseHeading();
+                                        event.accepted = true;
                                     }
                                 }
                             }
+                        }
 
-                            TextEdit {
-                                id: mdPreviewText
-                                width: mdPreviewFlickable.width - 16
-                                x: 8
-                                y: 8
-                                textFormat: TextEdit.MarkdownText
-                                text: mdEditor.text
-                                font.family: Config.theme.font
-                                font.pixelSize: Config.theme.fontSize
-                                color: Colors.overSurface
-                                wrapMode: TextEdit.Wrap
-                                readOnly: true
-                                selectByMouse: true
-                            }
+                        ScrollBar.vertical: ScrollBar {
+                            active: true
+                        }
+                    }
+                }
 
-                            ScrollBar.vertical: ScrollBar {
-                                active: true
+                // Separator
+                Separator {
+                    Layout.preferredWidth: 2
+                    Layout.fillHeight: true
+                    vert: true
+                }
+
+                // Markdown Preview
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: "transparent"
+
+                    Flickable {
+                        id: mdPreviewFlickable
+                        anchors.fill: parent
+                        contentWidth: width
+                        contentHeight: mdPreviewText.contentHeight + 32
+                        clip: true
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        // Sync scroll to editor
+                        onContentYChanged: {
+                            if (mdPreviewFlickable.moving || mdPreviewFlickable.dragging) {
+                                let ratio = contentHeight > height ? contentY / (contentHeight - height) : 0;
+                                let targetY = ratio * (mdEditorFlickable.contentHeight - mdEditorFlickable.height);
+                                if (mdEditorFlickable.contentHeight > mdEditorFlickable.height) {
+                                    mdEditorFlickable.contentY = Math.max(0, Math.min(targetY, mdEditorFlickable.contentHeight - mdEditorFlickable.height));
+                                }
                             }
+                        }
+
+                        TextEdit {
+                            id: mdPreviewText
+                            width: mdPreviewFlickable.width - 16
+                            x: 8
+                            y: 8
+                            textFormat: TextEdit.MarkdownText
+                            text: mdEditor.text
+                            font.family: Config.theme.font
+                            font.pixelSize: Config.theme.fontSize
+                            color: Colors.overSurface
+                            wrapMode: TextEdit.Wrap
+                            readOnly: true
+                            selectByMouse: true
+                        }
+
+                        ScrollBar.vertical: ScrollBar {
+                            active: true
                         }
                     }
                 }
