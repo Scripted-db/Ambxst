@@ -38,10 +38,35 @@ Rectangle {
                 clip: true
                 boundsBehavior: Flickable.StopAtBounds
 
+                // Sliding highlight behind tabs
+                StyledRect {
+                    id: tabHighlight
+                    variant: "focus"
+                    width: parent.width
+                    height: 40
+                    radius: Styling.radius(-6)
+                    z: 0
+
+                    readonly property int tabHeight: 40
+                    readonly property int tabSpacing: 4
+
+                    x: 0
+                    y: root.currentSection * (tabHeight + tabSpacing)
+
+                    Behavior on y {
+                        enabled: Config.animDuration > 0
+                        NumberAnimation {
+                            duration: Config.animDuration / 2
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+
                 Column {
                     id: sidebar
                     width: parent.width
                     spacing: 4
+                    z: 1
 
                     Repeater {
                         model: [
@@ -63,10 +88,8 @@ Rectangle {
 
                             property bool isActive: root.currentSection === sidebarButton.modelData.section
 
-                            background: StyledRect {
-                                visible: sidebarButton.isActive || sidebarButton.hovered
-                                variant: "focus"
-                                radius: Styling.radius(-4)
+                            background: Rectangle {
+                                color: "transparent"
                             }
 
                             contentItem: Row {
