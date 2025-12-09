@@ -19,8 +19,9 @@ Item {
     }
 
     Component.onCompleted: {
+        // Only refresh device list, don't start scanning automatically
         if (BluetoothService.enabled) {
-            BluetoothService.startDiscovery();
+            BluetoothService.updateDevices();
         }
     }
 

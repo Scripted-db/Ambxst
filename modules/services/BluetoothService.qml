@@ -14,16 +14,60 @@ Singleton {
     property int connectedDevices: 0
     
     readonly property list<BluetoothDevice> devices: []
-    readonly property list<var> friendlyDeviceList: [...devices].sort((a, b) => {
-        // Connected devices first
-        if (a.connected && !b.connected) return -1;
-        if (!a.connected && b.connected) return 1;
-        // Then paired devices
-        if (a.paired && !b.paired) return -1;
-        if (!a.paired && b.paired) return 1;
-        // Then by name
-        return (a.name || "").localeCompare(b.name || "");
-    })
+    
+    // Cached sorted device list - only updates when devices change
+    property list<var> friendlyDeviceList: []
+    
+    // Queue for batching updateInfo calls
+    property var pendingInfoUpdates: []
+    property bool isProcessingInfoQueue: false
+
+    function updateFriendlyList() {
+        friendlyDeviceList = [...devices].sort((a, b) => {
+            // Connected devices first
+            if (a.connected && !b.connected) return -1;
+            if (!a.connected && b.connected) return 1;
+            // Then paired devices
+            if (a.paired && !b.paired) return -1;
+            if (!a.paired && b.paired) return 1;
+            // Then by name
+            return (a.name || "").localeCompare(b.name || "");
+        });
+    }
+
+    // Batch process info updates with delay between each
+    function queueInfoUpdate(device: BluetoothDevice) {
+        if (pendingInfoUpdates.indexOf(device) === -1) {
+            pendingInfoUpdates.push(device);
+        }
+        if (!isProcessingInfoQueue) {
+            processNextInfoUpdate();
+        }
+    }
+
+    function processNextInfoUpdate() {
+        if (pendingInfoUpdates.length === 0) {
+            isProcessingInfoQueue = false;
+            updateFriendlyList();
+            return;
+        }
+        
+        isProcessingInfoQueue = true;
+        const device = pendingInfoUpdates.shift();
+        if (device) {
+            device.updateInfo();
+        }
+        // Process next after a small delay
+        infoQueueTimer.restart();
+    }
+
+    Timer {
+        id: infoQueueTimer
+        interval: 50  // 50ms between each info request
+        running: false
+        repeat: false
+        onTriggered: root.processNextInfoUpdate()
+    }
 
     // Control functions
     function toggle() {
@@ -232,15 +276,20 @@ Singleton {
                 const existing = rDevices.find(d => d.address === deviceData.address);
                 if (existing) {
                     existing.name = deviceData.name;
-                    existing.updateInfo();
+                    root.queueInfoUpdate(existing);
                 } else {
                     const newDevice = deviceComp.createObject(root, {
                         address: deviceData.address,
                         name: deviceData.name
                     });
                     rDevices.push(newDevice);
-                    newDevice.updateInfo();
+                    root.queueInfoUpdate(newDevice);
                 }
+            }
+            
+            // If no devices to update, just refresh the list
+            if (deviceAddresses.length === 0) {
+                root.updateFriendlyList();
             }
         }
     }

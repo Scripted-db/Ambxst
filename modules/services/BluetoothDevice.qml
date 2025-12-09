@@ -15,6 +15,8 @@ QtObject {
     property bool batteryAvailable: battery >= 0
     property bool connecting: false
 
+    signal infoUpdated()
+
     // Connect with auto-trust for new devices
     function connect() {
         connecting = true;
@@ -95,6 +97,7 @@ QtObject {
                     }
                 }
             }
+            root.infoUpdated();
         }
     }
 }
