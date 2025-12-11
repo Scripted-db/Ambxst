@@ -67,7 +67,7 @@ StyledRect {
                     root.draggingChanged(true);
                 }
                 let deltaValue = deltaY / 100.0;
-                let newValue = Math.max(0, Math.min(1, dragStartValue + deltaValue));
+                let newValue = Math.round(Math.max(0, Math.min(1, dragStartValue + deltaValue)) * 100) / 100;
                 root.controlValueChanged(newValue);
             }
         }
@@ -81,10 +81,10 @@ StyledRect {
 
         onWheel: wheel => {
             if (wheel.angleDelta.y > 0) {
-                let newValue = Math.min(1, root.value + 0.1);
+                let newValue = Math.round(Math.min(1, root.value + 0.1) * 100) / 100;
                 root.controlValueChanged(newValue);
             } else {
-                let newValue = Math.max(0, root.value - 0.1);
+                let newValue = Math.round(Math.max(0, root.value - 0.1) * 100) / 100;
                 root.controlValueChanged(newValue);
             }
         }
