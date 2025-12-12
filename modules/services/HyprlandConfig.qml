@@ -128,6 +128,50 @@ QtObject {
         }
     }
 
+    property Connections hyprlandConfigConnections: Connections {
+        target: Config.hyprland
+        function onBorderSizeChanged() { applyHyprlandConfig(); }
+        function onRoundingChanged() { applyHyprlandConfig(); }
+        function onGapsInChanged() { applyHyprlandConfig(); }
+        function onGapsOutChanged() { applyHyprlandConfig(); }
+        function onLayoutChanged() { applyHyprlandConfig(); }
+        function onActiveBorderColorChanged() { applyHyprlandConfig(); }
+        function onInactiveBorderColorChanged() { applyHyprlandConfig(); }
+        function onBorderAngleChanged() { applyHyprlandConfig(); }
+        function onInactiveBorderAngleChanged() { applyHyprlandConfig(); }
+        function onSyncRoundnessChanged() { applyHyprlandConfig(); }
+        function onSyncBorderWidthChanged() { applyHyprlandConfig(); }
+        function onSyncBorderColorChanged() { applyHyprlandConfig(); }
+        function onSyncShadowOpacityChanged() { applyHyprlandConfig(); }
+        function onSyncShadowColorChanged() { applyHyprlandConfig(); }
+        function onShadowEnabledChanged() { applyHyprlandConfig(); }
+        function onShadowRangeChanged() { applyHyprlandConfig(); }
+        function onShadowRenderPowerChanged() { applyHyprlandConfig(); }
+        function onShadowSharpChanged() { applyHyprlandConfig(); }
+        function onShadowIgnoreWindowChanged() { applyHyprlandConfig(); }
+        function onShadowColorChanged() { applyHyprlandConfig(); }
+        function onShadowColorInactiveChanged() { applyHyprlandConfig(); }
+        function onShadowOpacityChanged() { applyHyprlandConfig(); }
+        function onShadowOffsetChanged() { applyHyprlandConfig(); }
+        function onShadowScaleChanged() { applyHyprlandConfig(); }
+        function onBlurEnabledChanged() { applyHyprlandConfig(); }
+        function onBlurSizeChanged() { applyHyprlandConfig(); }
+        function onBlurPassesChanged() { applyHyprlandConfig(); }
+        function onBlurIgnoreOpacityChanged() { applyHyprlandConfig(); }
+        function onBlurNewOptimizationsChanged() { applyHyprlandConfig(); }
+        function onBlurXrayChanged() { applyHyprlandConfig(); }
+        function onBlurNoiseChanged() { applyHyprlandConfig(); }
+        function onBlurContrastChanged() { applyHyprlandConfig(); }
+        function onBlurBrightnessChanged() { applyHyprlandConfig(); }
+        function onBlurVibrancyChanged() { applyHyprlandConfig(); }
+        function onBlurVibrancyDarknessChanged() { applyHyprlandConfig(); }
+        function onBlurSpecialChanged() { applyHyprlandConfig(); }
+        function onBlurPopupsChanged() { applyHyprlandConfig(); }
+        function onBlurPopupsIgnorealphaChanged() { applyHyprlandConfig(); }
+        function onBlurInputMethodsChanged() { applyHyprlandConfig(); }
+        function onBlurInputMethodsIgnorealphaChanged() { applyHyprlandConfig(); }
+    }
+
     property Connections colorsConnections: Connections {
         target: Colors
         function onFileChanged() {
