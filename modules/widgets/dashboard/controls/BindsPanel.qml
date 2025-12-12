@@ -322,7 +322,6 @@ Item {
 
                             Layout.fillWidth: true
                             bindName: modelData.name
-                            bindCategory: modelData.category
                             keybindText: root.formatKeybind(modelData.bind)
                             dispatcher: modelData.bind.dispatcher
                             argument: modelData.bind.argument || ""
@@ -345,7 +344,6 @@ Item {
 
                             Layout.fillWidth: true
                             bindName: modelData.dispatcher
-                            bindCategory: modelData.flags ? "bind" + modelData.flags : "bind"
                             keybindText: root.formatKeybind(modelData)
                             dispatcher: modelData.dispatcher
                             argument: modelData.argument || ""
@@ -819,7 +817,6 @@ Item {
         id: bindItem
 
         property string bindName: ""
-        property string bindCategory: ""
         property string keybindText: ""
         property string dispatcher: ""
         property string argument: ""
@@ -831,35 +828,79 @@ Item {
         signal toggleEnabled()
 
         variant: isHovered ? "focus" : "common"
-        height: 56
+        height: 48
         radius: Styling.radius(-2)
         enableShadow: true
         opacity: isEnabled ? 1 : 0.5
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 12
-            spacing: 12
+            anchors.margins: 8
+            spacing: 8
 
-            // Keybind display
-            StyledRect {
-                variant: "pane"
-                Layout.preferredWidth: keybindLabel.width + 24
+            // Checkbox for custom binds (styled like OLED Mode)
+            Item {
+                id: checkboxItem
+                visible: !bindItem.isAmbxst
+                Layout.preferredWidth: 32
                 Layout.preferredHeight: 32
-                radius: Styling.radius(-4)
 
-                Text {
-                    id: keybindLabel
-                    anchors.centerIn: parent
-                    text: bindItem.keybindText
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(-1)
-                    font.weight: Font.Medium
-                    color: Colors.primary
+                Item {
+                    anchors.fill: parent
+
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: Styling.radius(-4)
+                        color: Colors.background
+                        visible: !bindItem.isEnabled
+                    }
+
+                    StyledRect {
+                        variant: "primary"
+                        anchors.fill: parent
+                        radius: Styling.radius(-4)
+                        visible: bindItem.isEnabled
+                        opacity: bindItem.isEnabled ? 1.0 : 0.0
+
+                        Behavior on opacity {
+                            enabled: Config.animDuration > 0
+                            NumberAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutQuart
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: Icons.accept
+                            color: Config.resolveColor(Config.theme.srPrimary.itemColor)
+                            font.family: Icons.font
+                            font.pixelSize: 16
+                            scale: bindItem.isEnabled ? 1.0 : 0.0
+
+                            Behavior on scale {
+                                enabled: Config.animDuration > 0
+                                NumberAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutBack
+                                    easing.overshoot: 1.5
+                                }
+                            }
+                        }
+                    }
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: mouse => {
+                        bindItem.toggleEnabled();
+                        mouse.accepted = true;
+                    }
                 }
             }
 
-            // Info column
+            // Info column - what the bind does
             ColumnLayout {
                 Layout.fillWidth: true
                 spacing: 2
@@ -885,84 +926,33 @@ Item {
                 }
             }
 
-            // Category badge
-            Text {
-                text: bindItem.bindCategory
-                font.family: Config.theme.font
-                font.pixelSize: Styling.fontSize(-2)
-                color: Colors.overSurfaceVariant
-            }
+            // Keybind display at the end
+            StyledRect {
+                variant: "pane"
+                Layout.preferredWidth: keybindLabel.width + 24
+                Layout.preferredHeight: 28
+                radius: Styling.radius(-4)
 
-            // Toggle for custom binds
-            Switch {
-                visible: !bindItem.isAmbxst
-                checked: bindItem.isEnabled
-                onCheckedChanged: {
-                    if (checked !== bindItem.isEnabled) {
-                        bindItem.toggleEnabled();
-                    }
-                }
-
-                indicator: Rectangle {
-                    implicitWidth: 36
-                    implicitHeight: 18
-                    radius: height / 2
-                    color: parent.checked ? Colors.primary : Colors.surfaceBright
-                    border.color: parent.checked ? Colors.primary : Colors.outline
-
-                    Rectangle {
-                        x: parent.parent.checked ? parent.width - width - 2 : 2
-                        y: 2
-                        width: parent.height - 4
-                        height: width
-                        radius: width / 2
-                        color: parent.parent.checked ? Colors.background : Colors.overSurfaceVariant
-
-                        Behavior on x {
-                            enabled: Config.animDuration > 0
-                            NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
-                        }
-                    }
-                }
-                background: null
-            }
-
-            // Edit button
-            Button {
-                id: editButton
-                flat: true
-                implicitWidth: 32
-                implicitHeight: 32
-
-                background: StyledRect {
-                    variant: editButton.hovered ? "primaryfocus" : "common"
-                    radius: Styling.radius(-4)
-                }
-
-                contentItem: Text {
-                    text: Icons.edit
-                    font.family: Icons.font
-                    font.pixelSize: 14
-                    color: editButton.hovered ? Colors.overPrimary : Colors.overBackground
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                onClicked: bindItem.editRequested()
-
-                StyledToolTip {
-                    visible: editButton.hovered
-                    tooltipText: "Edit keybind"
+                Text {
+                    id: keybindLabel
+                    anchors.centerIn: parent
+                    text: bindItem.keybindText
+                    font.family: Config.theme.font
+                    font.pixelSize: Styling.fontSize(-1)
+                    font.weight: Font.Medium
+                    color: Colors.primary
                 }
             }
         }
 
+        // Click anywhere to edit
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            acceptedButtons: Qt.NoButton
+            cursorShape: Qt.PointingHandCursor
             onEntered: bindItem.isHovered = true
             onExited: bindItem.isHovered = false
+            onClicked: bindItem.editRequested()
         }
     }
 }
