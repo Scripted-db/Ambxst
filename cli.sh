@@ -121,7 +121,7 @@ brightness)
       # Restore all monitors
       while IFS=: read -r name value; do
         if [ -n "$name" ] && [ -n "$value" ]; then
-          NORMALIZED=$(echo "scale=2; $value / 100" | bc)
+          NORMALIZED=$(awk "BEGIN {printf \"%.2f\", $value / 100}")
           qs ipc --pid "$PID" call brightness set "$NORMALIZED" "$name" 2>/dev/null || {
             echo "Warning: Could not restore brightness for $name"
           }
@@ -135,7 +135,7 @@ brightness)
         echo "Error: No saved brightness for monitor $MONITOR"
         exit 1
       fi
-      NORMALIZED=$(echo "scale=2; $VALUE / 100" | bc)
+      NORMALIZED=$(awk "BEGIN {printf \"%.2f\", $VALUE / 100}")
       qs ipc --pid "$PID" call brightness set "$NORMALIZED" "$MONITOR" 2>/dev/null || {
         echo "Error: Could not restore brightness for $MONITOR"
         exit 1
@@ -289,7 +289,7 @@ brightness)
   fi
   
   # Set brightness
-  NORMALIZED=$(echo "scale=2; $VALUE / 100" | bc)
+  NORMALIZED=$(awk "BEGIN {printf \"%.2f\", $VALUE / 100}")
   
   if [ -z "$MONITOR" ]; then
     # Set all monitors
