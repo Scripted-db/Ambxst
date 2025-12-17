@@ -153,7 +153,7 @@ Button {
 
     // Tooltip
     StyledToolTip {
-        visible: root.hovered && !root.isSeparator
+        show: root.hovered && !root.isSeparator
         tooltipText: root.desktopEntry?.name ?? root.appToplevel.appId
     }
 }

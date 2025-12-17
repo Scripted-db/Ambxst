@@ -9,6 +9,12 @@ import qs.modules.components
 ToolTip {
     id: root
     property string tooltipText: ""
+    property bool show: false
+
+    text: tooltipText
+    delay: 1000
+    timeout: 5000
+    visible: show && tooltipText.length > 0
 
     background: Rectangle {
         color: Colors.background
@@ -17,7 +23,6 @@ ToolTip {
         radius: Styling.radius(-8)
     }
     contentItem: Text {
-        anchors.centerIn: parent
         text: root.tooltipText
         color: Colors.overBackground
         font.pixelSize: Config.theme.fontSize

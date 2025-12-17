@@ -56,12 +56,13 @@ Scope {
 
             // Total height includes dock + margins (window side + edge side)
             readonly property int totalMargin: root.windowSideMargin + root.edgeSideMargin
+            readonly property int shadowSpace: 32
             
-            // Reserve space when pinned
-            exclusiveZone: root.pinned ? implicitHeight : 0
+            // Reserve space when pinned (without shadow space to not push windows too far)
+            exclusiveZone: root.pinned ? (Config.dock?.height ?? 56) + totalMargin : 0
 
-            implicitWidth: dockContainer.implicitWidth
-            implicitHeight: (Config.dock?.height ?? 56) + totalMargin
+            implicitWidth: dockContainer.implicitWidth + shadowSpace * 2
+            implicitHeight: (Config.dock?.height ?? 56) + totalMargin + shadowSpace * 2
             
             WlrLayershell.namespace: "quickshell:dock"
             color: "transparent"
@@ -72,25 +73,19 @@ Scope {
 
             MouseArea {
                 id: dockMouseArea
-                height: parent.height
+                // When hidden, only show a small hover region at the screen edge
+                // When revealed, cover the full dock area (excluding shadow space on window side)
+                height: dockWindow.reveal ? (Config.dock?.height ?? 56) + dockWindow.totalMargin + dockWindow.shadowSpace : (Config.dock?.hoverRegionHeight ?? 4)
                 anchors {
+                    // Always anchor to the screen edge
                     top: !root.isBottom ? parent.top : undefined
                     bottom: root.isBottom ? parent.bottom : undefined
-                    topMargin: !root.isBottom ? 
-                        (dockWindow.reveal ? 0 : dockWindow.implicitHeight - (Config.dock?.hoverRegionHeight ?? 4)) : 0
-                    bottomMargin: root.isBottom ? 
-                        (dockWindow.reveal ? 0 : dockWindow.implicitHeight - (Config.dock?.hoverRegionHeight ?? 4)) : 0
                     horizontalCenter: parent.horizontalCenter
                 }
                 implicitWidth: dockContainer.implicitWidth + 20
                 hoverEnabled: true
 
-                Behavior on anchors.topMargin {
-                    enabled: Config.animDuration > 0
-                    NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
-                }
-                
-                Behavior on anchors.bottomMargin {
+                Behavior on height {
                     enabled: Config.animDuration > 0
                     NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
                 }
@@ -133,8 +128,9 @@ Scope {
                         anchors.fill: parent
                         variant: "bg"
                         enableShadow: true
+                        radius: Styling.radius(4)
                         
-                        implicitWidth: dockRow.implicitWidth + 12
+                        implicitWidth: dockRow.implicitWidth + 16
                         implicitHeight: parent.height
                     }
 
@@ -184,7 +180,7 @@ Scope {
                                 onClicked: root.pinned = !root.pinned
                                 
                                 StyledToolTip {
-                                    visible: pinButton.hovered
+                                    show: pinButton.hovered
                                     tooltipText: root.pinned ? "Unpin dock" : "Pin dock"
                                 }
                             }
@@ -261,7 +257,7 @@ Scope {
                                 }
                                 
                                 StyledToolTip {
-                                    visible: overviewButton.hovered
+                                    show: overviewButton.hovered
                                     tooltipText: "Overview"
                                 }
                             }
