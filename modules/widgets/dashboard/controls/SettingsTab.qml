@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.modules.theme
+import QtQuick.Effects
 import qs.modules.components
 import qs.modules.services
 import qs.config
@@ -14,7 +15,7 @@ Rectangle {
     implicitWidth: 400
     implicitHeight: 300
 
-    property int currentSection: 0  // 0: Network, 1: Bluetooth, 2: Mixer, 3: Effects, 4: Theme, 5: Binds, 6: System
+    property int currentSection: 0  // 0: Network, 1: Bluetooth, 2: Mixer, 3: Effects, 4: Theme, 5: Shell, 6: Binds, 7: System
 
     RowLayout {
         anchors.fill: parent
@@ -70,13 +71,14 @@ Rectangle {
 
                         Repeater {
                             model: [
-                                { icon: Icons.wifiHigh, label: "Network", section: 0 },
-                                { icon: Icons.bluetooth, label: "Bluetooth", section: 1 },
-                                { icon: Icons.faders, label: "Mixer", section: 2 },
-                                { icon: Icons.waveform, label: "Effects", section: 3 },
-                                { icon: Icons.paintBrush, label: "Theme", section: 4 },
-                                { icon: Icons.keyboard, label: "Binds", section: 5 },
-                                { icon: Icons.circuitry, label: "System", section: 6 }
+                                { icon: Icons.wifiHigh, label: "Network", section: 0, isIcon: true },
+                                { icon: Icons.bluetooth, label: "Bluetooth", section: 1, isIcon: true },
+                                { icon: Icons.faders, label: "Mixer", section: 2, isIcon: true },
+                                { icon: Icons.waveform, label: "Effects", section: 3, isIcon: true },
+                                { icon: Icons.paintBrush, label: "Theme", section: 4, isIcon: true },
+                                { icon: Qt.resolvedUrl("../../../../assets/ambxst-icon.svg"), label: "Shell", section: 5, isIcon: false },
+                                { icon: Icons.keyboard, label: "Binds", section: 6, isIcon: true },
+                                { icon: Icons.circuitry, label: "System", section: 7, isIcon: true }
                             ]
 
                         delegate: Button {
@@ -98,10 +100,10 @@ Rectangle {
                             contentItem: Row {
                                 spacing: 8
 
-                                // Icon on the left
+                                // Icon on the left (font icon)
                                 Text {
                                     id: iconText
-                                    text: sidebarButton.modelData.icon
+                                    text: sidebarButton.modelData.isIcon ? sidebarButton.modelData.icon : ""
                                     font.family: Icons.font
                                     font.pixelSize: 20
                                     color: sidebarButton.isActive 
@@ -109,12 +111,42 @@ Rectangle {
                                         : Config.resolveColor(Config.theme.srCommon.itemColor)
                                     anchors.verticalCenter: parent.verticalCenter
                                     leftPadding: 10
+                                    visible: sidebarButton.modelData.isIcon
 
                                     Behavior on color {
                                         enabled: Config.animDuration > 0
                                         ColorAnimation {
                                             duration: Config.animDuration
                                             easing.type: Easing.OutCubic
+                                        }
+                                    }
+                                }
+
+                                // SVG icon
+                                Item {
+                                    width: 30
+                                    height: 20
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    visible: !sidebarButton.modelData.isIcon
+
+                                    Image {
+                                        id: svgIcon
+                                        width: 20
+                                        height: 20
+                                        anchors.centerIn: parent
+                                        anchors.horizontalCenterOffset: 5
+                                        source: !sidebarButton.modelData.isIcon ? sidebarButton.modelData.icon : ""
+                                        sourceSize: Qt.size(width * 2, height * 2)
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                        asynchronous: true
+                                        layer.enabled: true
+                                        layer.effect: MultiEffect {
+                                            brightness: 1.0
+                                            colorization: 1.0
+                                            colorizationColor: sidebarButton.isActive 
+                                                ? Config.resolveColor(Config.theme.srOverPrimary.itemColor)
+                                                : Config.resolveColor(Config.theme.srCommon.itemColor)
                                         }
                                     }
                                 }
@@ -156,7 +188,7 @@ Rectangle {
                         // Otherwise, navigate sections
                         if (event.angleDelta.y > 0 && root.currentSection > 0) {
                             root.currentSection--;
-                        } else if (event.angleDelta.y < 0 && root.currentSection < 6) {
+                        } else if (event.angleDelta.y < 0 && root.currentSection < 7) {
                             root.currentSection++;
                         }
                     }
@@ -333,9 +365,9 @@ Rectangle {
                 }
             }
 
-            // Binds Panel
-            BindsPanel {
-                id: bindsPanel
+            // Shell Panel
+            ShellPanel {
+                id: shellPanel
                 anchors.fill: parent
                 maxContentWidth: contentArea.maxContentWidth
                 visible: opacity > 0
@@ -362,9 +394,9 @@ Rectangle {
                 }
             }
 
-            // System Panel
-            SystemPanel {
-                id: systemPanel
+            // Binds Panel
+            BindsPanel {
+                id: bindsPanel
                 anchors.fill: parent
                 maxContentWidth: contentArea.maxContentWidth
                 visible: opacity > 0
@@ -380,6 +412,35 @@ Rectangle {
 
                 transform: Translate {
                     y: root.currentSection === 6 ? 0 : (root.currentSection > 6 ? -20 : 20)
+
+                    Behavior on y {
+                        enabled: Config.animDuration > 0
+                        NumberAnimation {
+                            duration: Config.animDuration
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+                }
+            }
+
+            // System Panel
+            SystemPanel {
+                id: systemPanel
+                anchors.fill: parent
+                maxContentWidth: contentArea.maxContentWidth
+                visible: opacity > 0
+                opacity: root.currentSection === 7 ? 1 : 0
+
+                Behavior on opacity {
+                    enabled: Config.animDuration > 0
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutCubic
+                    }
+                }
+
+                transform: Translate {
+                    y: root.currentSection === 7 ? 0 : (root.currentSection > 7 ? -20 : 20)
 
                     Behavior on y {
                         enabled: Config.animDuration > 0
