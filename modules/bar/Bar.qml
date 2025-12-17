@@ -278,6 +278,7 @@ PanelWindow {
                                 Weather {
                                     id: weatherComponent
                                     bar: panel
+                                    orientation: "horizontal"
                                     layer.enabled: false
                                 }
                             }
@@ -309,9 +310,6 @@ PanelWindow {
             anchors.margins: 4
             spacing: 4
 
-            // Obtener referencia al notch de esta pantalla
-            readonly property var notchContainer: Visibilities.getNotchForScreen(panel.screen.name)
-
             LauncherButton {
                 id: launcherButtonVert
                 Layout.preferredHeight: 36
@@ -319,70 +317,40 @@ PanelWindow {
 
             ColumnLayout {
                 id: topSection
-                Layout.fillHeight: true
-                Layout.preferredHeight: 0
                 spacing: 4
 
                 ClippingRectangle {
                     id: topRect
-                    Layout.fillHeight: true
+                    Layout.preferredHeight: topWidgets.height
                     Layout.preferredWidth: 36
                     color: "transparent"
                     radius: Styling.radius(0)
                     layer.enabled: Config.showBackground
                     layer.effect: Shadow {}
 
-                    Flickable {
-                        id: topFlickable
-                        width: parent.width
-                        height: parent.height
-                        anchors.top: parent.top
-                        contentWidth: 36
-                        contentHeight: topContent.height
-                        flickableDirection: Flickable.VerticalFlick
-                        clip: true
-                        pressDelay: 100
+                    ColumnLayout {
+                        id: topWidgets
+                        spacing: 4
 
-                        ColumnLayout {
-                            id: topContent
-                            spacing: 4
-
-                            ColumnLayout {
-                                id: topWidgets
-                                spacing: 4
-
-                                Workspaces {
-                                    orientation: panel.orientation
-                                    bar: QtObject {
-                                        property var screen: panel.screen
-                                    }
-                                    layer.enabled: false
-                                }
-                                OverviewButton {
-                                    id: overviewButtonVert
-                                    Layout.preferredHeight: 36
-                                    enableShadow: false
-                                }
+                        Workspaces {
+                            orientation: panel.orientation
+                            bar: QtObject {
+                                property var screen: panel.screen
                             }
-
-                            Item {
-                                Layout.preferredHeight: Math.max(0, topRect.height - topWidgets.height - 4)
-                            }
+                            layer.enabled: false
+                        }
+                        OverviewButton {
+                            id: overviewButtonVert
+                            Layout.preferredHeight: 36
+                            enableShadow: false
                         }
                     }
                 }
             }
 
-            // Espaciador sincronizado con el alto del notch
-            Item {
-                Layout.preferredHeight: verticalLayout.notchContainer ? verticalLayout.notchContainer.implicitHeight : 0
-                Layout.fillWidth: true
-            }
-
             ColumnLayout {
                 id: bottomSection
                 Layout.fillHeight: true
-                Layout.preferredHeight: 0
                 spacing: 4
 
                 ClippingRectangle {
@@ -445,6 +413,7 @@ PanelWindow {
                                 Weather {
                                     id: weatherComponentVert
                                     bar: panel
+                                    orientation: "vertical"
                                     layer.enabled: false
                                 }
                             }

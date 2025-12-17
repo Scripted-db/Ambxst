@@ -17,7 +17,8 @@ StyledRect {
 
     property bool weatherVisible: false
     required property var bar
-    property bool vertical: bar.orientation === "vertical"
+    property string orientation: "horizontal"
+    property bool vertical: orientation === "vertical"
 
     // Weather retry / backoff
     property int weatherRetryCount: 0
