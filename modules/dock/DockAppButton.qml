@@ -106,25 +106,12 @@ Button {
                         sourceSize.width: root.iconSize * 2
                         sourceSize.height: root.iconSize * 2
                         fillMode: Image.PreserveAspectFit
-                        visible: !(Config.dock?.monochromeIcons ?? false)
+                        visible: !Config.tintIcons
                     }
 
-                    // Monochrome version with effect
-                    Image {
-                        id: appIconMono
-                        anchors.fill: parent
-                        source: "image://icon/" + appIconContainer.iconName
-                        sourceSize.width: root.iconSize * 2
-                        sourceSize.height: root.iconSize * 2
-                        fillMode: Image.PreserveAspectFit
-                        visible: Config.dock?.monochromeIcons ?? false
-                        layer.enabled: true
-                        layer.effect: MultiEffect {
-                            saturation: 0
-                            brightness: 0.1
-                            colorization: 0.8
-                            colorizationColor: Colors.primary
-                        }
+                    Tinted {
+                        sourceItem: appIcon
+                        anchors.fill: appIcon
                     }
                 }
 

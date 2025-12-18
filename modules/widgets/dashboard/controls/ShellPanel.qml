@@ -756,14 +756,6 @@ Item {
                         }
 
                         ToggleRow {
-                            label: "Monochrome Icons"
-                            checked: Config.dock.monochromeIcons ?? false
-                            onToggled: value => {
-                                Config.dock.monochromeIcons = value;
-                            }
-                        }
-
-                        ToggleRow {
                             label: "Show Running Indicators"
                             checked: Config.dock.showRunningIndicators ?? true
                             visible: (Config.dock.theme ?? "default") !== "integrated"

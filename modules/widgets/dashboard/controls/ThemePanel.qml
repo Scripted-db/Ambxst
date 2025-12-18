@@ -210,6 +210,207 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     spacing: 12
 
+                    // General section
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: generalContent.implicitHeight
+
+                        ColumnLayout {
+                            id: generalContent
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            spacing: 8
+
+                            Text {
+                                text: "General"
+                                font.family: Config.theme.font
+                                font.pixelSize: Styling.fontSize(-1)
+                                font.weight: Font.Medium
+                                color: Colors.overSurfaceVariant
+                                Layout.bottomMargin: -4
+                            }
+
+                            // Tint Icons toggle
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: "Tint Icons"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    Layout.fillWidth: true
+                                }
+
+                                Switch {
+                                    id: tintIconsSwitch
+                                    checked: Config.theme.tintIcons
+
+                                    readonly property bool configValue: Config.theme.tintIcons
+
+                                    onConfigValueChanged: {
+                                        if (checked !== configValue) {
+                                            checked = configValue;
+                                        }
+                                    }
+
+                                    onCheckedChanged: {
+                                        if (checked !== Config.theme.tintIcons) {
+                                            GlobalStates.markThemeChanged();
+                                            Config.theme.tintIcons = checked;
+                                        }
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 40
+                                        implicitHeight: 20
+                                        x: tintIconsSwitch.leftPadding
+                                        y: parent.height / 2 - height / 2
+                                        radius: height / 2
+                                        color: tintIconsSwitch.checked ? Colors.primary : Colors.surfaceBright
+                                        border.color: tintIconsSwitch.checked ? Colors.primary : Colors.outline
+
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation { duration: Config.animDuration / 2 }
+                                        }
+
+                                        Rectangle {
+                                            x: tintIconsSwitch.checked ? parent.width - width - 2 : 2
+                                            y: 2
+                                            width: parent.height - 4
+                                            height: width
+                                            radius: width / 2
+                                            color: tintIconsSwitch.checked ? Colors.background : Colors.overSurfaceVariant
+
+                                            Behavior on x {
+                                                enabled: Config.animDuration > 0
+                                                NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                            }
+                                        }
+                                    }
+                                    background: null
+                                }
+                            }
+
+                            // Enable Corners toggle
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: "Enable Corners"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    Layout.fillWidth: true
+                                }
+
+                                Switch {
+                                    id: enableCornersSwitch
+                                    checked: Config.theme.enableCorners
+
+                                    readonly property bool configValue: Config.theme.enableCorners
+
+                                    onConfigValueChanged: {
+                                        if (checked !== configValue) {
+                                            checked = configValue;
+                                        }
+                                    }
+
+                                    onCheckedChanged: {
+                                        if (checked !== Config.theme.enableCorners) {
+                                            GlobalStates.markThemeChanged();
+                                            Config.theme.enableCorners = checked;
+                                        }
+                                    }
+
+                                    indicator: Rectangle {
+                                        implicitWidth: 40
+                                        implicitHeight: 20
+                                        x: enableCornersSwitch.leftPadding
+                                        y: parent.height / 2 - height / 2
+                                        radius: height / 2
+                                        color: enableCornersSwitch.checked ? Colors.primary : Colors.surfaceBright
+                                        border.color: enableCornersSwitch.checked ? Colors.primary : Colors.outline
+
+                                        Behavior on color {
+                                            enabled: Config.animDuration > 0
+                                            ColorAnimation { duration: Config.animDuration / 2 }
+                                        }
+
+                                        Rectangle {
+                                            x: enableCornersSwitch.checked ? parent.width - width - 2 : 2
+                                            y: 2
+                                            width: parent.height - 4
+                                            height: width
+                                            radius: width / 2
+                                            color: enableCornersSwitch.checked ? Colors.background : Colors.overSurfaceVariant
+
+                                            Behavior on x {
+                                                enabled: Config.animDuration > 0
+                                                NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                            }
+                                        }
+                                    }
+                                    background: null
+                                }
+                            }
+
+                            // Animation Duration slider
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: 8
+
+                                Text {
+                                    text: "Animation"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    Layout.preferredWidth: 80
+                                }
+
+                                StyledSlider {
+                                    id: animDurationSlider
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: 20
+                                    progressColor: Colors.primary
+                                    tooltipText: `${Math.round(value * 1000)}ms`
+                                    scroll: true
+
+                                    readonly property real configValue: Config.theme.animDuration / 1000
+
+                                    onConfigValueChanged: {
+                                        if (Math.abs(value - configValue) > 0.001) {
+                                            value = configValue;
+                                        }
+                                    }
+
+                                    Component.onCompleted: value = configValue
+
+                                    onValueChanged: {
+                                        let newDuration = Math.round(value * 1000);
+                                        if (newDuration !== Config.theme.animDuration) {
+                                            GlobalStates.markThemeChanged();
+                                            Config.theme.animDuration = newDuration;
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: Config.theme.animDuration + "ms"
+                                    font.family: Config.theme.font
+                                    font.pixelSize: Styling.fontSize(0)
+                                    color: Colors.overBackground
+                                    horizontalAlignment: Text.AlignRight
+                                    Layout.preferredWidth: 50
+                                }
+                            }
+                        }
+                    }
+
                     // Fonts section
                     Item {
                         Layout.fillWidth: true
