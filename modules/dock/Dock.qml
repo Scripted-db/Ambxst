@@ -3,12 +3,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.modules.theme
 import qs.modules.services
 import qs.modules.components
+import qs.modules.corners
 import qs.modules.globals
 import qs.config
 
@@ -161,9 +163,24 @@ Scope {
                 Item {
                     id: dockContainer
                     
-                    // Size
-                    width: dockContent.implicitWidth
-                    height: dockContent.implicitHeight
+                    // Corner size for default theme
+                    readonly property int cornerSize: root.isDefault && Config.roundness > 0 ? Config.roundness + 4 : 0
+                    
+                    // Size - includes corner space for default theme
+                    // Bottom: corners are on left and right sides (extra width, same height)
+                    // Vertical: corners are on top and bottom (same width, extra height)
+                    width: {
+                        if (root.isDefault && cornerSize > 0) {
+                            if (root.isBottom) return dockContent.implicitWidth + cornerSize * 2;
+                        }
+                        return dockContent.implicitWidth;
+                    }
+                    height: {
+                        if (root.isDefault && cornerSize > 0) {
+                            if (root.isVertical) return dockContent.implicitHeight + cornerSize * 2;
+                        }
+                        return dockContent.implicitHeight;
+                    }
                     
                     // Position using x/y
                     x: root.isBottom 
@@ -207,67 +224,152 @@ Scope {
                         }
                     }
 
-                    // Background
+                    // Full background container with masking (default theme)
+                    Item {
+                        id: dockFullBgContainer
+                        visible: root.isDefault
+                        anchors.fill: parent
+                        
+                        // Background rect - covers the entire area
+                        StyledRect {
+                            id: dockBackground
+                            anchors.fill: parent
+                            
+                            variant: "bg"
+                            enableShadow: true
+                            enableBorder: false
+                            
+                            readonly property int fullRadius: Styling.radius(4)
+                            
+                            // For default theme: corners on screen edge are 0 (flush with edge)
+                            topLeftRadius: {
+                                if (root.isBottom) return fullRadius;
+                                if (root.isLeft) return 0;
+                                if (root.isRight) return fullRadius;
+                                return fullRadius;
+                            }
+                            topRightRadius: {
+                                if (root.isBottom) return fullRadius;
+                                if (root.isLeft) return fullRadius;
+                                if (root.isRight) return 0;
+                                return fullRadius;
+                            }
+                            bottomLeftRadius: {
+                                if (root.isBottom) return 0;
+                                if (root.isLeft) return 0;
+                                if (root.isRight) return fullRadius;
+                                return fullRadius;
+                            }
+                            bottomRightRadius: {
+                                if (root.isBottom) return 0;
+                                if (root.isLeft) return fullRadius;
+                                if (root.isRight) return 0;
+                                return fullRadius;
+                            }
+                        }
+                        
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            maskEnabled: true
+                            maskSource: dockMask
+                            maskThresholdMin: 0.5
+                            maskSpreadAtMin: 1.0
+                        }
+                    }
+
+                    // Mask for the full background (default theme)
+                    Item {
+                        id: dockMask
+                        visible: false
+                        anchors.fill: parent
+                        
+                        layer.enabled: true
+                        layer.smooth: true
+
+                        // First corner - position and type change based on dock position
+                        RoundCorner {
+                            id: corner1
+                            x: {
+                                if (root.isBottom) return 0;
+                                if (root.isLeft) return 0;  // Left edge (screen border)
+                                if (root.isRight) return parent.width - dockContainer.cornerSize;  // Right edge (screen border)
+                                return 0;
+                            }
+                            y: {
+                                if (root.isBottom) return parent.height - dockContainer.cornerSize;
+                                return 0;  // Top of container for vertical docks
+                            }
+                            size: Math.max(dockContainer.cornerSize, 1)
+                            corner: {
+                                if (root.isBottom) return RoundCorner.CornerEnum.BottomRight;
+                                if (root.isLeft) return RoundCorner.CornerEnum.BottomRight;  // Curves down-right
+                                if (root.isRight) return RoundCorner.CornerEnum.BottomLeft;  // Curves down-left
+                                return RoundCorner.CornerEnum.BottomRight;
+                            }
+                            color: "white"
+                        }
+                        
+                        // Second corner - position and type change based on dock position
+                        RoundCorner {
+                            id: corner2
+                            x: {
+                                if (root.isBottom) return parent.width - dockContainer.cornerSize;
+                                if (root.isLeft) return 0;  // Left edge (screen border)
+                                if (root.isRight) return parent.width - dockContainer.cornerSize;  // Right edge (screen border)
+                                return 0;
+                            }
+                            y: parent.height - dockContainer.cornerSize  // Always at bottom of container
+                            size: Math.max(dockContainer.cornerSize, 1)
+                            corner: {
+                                if (root.isBottom) return RoundCorner.CornerEnum.BottomLeft;
+                                if (root.isLeft) return RoundCorner.CornerEnum.TopRight;  // Curves up-right
+                                if (root.isRight) return RoundCorner.CornerEnum.TopLeft;  // Curves up-left
+                                return RoundCorner.CornerEnum.BottomLeft;
+                            }
+                            color: "white"
+                        }
+
+                        // Center rect mask (the main dock area)
+                        Rectangle {
+                            id: centerMask
+                            width: dockContent.implicitWidth
+                            height: dockContent.implicitHeight
+                            color: "white"
+                            
+                            // Position based on dock position
+                            x: {
+                                if (root.isBottom) return dockContainer.cornerSize;
+                                return 0;  // Vertical docks: no x offset
+                            }
+                            y: {
+                                if (root.isBottom) return 0;
+                                return dockContainer.cornerSize;  // Vertical docks: after top corner
+                            }
+                            
+                            topLeftRadius: dockBackground.topLeftRadius
+                            topRightRadius: dockBackground.topRightRadius
+                            bottomLeftRadius: dockBackground.bottomLeftRadius
+                            bottomRightRadius: dockBackground.bottomRightRadius
+                        }
+                    }
+
+                    // Background for floating theme (simple, no round corners)
                     StyledRect {
-                        id: dockBackground
+                        id: dockBackgroundFloating
+                        visible: root.isFloating
                         anchors.fill: parent
                         variant: "bg"
                         enableShadow: true
-                        
-                        // Radius depends on theme and position
-                        // Default: corners touching edge have 0 radius
-                        // Floating: all corners have full radius
-                        readonly property int fullRadius: Styling.radius(4)
-                        
-                        topLeftRadius: {
-                            if (root.isFloating) return fullRadius;
-                            if (root.isDefault) {
-                                if (root.isBottom) return fullRadius;
-                                if (root.isLeft) return 0;
-                                if (root.isRight) return fullRadius;
-                            }
-                            return fullRadius;
-                        }
-                        topRightRadius: {
-                            if (root.isFloating) return fullRadius;
-                            if (root.isDefault) {
-                                if (root.isBottom) return fullRadius;
-                                if (root.isLeft) return fullRadius;
-                                if (root.isRight) return 0;
-                            }
-                            return fullRadius;
-                        }
-                        bottomLeftRadius: {
-                            if (root.isFloating) return fullRadius;
-                            if (root.isDefault) {
-                                if (root.isBottom) return 0;
-                                if (root.isLeft) return 0;
-                                if (root.isRight) return fullRadius;
-                            }
-                            return fullRadius;
-                        }
-                        bottomRightRadius: {
-                            if (root.isFloating) return fullRadius;
-                            if (root.isDefault) {
-                                if (root.isBottom) return 0;
-                                if (root.isLeft) return fullRadius;
-                                if (root.isRight) return 0;
-                            }
-                            return fullRadius;
-                        }
-                        
-                        implicitWidth: root.isVertical 
-                            ? dockWindow.dockSize 
-                            : dockLayoutHorizontal.implicitWidth + 16
-                        implicitHeight: root.isVertical 
-                            ? dockLayoutVertical.implicitHeight + 16 
-                            : dockWindow.dockSize
+                        radius: Styling.radius(4)
                     }
 
                     // Horizontal layout (bottom dock)
                     RowLayout {
                         id: dockLayoutHorizontal
-                        anchors.centerIn: parent
+                        // For default theme, center in the dock content area (not the expanded container)
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: (dockContent.implicitHeight - implicitHeight) / 2
                         spacing: Config.dock?.spacing ?? 4
                         visible: !root.isVertical
                         
@@ -403,7 +505,9 @@ Scope {
                     // Vertical layout (left/right dock)
                     ColumnLayout {
                         id: dockLayoutVertical
-                        anchors.centerIn: parent
+                        // Center in the dock content area, accounting for corner space
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        y: dockContainer.cornerSize + (dockContent.implicitHeight - implicitHeight) / 2
                         spacing: Config.dock?.spacing ?? 4
                         visible: root.isVertical
                         

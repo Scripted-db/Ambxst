@@ -23,6 +23,11 @@ Item {
     onSizeChanged: {
         canvas.requestPaint();
     }
+    onVisibleChanged: {
+        if (visible) {
+            canvas.requestPaint();
+        }
+    }
 
     implicitWidth: size
     implicitHeight: size
