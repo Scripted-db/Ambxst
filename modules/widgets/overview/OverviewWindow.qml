@@ -65,8 +65,6 @@ Item {
     Drag.hotSpot.x: width / 2
     Drag.hotSpot.y: height / 2
 
-    // Enable layer for GPU acceleration
-    layer.enabled: true
     clip: true
 
     Behavior on x {

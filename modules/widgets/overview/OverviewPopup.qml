@@ -289,19 +289,31 @@ PanelWindow {
             variant: "bg"
             anchors.left: overviewContainer.right
             anchors.leftMargin: 8
-            anchors.top: overviewContainer.top
-            anchors.bottom: overviewContainer.bottom
-            width: 24
-            radius: 12
+            anchors.verticalCenter: overviewContainer.verticalCenter
+            width: 32
+            height: Math.max(overviewContainer.height * 0.6, 200)
+            radius: 16
 
             layer.enabled: true
             layer.effect: Shadow {}
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                onWheel: wheel => {
+                    if (overviewLoader.item && overviewLoader.item.flickable) {
+                        const flickable = overviewLoader.item.flickable;
+                        const delta = wheel.angleDelta.y > 0 ? -150 : 150;
+                        flickable.contentY = Math.max(0, Math.min(flickable.contentY + delta, flickable.contentHeight - flickable.height));
+                    }
+                }
+            }
 
             ScrollBar {
                 id: externalScrollBar
                 anchors.centerIn: parent
                 height: parent.height - 16
-                width: 6
+                width: 12
                 orientation: Qt.Vertical
                 policy: ScrollBar.AlwaysOn
                 
@@ -317,15 +329,11 @@ PanelWindow {
                 }
                 
                 contentItem: Rectangle {
-                    implicitWidth: 6
-                    radius: 3
-                    color: externalScrollBar.pressed ? Colors.primary : (externalScrollBar.hovered ? Colors.overSurfaceVariant : Colors.outline)
-                    opacity: externalScrollBar.pressed ? 1.0 : (externalScrollBar.hovered ? 0.8 : 0.5)
+                    implicitWidth: 12
+                    radius: 6
+                    color: Colors.primary
+                    opacity: externalScrollBar.pressed ? 1.0 : (externalScrollBar.hovered ? 0.9 : 0.7)
                     
-                    Behavior on color {
-                        enabled: Config.animDuration > 0
-                        ColorAnimation { duration: Config.animDuration / 2 }
-                    }
                     Behavior on opacity {
                         enabled: Config.animDuration > 0
                         NumberAnimation { duration: Config.animDuration / 2 }
@@ -333,8 +341,8 @@ PanelWindow {
                 }
                 
                 background: Rectangle {
-                    implicitWidth: 6
-                    radius: 3
+                    implicitWidth: 12
+                    radius: 6
                     color: Colors.surfaceContainer
                     opacity: 0.3
                 }

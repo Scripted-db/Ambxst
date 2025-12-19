@@ -192,9 +192,6 @@ Item {
 
     implicitWidth: overviewBackground.implicitWidth
     implicitHeight: overviewBackground.implicitHeight
-    
-    // Enable layer for GPU acceleration
-    layer.enabled: true
 
     Item {
         id: overviewBackground

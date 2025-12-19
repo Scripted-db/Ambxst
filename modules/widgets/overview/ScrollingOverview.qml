@@ -183,11 +183,16 @@ Item {
         (workspaceHeight + workspacePadding + workspaceSpacing) * totalWorkspaces
     ) + 8
 
-    layer.enabled: true
-
     // Expose flickable for external scrollbar
     property alias flickable: workspaceFlickable
     readonly property bool needsScrollbar: workspaceFlickable.contentHeight > workspaceFlickable.height
+
+    // Calculate target scroll position to center active workspace
+    readonly property int activeWorkspaceId: monitor?.activeWorkspace?.id || 1
+    readonly property real workspaceRowHeight: workspaceHeight + workspacePadding + workspaceSpacing
+
+    // Scroll to center active workspace when it changes
+    onActiveWorkspaceIdChanged: workspaceFlickable.scrollToActiveWorkspace()
 
     // Vertical flickable containing all workspaces
     Flickable {
@@ -200,22 +205,20 @@ Item {
         boundsBehavior: Flickable.StopAtBounds
         flickableDirection: Flickable.VerticalFlick
 
-        // Auto-scroll to active workspace
+        Behavior on contentY {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutQuart
+            }
+        }
+
         Component.onCompleted: scrollToActiveWorkspace()
 
         function scrollToActiveWorkspace() {
-            const activeWsId = scrollingOverviewRoot.monitor?.activeWorkspace?.id || 1;
-            const targetY = (activeWsId - 1) * (workspaceHeight + workspacePadding + workspaceSpacing);
-            // Center the active workspace in view
+            const targetY = (scrollingOverviewRoot.activeWorkspaceId - 1) * scrollingOverviewRoot.workspaceRowHeight;
             const centeredY = targetY - (height - workspaceHeight - workspacePadding) / 2;
             contentY = Math.max(0, Math.min(centeredY, contentHeight - height));
-        }
-
-        Connections {
-            target: scrollingOverviewRoot.monitor?.activeWorkspace ?? null
-            function onIdChanged() {
-                workspaceFlickable.scrollToActiveWorkspace();
-            }
         }
 
         // Content item containing workspaces and indicator
