@@ -133,8 +133,53 @@ QtObject {
     readonly property real effectiveSunProgress: debugMode ? debugSunProgress : sunProgress
     readonly property string effectiveTimeOfDay: debugMode ? debugTimeOfDay : timeOfDay
     readonly property bool effectiveIsDay: debugMode ? debugIsDay : isDay
+    readonly property int effectiveWeatherCode: debugMode ? debugWeatherCode : weatherCode
     readonly property string effectiveWeatherSymbol: debugMode ? getWeatherCodeEmoji(debugWeatherCode) : weatherSymbol
     readonly property string effectiveWeatherDescription: debugMode ? getWeatherDescription(debugWeatherCode) : weatherDescription
+
+    // Weather effect types based on code
+    readonly property string effectiveWeatherEffect: getWeatherEffect(effectiveWeatherCode)
+    readonly property real effectiveWeatherIntensity: getWeatherIntensity(effectiveWeatherCode)
+
+    function getWeatherEffect(code) {
+        if (code === 0 || code === 1) return "clear";
+        if (code === 2 || code === 3) return "clouds";
+        if (code === 45 || code === 48) return "fog";
+        if (code >= 51 && code <= 57) return "drizzle";
+        if (code >= 61 && code <= 67) return "rain";
+        if (code >= 71 && code <= 77) return "snow";
+        if (code >= 80 && code <= 82) return "rain";
+        if (code >= 85 && code <= 86) return "snow";
+        if (code === 95) return "thunderstorm";
+        if (code >= 96 && code <= 99) return "thunderstorm";
+        return "clear";
+    }
+
+    function getWeatherIntensity(code) {
+        // Returns 0.0 - 1.0 intensity
+        if (code === 0 || code === 1) return 0.0;
+        if (code === 2) return 0.3;  // Partly cloudy
+        if (code === 3) return 0.7;  // Overcast
+        if (code === 45) return 0.5;  // Fog
+        if (code === 48) return 0.7;  // Rime fog
+        if (code === 51 || code === 56) return 0.3;  // Light drizzle
+        if (code === 53) return 0.5;  // Moderate drizzle
+        if (code === 55 || code === 57) return 0.7;  // Dense drizzle
+        if (code === 61) return 0.4;  // Light rain
+        if (code === 63 || code === 66) return 0.6;  // Moderate rain
+        if (code === 65 || code === 67) return 0.9;  // Heavy rain
+        if (code === 71) return 0.3;  // Light snow
+        if (code === 73) return 0.5;  // Moderate snow
+        if (code === 75 || code === 77) return 0.8;  // Heavy snow
+        if (code === 80) return 0.5;  // Light showers
+        if (code === 81) return 0.7;  // Moderate showers
+        if (code === 82) return 1.0;  // Heavy showers
+        if (code === 85) return 0.6;  // Light snow showers
+        if (code === 86) return 0.9;  // Heavy snow showers
+        if (code === 95) return 0.8;  // Thunderstorm
+        if (code >= 96) return 1.0;  // Thunderstorm with hail
+        return 0.0;
+    }
 
     // Internal state
     property int retryCount: 0
