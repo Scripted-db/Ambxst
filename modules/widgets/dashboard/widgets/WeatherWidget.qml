@@ -784,7 +784,7 @@ Rectangle {
     // TEXT CONTENT
     // ═══════════════════════════════════════════════════════════
 
-    // Time of day label (top left)
+    // Temperature and weather description (top left)
     Column {
         anchors.left: parent.left
         anchors.top: parent.top
@@ -792,10 +792,10 @@ Rectangle {
         spacing: 2
 
         Text {
-            text: WeatherService.effectiveTimeOfDay
+            text: Math.round(WeatherService.currentTemp) + "°" + Config.weather.unit
             color: root.textPrimary
             font.family: Config.theme.font
-            font.pixelSize: Config.theme.fontSize + 4
+            font.pixelSize: Config.theme.fontSize + 6
             font.weight: Font.Bold
         }
 
@@ -805,18 +805,6 @@ Rectangle {
             font.family: Config.theme.font
             font.pixelSize: Config.theme.fontSize - 2
         }
-    }
-
-    // Temperature (top right)
-    Text {
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: 12
-        text: Math.round(WeatherService.currentTemp) + Config.weather.unit + "°"
-        color: root.textPrimary
-        font.family: Config.theme.font
-        font.pixelSize: Config.theme.fontSize + 6
-        font.weight: Font.Medium
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -859,28 +847,36 @@ Rectangle {
             }
         }
 
-        // Hour controls
+        // Hour controls (10 minute increments)
         Row {
             spacing: 4
 
             Rectangle {
-                width: 24; height: 20
+                width: 28; height: 20
                 radius: 4
                 color: "#555"
-                Text { anchors.centerIn: parent; text: "−1h"; font.pixelSize: 8; color: "#fff" }
+                Text { anchors.centerIn: parent; text: "−10m"; font.pixelSize: 8; color: "#fff" }
                 MouseArea { 
                     anchors.fill: parent
-                    onClicked: WeatherService.debugHour = (WeatherService.debugHour - 1 + 24) % 24
+                    onClicked: {
+                        var newHour = WeatherService.debugHour - (10 / 60);
+                        if (newHour < 0) newHour += 24;
+                        WeatherService.debugHour = newHour;
+                    }
                 }
             }
             Rectangle {
-                width: 24; height: 20
+                width: 28; height: 20
                 radius: 4
                 color: "#555"
-                Text { anchors.centerIn: parent; text: "+1h"; font.pixelSize: 8; color: "#fff" }
+                Text { anchors.centerIn: parent; text: "+10m"; font.pixelSize: 8; color: "#fff" }
                 MouseArea { 
                     anchors.fill: parent
-                    onClicked: WeatherService.debugHour = (WeatherService.debugHour + 1) % 24
+                    onClicked: {
+                        var newHour = WeatherService.debugHour + (10 / 60);
+                        if (newHour >= 24) newHour -= 24;
+                        WeatherService.debugHour = newHour;
+                    }
                 }
             }
         }

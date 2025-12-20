@@ -78,15 +78,24 @@ QtObject {
 
     // Simplified: calculate blend factors for smooth transitions
     // Returns values 0-1 for day, evening, night that sum to 1
+    // Transition scheme:
+    // 5-6: Night -> Evening
+    // 6-8: Evening (max)
+    // 8-9: Evening -> Day
+    // 9-17: Day (max)
+    // 17-18: Day -> Evening
+    // 18-20: Evening (max)
+    // 20-21: Evening -> Night
+    // 21-5: Night (max)
     function calculateTimeBlend(hour) {
         var day = 0, evening = 0, night = 0;
         
-        if (hour >= 8 && hour <= 17) {
-            // Pure day (8:00 - 17:00)
+        if (hour >= 9 && hour <= 17) {
+            // Pure day (9:00 - 17:00)
             day = 1.0;
-        } else if (hour > 6 && hour < 8) {
-            // Dawn transition (6:00 - 8:00): evening -> day
-            var t = (hour - 6) / 2;
+        } else if (hour > 8 && hour < 9) {
+            // Morning transition (8:00 - 9:00): evening -> day
+            var t = hour - 8;
             evening = 1.0 - t;
             day = t;
         } else if (hour > 17 && hour < 18) {
@@ -94,19 +103,25 @@ QtObject {
             var t = hour - 17;
             day = 1.0 - t;
             evening = t;
-        } else if (hour >= 18 && hour < 20) {
-            // Dusk transition (18:00 - 20:00): evening -> night
-            var t = (hour - 18) / 2;
-            evening = 1.0 - t;
-            night = t;
-        } else if (hour >= 20 || hour < 5) {
-            // Pure night (20:00 - 5:00)
-            night = 1.0;
-        } else if (hour >= 5 && hour <= 6) {
+        } else if (hour >= 6 && hour <= 8) {
+            // Dawn evening (6:00 - 8:00): pure evening
+            evening = 1.0;
+        } else if (hour >= 18 && hour <= 20) {
+            // Dusk evening (18:00 - 20:00): pure evening
+            evening = 1.0;
+        } else if (hour > 5 && hour < 6) {
             // Pre-dawn (5:00 - 6:00): night -> evening
             var t = hour - 5;
             night = 1.0 - t;
             evening = t;
+        } else if (hour > 20 && hour < 21) {
+            // Post-dusk (20:00 - 21:00): evening -> night
+            var t = hour - 20;
+            evening = 1.0 - t;
+            night = t;
+        } else {
+            // Pure night (21:00 - 5:00)
+            night = 1.0;
         }
         
         return { day: day, evening: evening, night: night };
