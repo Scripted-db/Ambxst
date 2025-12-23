@@ -10,22 +10,22 @@ import qs.modules.components
 
 Popup {
     id: root
-    
+
     signal modelSelected(string modelName)
-    
+
     width: 400
     // Height: Header (48) + Spacing (12) + List (5 * 48 = 240) + Padding (8*2)
     height: contentItem.implicitHeight + padding * 2
     padding: 16
-    
+
     // Center in parent
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
-    
+
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    
+
     onOpened: {
         searchInput.focusInput();
         updateFilteredModels();
@@ -40,51 +40,60 @@ Popup {
 
     property int selectedIndex: -1  // Start with no selection like App Launcher
     property var filteredModels: []
-    
+
     function getProviderIcon(provider) {
-        if (!provider) return "";
+        if (!provider)
+            return "";
         let p = provider.toLowerCase();
         // Path relative to this file: modules/widgets/dashboard/assistant/ModelSelectorPopup.qml
         let path = "../../../../assets/aiproviders/";
-        
-        if (p.includes("google") || p.includes("gemini")) return path + "gemini.svg";
-        if (p.includes("openai") || p.includes("gpt")) return path + "openai.svg";
-        if (p.includes("mistral")) return path + "mistral.svg";
-        if (p.includes("anthropic") || p.includes("claude")) return path + "anthropic.svg";
-        if (p.includes("deepseek")) return path + "deepseek.svg";
-        if (p.includes("ollama")) return path + "ollama.svg";
-        if (p.includes("openrouter")) return path + "openrouter.svg";
-        if (p.includes("github")) return path + "github.svg";
-        if (p.includes("perplexity")) return path + "perplexity.svg";
-        if (p.includes("groq")) return path + "groq.svg";
-        if (p.includes("xai")) return path + "xai.svg";
-        if (p.includes("lmstudio") || p.includes("lm_studio")) return path + "lmstudio.svg";
-        
+
+        if (p.includes("google") || p.includes("gemini"))
+            return path + "google.svg";
+        if (p.includes("openai") || p.includes("gpt"))
+            return path + "openai.svg";
+        if (p.includes("mistral"))
+            return path + "mistral.svg";
+        if (p.includes("anthropic") || p.includes("claude"))
+            return path + "anthropic.svg";
+        if (p.includes("deepseek"))
+            return path + "deepseek.svg";
+        if (p.includes("ollama"))
+            return path + "ollama.svg";
+        if (p.includes("openrouter"))
+            return path + "openrouter.svg";
+        if (p.includes("github"))
+            return path + "github.svg";
+        if (p.includes("perplexity"))
+            return path + "perplexity.svg";
+        if (p.includes("groq"))
+            return path + "groq.svg";
+        if (p.includes("xai"))
+            return path + "xai.svg";
+        if (p.includes("lmstudio") || p.includes("lm_studio"))
+            return path + "lmstudio.svg";
+
         return "";
     }
-    
+
     function updateFilteredModels() {
         let text = searchInput.text.toLowerCase();
         let allModels = [];
-        for(let i=0; i<Ai.models.length; i++) {
+        for (let i = 0; i < Ai.models.length; i++) {
             allModels.push(Ai.models[i]);
         }
-        
+
         if (text.trim() === "") {
             filteredModels = allModels;
         } else {
-            filteredModels = allModels.filter(m => 
-                m.name.toLowerCase().includes(text) || 
-                m.api_format.toLowerCase().includes(text) ||
-                m.model.toLowerCase().includes(text)
-            );
+            filteredModels = allModels.filter(m => m.name.toLowerCase().includes(text) || m.api_format.toLowerCase().includes(text) || m.model.toLowerCase().includes(text));
         }
-        
+
         // Reset selection if out of bounds
         if (selectedIndex >= filteredModels.length) {
             selectedIndex = Math.max(0, filteredModels.length - 1);
         }
-        
+
         // Reset selection to -1 (no selection) when filter changes
         selectedIndex = -1;
         modelList.currentIndex = -1;
@@ -94,26 +103,26 @@ Popup {
         variant: "popup"
         radius: Styling.radius(20)
     }
-    
+
     contentItem: ColumnLayout {
         spacing: 12
-        
+
         // Search Header
         RowLayout {
             Layout.fillWidth: true
             Layout.preferredHeight: 48
             spacing: 8
-            
+
             SearchInput {
                 id: searchInput
                 Layout.fillWidth: true
                 placeholderText: "Search models..."
                 iconText: "" // Removed icon as requested
-                
+
                 onSearchTextChanged: text => {
                     root.updateFilteredModels();
                 }
-                
+
                 onDownPressed: {
                     if (root.filteredModels.length > 0) {
                         if (root.selectedIndex < root.filteredModels.length - 1) {
@@ -124,7 +133,7 @@ Popup {
                         modelList.currentIndex = root.selectedIndex;
                     }
                 }
-                
+
                 onUpPressed: {
                     if (root.selectedIndex > 0) {
                         root.selectedIndex--;
@@ -134,70 +143,74 @@ Popup {
                         modelList.currentIndex = root.selectedIndex;
                     }
                 }
-                
+
                 onAccepted: {
                     if (root.filteredModels.length > 0 && root.selectedIndex >= 0) {
-                         let m = root.filteredModels[root.selectedIndex];
-                         Ai.setModel(m.name);
-                         root.modelSelected(m.name);
-                         root.close();
+                        let m = root.filteredModels[root.selectedIndex];
+                        Ai.setModel(m.name);
+                        root.modelSelected(m.name);
+                        root.close();
                     }
                 }
-                
+
                 onEscapePressed: {
                     root.close();
                 }
             }
-            
+
             // Refresh Button (Icon only)
             // Refresh Button (Interactive)
             Button {
                 id: refreshBtn
-                
+
                 property bool confirming: false
-                
+
                 // Reset state when focus is lost
                 onActiveFocusChanged: {
                     if (!activeFocus && confirming) {
                         confirming = false;
                     }
                 }
-                
+
                 Layout.preferredWidth: confirming ? 112 : 48
                 Layout.preferredHeight: 48
-                
+
                 Behavior on Layout.preferredWidth {
                     enabled: Config.animDuration > 0
-                    NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: Config.animDuration
+                        easing.type: Easing.OutCubic
+                    }
                 }
-                
+
                 flat: true
                 padding: 0
-                
+
                 // Allow focus via Tab
                 activeFocusOnTab: true
-                
+
                 contentItem: RowLayout {
                     anchors.fill: parent
                     anchors.margins: 8
                     spacing: 8
-                    
+
                     // Icon (Left Aligned)
                     Item {
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
                         Layout.alignment: Qt.AlignVCenter
-                        
+
                         Text {
                             anchors.centerIn: parent
                             text: Ai.fetchingModels ? Icons.circleNotch : (refreshBtn.confirming ? Icons.sync : Icons.arrowCounterClockwise)
                             font.family: Icons.font
                             font.pixelSize: 20
                             color: refreshBtn.confirming ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.primary
-                            
+
                             RotationAnimation on rotation {
                                 loops: Animation.Infinite
-                                from: 0; to: 360
+                                from: 0
+                                to: 360
                                 duration: 1000
                                 running: Ai.fetchingModels
                                 onRunningChanged: {
@@ -206,14 +219,16 @@ Popup {
                                     }
                                 }
                             }
-                            
+
                             Behavior on color {
                                 enabled: Config.animDuration > 0
-                                ColorAnimation { duration: Config.animDuration / 2 }
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                }
                             }
                         }
                     }
-                    
+
                     // Text Reveal (Right)
                     Text {
                         Layout.fillWidth: true
@@ -224,27 +239,31 @@ Popup {
                         font.pixelSize: 13
                         font.weight: Font.Bold
                         color: Config.resolveColor(Config.theme.srPrimary.itemColor)
-                        
+
                         opacity: refreshBtn.confirming ? 1 : 0
                         visible: opacity > 0
-                        
+
                         Behavior on opacity {
                             enabled: Config.animDuration > 0
-                            NumberAnimation { duration: Config.animDuration / 2 }
+                            NumberAnimation {
+                                duration: Config.animDuration / 2
+                            }
                         }
                     }
                 }
-                
+
                 background: StyledRect {
                     variant: parent.confirming ? "primary" : (parent.hovered || parent.activeFocus ? "focus" : "pane")
                     radius: Styling.radius(4)
-                    
+
                     Behavior on color {
                         enabled: Config.animDuration > 0
-                        ColorAnimation { duration: Config.animDuration / 2 }
+                        ColorAnimation {
+                            duration: Config.animDuration / 2
+                        }
                     }
                 }
-                
+
                 onClicked: {
                     if (!confirming) {
                         confirming = true;
@@ -253,7 +272,7 @@ Popup {
                         confirming = false;
                     }
                 }
-                
+
                 Keys.onReturnPressed: clicked()
                 Keys.onEnterPressed: clicked()
                 Keys.onEscapePressed: event => {
@@ -263,7 +282,7 @@ Popup {
                 }
             }
         }
-        
+
         // Model List
         ListView {
             id: modelList
@@ -271,11 +290,11 @@ Popup {
             // Limit height to 5 items (5 * 48 = 240)
             Layout.preferredHeight: Math.min(contentHeight, 240)
             clip: true
-            
+
             model: root.filteredModels
-            
+
             property bool enableScrollAnimation: true
-            
+
             Behavior on contentY {
                 enabled: Config.animDuration > 0 && modelList.enableScrollAnimation && !modelList.moving
                 NumberAnimation {
@@ -283,7 +302,7 @@ Popup {
                     easing.type: Easing.OutCubic
                 }
             }
-            
+
             // Handle smooth auto-scroll on index change
             onCurrentIndexChanged: {
                 if (currentIndex >= 0) {
@@ -291,7 +310,7 @@ Popup {
                     let itemHeight = 48;
                     let viewportTop = contentY;
                     let viewportBottom = viewportTop + height;
-                    
+
                     if (itemY < viewportTop) {
                         // Item above viewport, scroll up
                         contentY = itemY;
@@ -301,15 +320,15 @@ Popup {
                     }
                 }
             }
-            
+
             // Highlight component - matches App Launcher pattern
             highlight: Item {
                 width: modelList.width
                 height: 48
-                
+
                 // Calculate Y position based on index (all items have same height)
                 y: modelList.currentIndex >= 0 ? modelList.currentIndex * 48 : 0
-                
+
                 Behavior on y {
                     enabled: Config.animDuration > 0
                     NumberAnimation {
@@ -317,7 +336,7 @@ Popup {
                         easing.type: Easing.OutCubic
                     }
                 }
-                
+
                 StyledRect {
                     anchors.fill: parent
                     variant: "primary"
@@ -326,7 +345,7 @@ Popup {
                 }
             }
             highlightFollowsCurrentItem: false
-            
+
             delegate: Button {
                 id: delegateBtn
                 width: modelList.width
@@ -334,7 +353,7 @@ Popup {
                 flat: true
                 leftPadding: 8
                 rightPadding: 8
-                
+
                 // Controlled by ListView's currentIndex via root.selectedIndex
                 property bool isSelected: ListView.isCurrentItem
                 property bool isActiveModel: Ai.currentModel.name === modelData.name
@@ -344,32 +363,32 @@ Popup {
                     anchors.leftMargin: delegateBtn.leftPadding
                     anchors.rightMargin: delegateBtn.rightPadding
                     spacing: 12
-                    
+
                     // Icon
                     StyledRect {
                         id: iconRect
                         Layout.preferredWidth: 32
                         Layout.preferredHeight: 32
                         Layout.alignment: Qt.AlignVCenter
-                        
+
                         variant: delegateBtn.isSelected ? "overprimary" : "common"
                         radius: Styling.radius(-4)
-                        
+
                         property string finalIconSource: {
                             var src = "";
                             if (typeof modelData !== "undefined" && modelData !== null) {
                                 // Check explicit icon first
                                 if (modelData.icon && typeof modelData.icon === "string" && modelData.icon.indexOf(".svg") !== -1) {
                                     src = modelData.icon;
-                                }
+                                } else
                                 // Fallback to provider icon
-                                else if (modelData.api_format) {
+                                if (modelData.api_format) {
                                     src = root.getProviderIcon(modelData.api_format);
                                 }
                             }
                             return src;
                         }
-                        
+
                         // SVG Icon (if available)
                         Image {
                             anchors.centerIn: parent
@@ -380,7 +399,7 @@ Popup {
                             fillMode: Image.PreserveAspectFit
                             mipmap: true
                             asynchronous: true
-                            
+
                             layer.enabled: true
                             layer.effect: MultiEffect {
                                 brightness: 1.0
@@ -394,38 +413,50 @@ Popup {
                         Text {
                             anchors.centerIn: parent
                             text: {
-                                if (iconRect.finalIconSource.length > 0) return "";
-                                if (typeof modelData === "undefined" || modelData === null) return Icons.robot;
-                                
-                                switch(modelData.icon) {
-                                    case "sparkles": return Icons.sparkle;
-                                    case "openai": return Icons.lightning;
-                                    case "wind": return Icons.sparkle; 
-                                    default: return Icons.robot;
+                                if (iconRect.finalIconSource.length > 0)
+                                    return "";
+                                if (typeof modelData === "undefined" || modelData === null)
+                                    return Icons.robot;
+
+                                switch (modelData.icon) {
+                                case "sparkles":
+                                    return Icons.sparkle;
+                                case "openai":
+                                    return Icons.lightning;
+                                case "wind":
+                                    return Icons.sparkle;
+                                default:
+                                    return Icons.robot;
                                 }
                             }
                             font.family: Icons.font
                             font.pixelSize: 18
                             visible: iconRect.finalIconSource.length === 0
                             color: iconRect.itemColor
-                            
+
                             Behavior on color {
                                 enabled: Config.animDuration > 0
-                                ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
-                        
+
                         Behavior on color {
                             enabled: Config.animDuration > 0
-                            ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                            ColorAnimation {
+                                duration: Config.animDuration / 2
+                                easing.type: Easing.OutCubic
+                            }
                         }
                     }
-                    
+
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
                         spacing: 2
-                        
+
                         Text {
                             text: modelData.name
                             color: delegateBtn.isSelected ? Config.resolveColor(Config.theme.srPrimary.itemColor) : (delegateBtn.isActiveModel ? Colors.primary : Colors.overBackground)
@@ -434,13 +465,16 @@ Popup {
                             font.weight: Font.Medium
                             Layout.fillWidth: true
                             elide: Text.ElideRight
-                            
+
                             Behavior on color {
                                 enabled: Config.animDuration > 0
-                                ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
-                        
+
                         Text {
                             // Show provider and model ID
                             text: modelData.api_format.toUpperCase() + " • " + modelData.model
@@ -449,14 +483,17 @@ Popup {
                             font.pixelSize: 11
                             Layout.fillWidth: true
                             elide: Text.ElideRight
-                            
+
                             Behavior on color {
                                 enabled: Config.animDuration > 0
-                                ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
                     }
-                    
+
                     // Active Check
                     Item {
                         Layout.preferredWidth: 32
@@ -471,26 +508,29 @@ Popup {
                             // On primary highlight, color should be readable. srPrimary itemColor usually contrasts well.
                             color: delegateBtn.isSelected ? Config.resolveColor(Config.theme.srPrimary.itemColor) : Colors.primary
                             visible: delegateBtn.isActiveModel
-                            
+
                             Behavior on color {
                                 enabled: Config.animDuration > 0
-                                ColorAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                                ColorAnimation {
+                                    duration: Config.animDuration / 2
+                                    easing.type: Easing.OutCubic
+                                }
                             }
                         }
                     }
                 }
-                
-                background: Item {
-                   // Background handled by ListView highlight
-                   // We keep this empty or transparent
-                }
-                
+
+                background:
+                // Background handled by ListView highlight
+                // We keep this empty or transparent
+                Item {}
+
                 onClicked: {
                     Ai.setModel(modelData.name);
                     root.modelSelected(modelData.name);
                     root.close();
                 }
-                
+
                 onHoveredChanged: {
                     if (hovered) {
                         root.selectedIndex = index;
