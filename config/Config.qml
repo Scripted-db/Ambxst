@@ -2048,6 +2048,21 @@ Singleton {
     // AI configuration
     property QtObject ai: aiLoader.adapter
 
+    // Save functions for modules
+    function saveBar() { barLoader.writeAdapter(); }
+    function saveWorkspaces() { workspacesLoader.writeAdapter(); }
+    function saveOverview() { overviewLoader.writeAdapter(); }
+    function saveNotch() { notchLoader.writeAdapter(); }
+    function saveHyprland() { hyprlandLoader.writeAdapter(); }
+    function savePerformance() { performanceLoader.writeAdapter(); }
+    function saveWeather() { weatherLoader.writeAdapter(); }
+    function saveDesktop() { desktopLoader.writeAdapter(); }
+    function saveLockscreen() { lockscreenLoader.writeAdapter(); }
+    function savePrefix() { prefixLoader.writeAdapter(); }
+    function saveSystem() { systemLoader.writeAdapter(); }
+    function saveDock() { dockLoader.writeAdapter(); }
+    function saveAi() { aiLoader.writeAdapter(); }
+
     // Helper functions for color handling (HEX or named colors)
     function isHexColor(colorValue) {
         if (typeof colorValue !== 'string')

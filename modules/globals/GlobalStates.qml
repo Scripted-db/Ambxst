@@ -323,8 +323,24 @@ Singleton {
             for (var j = 0; j < props.length; j++) {
                 var prop = props[j];
                 var val = snapshot[section][prop];
+                
+                // Special handling for system.idle (JsonObject)
+                if (section === "system" && prop === "idle" && val) {
+                    if (val.general) {
+                        var generalProps = ["lock_cmd", "before_sleep_cmd", "after_sleep_cmd"];
+                        for (var k = 0; k < generalProps.length; k++) {
+                            var gp = generalProps[k];
+                            if (val.general[gp] !== undefined) {
+                                Config.system.idle.general[gp] = val.general[gp];
+                            }
+                        }
+                    }
+                    if (val.listeners) {
+                        Config.system.idle.listeners = JSON.parse(JSON.stringify(val.listeners));
+                    }
+                }
                 // Deep copy arrays or objects
-                if (typeof val === 'object' && val !== null) {
+                else if (typeof val === 'object' && val !== null) {
                     Config[section][prop] = JSON.parse(JSON.stringify(val));
                 } else {
                     Config[section][prop] = val;
