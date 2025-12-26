@@ -167,24 +167,36 @@ PanelWindow {
             }
         }
 
-        // 4. Region Selection (Drag)
+        // 4. Region Selection (Drag) and Screen Capture (Click)
         MouseArea {
             id: regionArea
             anchors.fill: parent
-            enabled: screenshotPopup.state === "active" && screenshotPopup.currentMode === "region"
+            enabled: screenshotPopup.state === "active" && (screenshotPopup.currentMode === "region" || screenshotPopup.currentMode === "screen")
             hoverEnabled: true
-            cursorShape: Qt.CrossCursor
+            cursorShape: screenshotPopup.currentMode === "region" ? Qt.CrossCursor : Qt.ArrowCursor
 
             property point startPoint: Qt.point(0, 0)
             property bool selecting: false
 
             onPressed: mouse => {
+                if (screenshotPopup.currentMode === "screen") {
+                    // Immediate capture for screen mode
+                    return
+                }
+                
                 startPoint = Qt.point(mouse.x, mouse.y)
                 selectionRect.x = mouse.x
                 selectionRect.y = mouse.y
                 selectionRect.width = 0
                 selectionRect.height = 0
                 selecting = true
+            }
+
+            onClicked: {
+                if (screenshotPopup.currentMode === "screen") {
+                    screenshotService.processFullscreen()
+                    screenshotPopup.close()
+                }
             }
 
             onPositionChanged: mouse => {
@@ -202,6 +214,8 @@ PanelWindow {
             }
 
             onReleased: {
+                if (!selecting) return // for screen mode click
+                
                 selecting = false
                 // Auto capture on release? Or wait for confirm? 
                 // Usually region drag ends in capture.

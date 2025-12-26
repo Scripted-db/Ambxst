@@ -16,6 +16,9 @@ QtObject {
     // We'll store the resolved XDG_PICTURES_DIR/Screenshots here
     property string screenshotsDir: ""
     property string finalPath: ""
+    
+    // Internal storage for active workspace IDs
+    property var _activeWorkspaceIds: []
 
     // Process to resolve XDG_PICTURES_DIR
     property Process xdgProcess: Process {
@@ -58,6 +61,40 @@ QtObject {
             }
         }
     }
+    
+    // Process for fetching monitors (to get active workspaces reliably)
+    property Process monitorsProcess: Process {
+        id: monitorsProcess
+        command: ["hyprctl", "-j", "monitors"]
+        stdout: StdioCollector {}
+        onExited: exitCode => {
+            if (exitCode === 0) {
+                try {
+                    var monitors = JSON.parse(monitorsProcess.stdout.text)
+                    var ids = []
+                    for (var i = 0; i < monitors.length; i++) {
+                        if (monitors[i].activeWorkspace) {
+                            ids.push(monitors[i].activeWorkspace.id)
+                        }
+                    }
+                    root._activeWorkspaceIds = ids
+                    console.log("Screenshot: Active workspaces found via hyprctl: " + JSON.stringify(ids))
+                    
+                    // Now fetch clients
+                    clientsProcess.running = true
+                } catch (e) {
+                    console.warn("Screenshot: Failed to parse monitors: " + e.message)
+                    // Fallback: try fetching clients anyway, filtering might fail or be permissive
+                    root._activeWorkspaceIds = []
+                    clientsProcess.running = true
+                }
+            } else {
+                console.warn("Screenshot: Failed to fetch monitors")
+                root._activeWorkspaceIds = []
+                clientsProcess.running = true
+            }
+        }
+    }
 
     // Process for fetching windows
     property Process clientsProcess: Process {
@@ -68,10 +105,25 @@ QtObject {
             if (exitCode === 0) {
                 try {
                     var allClients = JSON.parse(clientsProcess.stdout.text)
-                    root.windowListReady(allClients)
+                    
+                    // Filter using the IDs we got from monitorsProcess
+                    var activeIds = root._activeWorkspaceIds
+                    
+                    var filteredClients = allClients.filter(c => {
+                        // Keep pinned windows OR windows on active workspaces
+                        return c.pinned || (activeIds.length > 0 && activeIds.includes(c.workspace.id))
+                    })
+                    
+                    console.log("Screenshot: Total clients: " + allClients.length + ", Filtered: " + filteredClients.length)
+                    
+                    root.windowListReady(filteredClients)
+                    
                 } catch (e) {
+                    console.warn("Screenshot: Error processing windows: " + e.message)
                     root.errorOccurred("Failed to parse window list: " + e.message)
                 }
+            } else {
+                console.warn("Screenshot: hyprctl clients failed with code " + exitCode)
             }
         }
     }
@@ -105,7 +157,8 @@ QtObject {
     }
 
     function fetchWindows() {
-        clientsProcess.running = true
+        // Start the chain: Monitors -> Clients
+        monitorsProcess.running = true
     }
 
     function getTimestamp() {
