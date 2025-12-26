@@ -126,6 +126,9 @@ Singleton {
     // Screenshot Tool state
     property bool screenshotToolVisible: false
 
+    // Screen Record Tool state
+    property bool screenRecordToolVisible: false
+
     // Theme editor state - persists across tab switches
     property bool themeHasChanges: false
     property var themeSnapshot: null

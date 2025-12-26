@@ -192,6 +192,36 @@ ShellRoot {
         }
     }
 
+    // Screen Record Tool
+    Loader {
+        id: screenRecordLoader
+        active: true
+        source: "modules/tools/ScreenRecordTool.qml"
+        
+        Connections {
+            target: GlobalStates
+            function onScreenRecordToolVisibleChanged() {
+                if (screenRecordLoader.status === Loader.Ready) {
+                    if (GlobalStates.screenRecordToolVisible) {
+                        screenRecordLoader.item.open();
+                    } else {
+                        screenRecordLoader.item.close();
+                    }
+                }
+            }
+        }
+        
+        Connections {
+            target: screenRecordLoader.item
+            ignoreUnknownSignals: true
+            function onVisibleChanged() {
+                if (!screenRecordLoader.item.visible && GlobalStates.screenRecordToolVisible) {
+                    GlobalStates.screenRecordToolVisible = false;
+                }
+            }
+        }
+    }
+
     // Initialize clipboard service at startup to ensure clipboard watching starts immediately
     Connections {
         target: ClipboardService

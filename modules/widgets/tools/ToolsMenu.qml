@@ -77,7 +77,11 @@ ActionGrid {
         if (action.tooltip === "Screenshot") {
             GlobalStates.screenshotToolVisible = true
         } else if (action.tooltip === "Record Screen") {
-            ScreenRecorder.toggleRecording()
+            if (ScreenRecorder.isRecording) {
+                ScreenRecorder.toggleRecording() // Stops it
+            } else {
+                GlobalStates.screenRecordToolVisible = true
+            }
         }
         
         root.itemSelected();

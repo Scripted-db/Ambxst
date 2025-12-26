@@ -48,17 +48,8 @@ QtObject {
 
     property Process checkProcess: Process {
         id: checkProcess
-        // Use -f to match against full command line (handles wrappers/scripts)
-        // grep -v to ensure we don't match the check process itself just in case
         command: ["bash", "-c", "pgrep -f 'gpu-screen-recorder' | grep -v $$ > /dev/null"]
-        stdout: StdioCollector {
-            onTextChanged: {
-                // If output not empty, it's running
-            }
-        }
         onExited: exitCode => {
-            // Only update status if we are not in the middle of starting/stopping manually
-            // to avoid flickering state, though polling is authoritative.
             var wasRecording = root.isRecording;
             root.isRecording = (exitCode === 0);
             
@@ -76,7 +67,6 @@ QtObject {
 
     property Process timeProcess: Process {
         id: timeProcess
-        // Get elapsed time of the oldest matching process
         command: ["bash", "-c", "pid=$(pgrep -f 'gpu-screen-recorder' | head -n 1); if [ -n \"$pid\" ]; then ps -o etime= -p \"$pid\"; fi"]
         stdout: StdioCollector {
             onTextChanged: {
@@ -89,8 +79,42 @@ QtObject {
         if (isRecording) {
             stopProcess.running = true;
         } else {
-            prepareProcess.running = true;
+            // Default behavior: Portal, no audio
+            startRecording("portal", "", false, false);
         }
+    }
+
+    function startRecording(mode, regionStr, recordAudioOutput, recordAudioInput) {
+        if (isRecording) return;
+        
+        var cmd = "gpu-screen-recorder -o \"" + root.videosDir + "/$(date +%Y-%m-%d-%H-%M-%S).mp4\"";
+        
+        // Quality and Codec settings
+        cmd += " -q ultra -k h265 -f 60";
+        
+        // Mode
+        if (mode === "screen") {
+            cmd += " -w screen";
+        } else if (mode === "portal") {
+            cmd += " -w portal";
+        } else if (mode === "region") {
+            cmd += " -w region -region " + regionStr;
+        } else {
+            cmd += " -w portal";
+        }
+        
+        // Audio
+        if (recordAudioOutput) {
+            cmd += " -a default_output";
+        }
+        if (recordAudioInput) {
+            cmd += " -a default_input";
+        }
+        
+        console.log("[ScreenRecorder] Starting with command: " + cmd);
+        startProcess.command = ["bash", "-c", cmd];
+        
+        prepareProcess.running = true;
     }
     
     // 1. Ensure directory exists
@@ -112,8 +136,7 @@ QtObject {
     // 3. Start recording (Foreground)
     property Process startProcess: Process {
         id: startProcess
-        // Removed '&' to keep process alive and capture output
-        command: ["bash", "-c", "gpu-screen-recorder -w portal -q ultra -k h265 -ac opus -cr full -f 60 -o \"" + root.videosDir + "/$(date +%Y-%m-%d-%H-%M-%S).mp4\""]
+        command: ["bash", "-c", "echo 'Error: Command not set'"]
         
         stdout: StdioCollector {
             onTextChanged: console.log("[ScreenRecorder] OUT: " + text)
@@ -128,10 +151,6 @@ QtObject {
         
         onExited: exitCode => {
             console.log("[ScreenRecorder] Exited with code: " + exitCode)
-            // 0 = Success (usually not for infinite record unless killed nicely?)
-            // 130 = SIGINT (Ctrl+C), which is how we stop it usually, so it's a "Success"
-            // 2 = Error
-            
             if (exitCode !== 0 && exitCode !== 130) {
                 root.isRecording = false
                 notifyErrorProcess.running = true
