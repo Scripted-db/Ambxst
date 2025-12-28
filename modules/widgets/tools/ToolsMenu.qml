@@ -73,24 +73,26 @@ ActionGrid {
 
     Process {
         id: colorPickerProc
-        command: ["bash", "-c", "/home/adriano/Repos/Axenide/Ambxst/scripts/color_picker.sh"]
     }
 
     onActionTriggered: action => {
         console.log("Tools action triggered:", action.tooltip);
-        
+
         if (action.tooltip === "Screenshot") {
-            GlobalStates.screenshotToolVisible = true
+            GlobalStates.screenshotToolVisible = true;
         } else if (action.tooltip === "Record Screen") {
             if (ScreenRecorder.isRecording) {
-                ScreenRecorder.toggleRecording() // Stops it
+                ScreenRecorder.toggleRecording(); // Stops it
             } else {
-                GlobalStates.screenRecordToolVisible = true
+                GlobalStates.screenRecordToolVisible = true;
             }
         } else if (action.tooltip === "Color Picker") {
-            colorPickerProc.running = true
+            var scriptPath = Qt.resolvedUrl("../../../scripts/color_picker.sh").toString().replace("file://", "");
+            // Run detached so it survives when the menu closes
+            colorPickerProc.command = ["bash", "-c", "nohup bash \"" + scriptPath + "\" > /dev/null 2>&1 &"];
+            colorPickerProc.running = true;
         }
-        
+
         root.itemSelected();
     }
 }
