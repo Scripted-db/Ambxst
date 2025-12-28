@@ -75,6 +75,10 @@ ActionGrid {
         id: colorPickerProc
     }
 
+    Process {
+        id: ocrProc
+    }
+
     onActionTriggered: action => {
         console.log("Tools action triggered:", action.tooltip);
 
@@ -91,6 +95,10 @@ ActionGrid {
             // Run detached so it survives when the menu closes
             colorPickerProc.command = ["bash", "-c", "nohup python3 \"" + scriptPath + "\" > /dev/null 2>&1 &"];
             colorPickerProc.running = true;
+        } else if (action.tooltip === "OCR") {
+            var scriptPath = Qt.resolvedUrl("../../../scripts/ocr.sh").toString().replace("file://", "");
+            ocrProc.command = ["bash", "-c", "nohup \"" + scriptPath + "\" > /dev/null 2>&1 &"];
+            ocrProc.running = true;
         }
 
         root.itemSelected();
