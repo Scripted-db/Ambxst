@@ -13,6 +13,7 @@ import qs.modules.widgets.dashboard.wallpapers
 import qs.modules.widgets.settings
 import qs.modules.notch
 import qs.modules.widgets.overview
+import qs.modules.widgets.presets
 import qs.modules.services
 import qs.modules.corners
 import qs.modules.components
@@ -111,6 +112,26 @@ ShellRoot {
             required property ShellScreen modelData
             sourceComponent: OverviewPopup {
                 screen: overviewLoader.modelData
+            }
+        }
+    }
+
+    // Presets popup window
+    Variants {
+        model: {
+            const screens = Quickshell.screens;
+            const list = Config.bar.screenList;
+            if (!list || list.length === 0)
+                return screens;
+            return screens.filter(screen => list.includes(screen.name));
+        }
+
+        Loader {
+            id: presetsLoader
+            active: true
+            required property ShellScreen modelData
+            sourceComponent: PresetsPopup {
+                screen: presetsLoader.modelData
             }
         }
     }

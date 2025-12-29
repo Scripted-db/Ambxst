@@ -88,7 +88,7 @@ Singleton {
 
     function getNotchOpen(screenName) {
         let visibilities = Visibilities.getForScreen(screenName);
-        return visibilities.launcher || visibilities.dashboard || visibilities.overview;
+        return visibilities.launcher || visibilities.dashboard || visibilities.overview || visibilities.presets;
     }
 
     function getActiveLauncher() {
@@ -106,6 +106,11 @@ Singleton {
         return active ? active.overview : false;
     }
 
+    function getActivePresets() {
+        let active = Visibilities.getForActive();
+        return active ? active.presets : false;
+    }
+
     function getActiveNotchOpen() {
         let active = Visibilities.getForActive();
         return active ? (active.launcher || active.dashboard || active.overview) : false;
@@ -114,6 +119,7 @@ Singleton {
     // Legacy properties for backward compatibility - use active screen
     readonly property bool notchOpen: getActiveNotchOpen()
     readonly property bool overviewOpen: getActiveOverview()
+    readonly property bool presetsOpen: getActivePresets()
     readonly property bool launcherOpen: getActiveLauncher()
     readonly property bool dashboardOpen: getActiveDashboard()
 
