@@ -1,37 +1,37 @@
-# Ambxst
-
-<img src="./assets/ambxst/ambxst-banner.png" alt="Ambxst Logo" style="max-width: 500px; width: 100%;" align="center" />
-
 <p align="center">
-An ***Ax**tremely* customizable shell.
+<img src="./assets/ambxst/ambxst-banner.png" alt="Ambxst Logo" style="width: 60%;" align="center" />
+  <br>
+An <i><b>Ax</b>tremely</i> customizable shell.
 </p>
 
 ---
 
-## Screenshots
+<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Camera%20with%20Flash.png" alt="Camera with Flash" width="32" height="32" /></sub> Screenshots</h2>
 
-<img src="./assets/screenshots/1.png" />
-<img src="./assets/screenshots/2.png" />
-<img src="./assets/screenshots/3.png" />
-<img src="./assets/screenshots/4.png" />
-<img src="./assets/screenshots/5.png" />
-<img src="./assets/screenshots/6.png" />
-<img src="./assets/screenshots/7.png" />
+<div align="center">
+  <img src="./assets/screenshots/1.png" width="100%" />
+
+  <br />
+
+  <img src="./assets/screenshots/2.png" width="32%" />
+  <img src="./assets/screenshots/3.png" width="32%" />
+  <img src="./assets/screenshots/4.png" width="32%" />
+
+  <img src="./assets/screenshots/5.png" width="32%" />
+  <img src="./assets/screenshots/6.png" width="32%" />
+  <img src="./assets/screenshots/7.png" width="32%" />
+</div>
 
 ---
 
-## Installation
+<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Package.png" alt="Package" width="32" height="32" /></sub> Installation</h2>
 
 ```bash
 curl -L get.axeni.de/ambxst | sh
 ````
 
-> **⚠️ WARNING**
+> [!WARNING]
 > Ambxst is currently in early development.
-
-👉 **Check the code:**
-[https://github.com/Axenide/Ambxst](https://github.com/Axenide/Ambxst)
-*(Mmm... Spaghetti. 🍝)*
 
 ---
 
@@ -54,12 +54,12 @@ On **NixOS**:
   nix profile add github:Axenide/Ambxst
   ```
 
-> **ℹ️ NOTE**
+> [!NOTE]
 > The installation script doesn't do anything else on NixOS, so you can declare it however you like in your system.
 
 ---
 
-## Features
+<h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Activity/Sparkles.webp" alt="Sparkles" width="32" height="32" /></sub> Features</h2>
 
 * [x] Customizable components
 * [x] Themes
@@ -116,6 +116,6 @@ For now, the most important things to know are:
   * [Axenide Discord server](https://discord.com/invite/gHG9WHyNvH)
   * [GitHub discussions](https://github.com/Axenide/Ambxst/discussions)
 
-> **⚠️ CAUTION**
+> [!CAUTION]
 > Packages installed via Nix will take priority over system ones.
 > Keep this in mind if you run into version conflicts.
