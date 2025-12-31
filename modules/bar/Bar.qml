@@ -175,13 +175,12 @@ PanelWindow {
                 bar: QtObject {
                     property var screen: panel.screen
                 }
-                layer.enabled: false
             }
 
             LayoutSelectorButton {
                 id: layoutSelectorButton
                 bar: panel
-                layerEnabled: false
+                layerEnabled: Config.showBackground
             }
 
             Item {
@@ -233,19 +232,19 @@ PanelWindow {
             ControlsButton {
                 id: controlsButton
                 bar: panel
-                layerEnabled: false
+                layerEnabled: Config.showBackground
             }
 
             Bar.BatteryIndicator {
                 id: batteryIndicator
                 bar: panel
-                layerEnabled: false
+                layerEnabled: Config.showBackground
             }
 
             Clock {
                 id: clockComponent
                 bar: panel
-                layer.enabled: Config.showBackground
+                layerEnabled: Config.showBackground
             }
 
             PowerButton {
@@ -273,7 +272,7 @@ PanelWindow {
             ControlsButton {
                 id: controlsButtonVert
                 bar: panel
-                layerEnabled: false
+                layerEnabled: Config.showBackground
             }
 
             // Center Group Container
@@ -301,7 +300,7 @@ PanelWindow {
                     LayoutSelectorButton {
                         id: layoutSelectorButtonVert
                         bar: panel
-                        layerEnabled: false
+                        layerEnabled: Config.showBackground
                         Layout.alignment: Qt.AlignHCenter
                     }
 
@@ -311,7 +310,6 @@ PanelWindow {
                         bar: QtObject {
                             property var screen: panel.screen
                         }
-                        layer.enabled: false
                         Layout.alignment: Qt.AlignHCenter
                     }
 
@@ -337,13 +335,13 @@ PanelWindow {
             Bar.BatteryIndicator {
                 id: batteryIndicatorVert
                 bar: panel
-                layerEnabled: false
+                layerEnabled: Config.showBackground
             }
 
             Clock {
                 id: clockComponentVert
                 bar: panel
-                layer.enabled: Config.showBackground
+                layerEnabled: Config.showBackground
             }
 
             PowerButton {

@@ -144,6 +144,7 @@ Item {
         id: bgRect
         variant: "bg"
         anchors.fill: parent
+        enableShadow: Config.showBackground
     }
 
     WheelHandler {

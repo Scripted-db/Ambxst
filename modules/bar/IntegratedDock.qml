@@ -29,7 +29,7 @@ StyledRect {
 
     variant: "bg"
     radius: Styling.radius(0)
-    enableShadow: false
+    enableShadow: Config.showBackground
 
     implicitWidth: isVertical ? 36 : dockLayout.implicitWidth + 8
     implicitHeight: isVertical ? dockLayoutVertical.implicitHeight + 8 : 36
