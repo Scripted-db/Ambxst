@@ -56,18 +56,20 @@ install_dependencies() {
 	case "$DISTRO" in
 	nixos)
 		# Existing NixOS/Nix Logic (via flake)
-		log_info "Using Nix profile install..."
 		FLAKE_URI="${1:-github:Axenide/Ambxst}"
 
 		# Conflict cleanup logic from original script
 		if nix profile list | grep -q "ddcutil"; then
 			nix profile remove ddcutil 2>/dev/null || true
 		fi
-		if nix profile list | grep -q "Ambxst"; then
-			nix profile remove Ambxst 2>/dev/null || true
-		fi
 
-		nix profile install "$FLAKE_URI" --impure
+		if nix profile list | grep -q "Ambxst"; then
+			log_info "Updating Ambxst..."
+			nix profile upgrade Ambxst --refresh --impure
+		else
+			log_info "Installing Ambxst..."
+			nix profile add "$FLAKE_URI" --impure
+		fi
 		;;
 
 	fedora)
