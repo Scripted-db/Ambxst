@@ -58,4 +58,5 @@ let
 in pkgs.buildEnv {
   name = "Ambxst";
   paths = [ envAmbxst launcher ];
+  meta.mainProgram = "ambxst";
 }
