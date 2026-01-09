@@ -718,6 +718,77 @@ Item {
                             }
                         }
 
+                        Separator {
+                            Layout.fillWidth: true
+                        }
+
+                        Text {
+                            text: "Auto-hide"
+                            font.family: Config.theme.font
+                            font.pixelSize: Styling.fontSize(-1)
+                            font.weight: Font.Medium
+                            color: Colors.overSurfaceVariant
+                            Layout.bottomMargin: -4
+                        }
+
+                        ToggleRow {
+                            label: "Pinned on Startup"
+                            checked: Config.bar.pinnedOnStartup ?? true
+                            onToggled: value => {
+                                if (value !== Config.bar.pinnedOnStartup) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.pinnedOnStartup = value;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Hover to Reveal"
+                            checked: Config.bar.hoverToReveal ?? true
+                            onToggled: value => {
+                                if (value !== Config.bar.hoverToReveal) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.hoverToReveal = value;
+                                }
+                            }
+                        }
+
+                        NumberInputRow {
+                            label: "Hover Region Height"
+                            value: Config.bar.hoverRegionHeight ?? 8
+                            minValue: 0
+                            maxValue: 32
+                            suffix: "px"
+                            onValueEdited: newValue => {
+                                if (newValue !== Config.bar.hoverRegionHeight) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.hoverRegionHeight = newValue;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Show Pin Button"
+                            checked: Config.bar.showPinButton ?? true
+                            onToggled: value => {
+                                if (value !== Config.bar.showPinButton) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.showPinButton = value;
+                                }
+                            }
+                        }
+
+                        ToggleRow {
+                            label: "Available on Fullscreen"
+                            checked: Config.bar.availableOnFullscreen ?? false
+                            onToggled: value => {
+                                if (value !== Config.bar.availableOnFullscreen) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.availableOnFullscreen = value;
+                                }
+                            }
+                        }
+
                         ScreenListRow {
                             label: "Screens"
                             selectedScreens: Config.bar.screenList ?? []

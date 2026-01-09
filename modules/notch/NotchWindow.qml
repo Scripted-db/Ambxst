@@ -35,16 +35,43 @@ PanelWindow {
 
     // Get the bar position for this screen
     readonly property string barPosition: Config.bar?.position ?? "top"
-    readonly property bool shouldAutoHide: barPosition !== "top"
 
-    // Check if the bar for this screen is vertical
-    readonly property bool isBarVertical: {
-        const barPanel = Visibilities.panels[screen.name];
-        if (barPanel && barPanel.position) {
-            return barPanel.position === "left" || barPanel.position === "right";
+    // Get the bar panel for this screen to check its state
+    readonly property var barPanelRef: Visibilities.barPanels[screen.name]
+
+    // Check if bar is pinned (for synchronized auto-hide when bar is at top)
+    readonly property bool barPinned: {
+        if (barPosition !== "top")
+            return true; // Default to pinned if bar not at top
+        if (barPanelRef && typeof barPanelRef.pinned !== 'undefined') {
+            return barPanelRef.pinned;
+        }
+        return Config.bar?.pinnedOnStartup ?? true;
+    }
+
+    // Check if bar is hovering (for synchronized reveal when bar is at top)
+    readonly property bool barHoverActive: {
+        if (barPosition !== "top")
+            return false;
+        if (barPanelRef && typeof barPanelRef.hoverActive !== 'undefined') {
+            return barPanelRef.hoverActive;
         }
         return false;
     }
+
+    // Fullscreen detection - check if active toplevel is fullscreen
+    readonly property bool activeWindowFullscreen: {
+        const toplevel = ToplevelManager.activeToplevel;
+        if (!toplevel || !toplevel.activated)
+            return false;
+        return toplevel.fullscreen === true;
+    }
+
+    // Should auto-hide: when bar is at top and unpinned, OR when fullscreen
+    readonly property bool shouldAutoHide: (barPosition === "top" && !barPinned) || activeWindowFullscreen
+
+    // Check if the bar for this screen is vertical
+    readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
 
     // Notch state properties
     readonly property bool screenNotchOpen: screenVisibilities ? (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
@@ -54,14 +81,30 @@ PanelWindow {
     property bool hoverActive: false
 
     // Track if mouse is over any notch-related area
-    readonly property bool isMouseOverNotch: notchMouseArea.containsMouse || notchRegionHover.hovered
+    readonly property bool isMouseOverNotch: notchMouseAreaHover.hovered || notchRegionHover.hovered
 
-    // Reveal logic similar to Dock: show when no active window, hovering, notch open, or has notifications
-    readonly property bool reveal: !shouldAutoHide || 
-        screenNotchOpen || 
-        hasActiveNotifications || 
-        hoverActive || 
-        !ToplevelManager.activeToplevel?.activated
+    // Reveal logic:
+    // - Show when not auto-hiding (bar at top and not fullscreen)
+    // - Show when notch is open (dashboard, powermenu, tools)
+    // - Show when there are notifications
+    // - Show when hovering over notch or bar (when bar at top)
+    // - Show when no active window
+    readonly property bool reveal: {
+        // If fullscreen and bar/notch shouldn't be available, hide
+        if (activeWindowFullscreen) {
+            // Only show if explicitly available on fullscreen AND (hovering or notch open or has notifications)
+            if (!(Config.bar?.availableOnFullscreen ?? false)) {
+                // Allow notifications to still reveal the notch even in fullscreen
+                return hasActiveNotifications || screenNotchOpen;
+            }
+        }
+
+        // Normal reveal logic
+        if (!shouldAutoHide)
+            return true;
+
+        return screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive || !ToplevelManager.activeToplevel?.activated;
+    }
 
     // Timer to delay hiding the notch after mouse leaves
     Timer {
@@ -91,10 +134,9 @@ PanelWindow {
         id: focusGrab
         windows: {
             let windowList = [notchPanel];
-            // Agregar la barra de esta pantalla al focus grab cuando el notch esté abierto
-            let barPanel = Visibilities.panels[screen.name];
-            if (barPanel && (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools)) {
-                windowList.push(barPanel);
+            // Agregar la barra de esta pantalla al focus grab cuando el notch este abierto
+            if (barPanelRef && (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools)) {
+                windowList.push(barPanelRef);
             }
             return windowList;
         }
@@ -106,18 +148,18 @@ PanelWindow {
     }
 
     exclusionMode: ExclusionMode.Ignore
-    WlrLayershell.layer: WlrLayer.Top
+    WlrLayershell.layer: WlrLayer.Overlay
     mask: Region {
-        item: notchPanel.reveal ? notchRegionContainer : notchMouseArea
+        item: notchPanel.reveal ? notchRegionContainer : notchHoverRegion
     }
 
     Component.onCompleted: {
-        Visibilities.registerPanel(screen.name, notchPanel);
+        Visibilities.registerNotchPanel(screen.name, notchPanel);
         Visibilities.registerNotch(screen.name, notchContainer);
     }
 
     Component.onDestruction: {
-        Visibilities.unregisterPanel(screen.name);
+        Visibilities.unregisterNotchPanel(screen.name);
         Visibilities.unregisterNotch(screen.name);
     }
 
@@ -151,24 +193,30 @@ PanelWindow {
         NotchNotificationView {}
     }
 
-    // MouseArea for hover detection when notch is hidden (similar to Dock)
+    // Hover region for detecting mouse when notch is hidden (doesn't block clicks)
     // Placed outside notchRegionContainer so it can work with mask independently
-    MouseArea {
-        id: notchMouseArea
-        hoverEnabled: true
-        
+    Item {
+        id: notchHoverRegion
+
         // Width follows the notch, height is small hover region when hidden
         width: notchRegionContainer.width + 20
-        height: notchPanel.reveal 
-            ? notchRegionContainer.height 
-            : Math.max(Config.notch?.hoverRegionHeight ?? 8, 8)
-        
+        height: notchPanel.reveal ? notchRegionContainer.height : Math.max(Config.notch?.hoverRegionHeight ?? 8, 8)
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
 
         Behavior on height {
             enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
-            NumberAnimation { duration: Config.animDuration / 4; easing.type: Easing.OutCubic }
+            NumberAnimation {
+                duration: Config.animDuration / 4
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        // HoverHandler doesn't block mouse events
+        HoverHandler {
+            id: notchMouseAreaHover
+            enabled: notchPanel.shouldAutoHide
         }
     }
 
@@ -197,7 +245,10 @@ PanelWindow {
             opacity: notchPanel.reveal ? 1 : 0
             Behavior on opacity {
                 enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
-                NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutCubic
+                }
             }
 
             // Slide animation (slide up when hidden)
@@ -205,7 +256,10 @@ PanelWindow {
                 y: notchPanel.reveal ? 0 : -(notchContainer.height + 16)
                 Behavior on y {
                     enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
-                    NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutCubic
+                    }
                 }
             }
 
@@ -215,7 +269,7 @@ PanelWindow {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
 
-                 anchors.topMargin: (Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0))
+                anchors.topMargin: (Config.notchTheme === "default" ? 0 : (Config.notchTheme === "island" ? 4 : 0))
 
                 layer.enabled: true
                 layer.effect: Shadow {}
@@ -239,8 +293,8 @@ PanelWindow {
 
         // Popup de notificaciones debajo del notch
         StyledRect {
-            variant: "bg"
             id: notificationPopupContainer
+            variant: "bg"
             anchors.top: notchAnimationContainer.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 4
@@ -255,14 +309,20 @@ PanelWindow {
             opacity: notchPanel.reveal ? 1 : 0
             Behavior on opacity {
                 enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
-                NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                NumberAnimation {
+                    duration: Config.animDuration / 2
+                    easing.type: Easing.OutCubic
+                }
             }
 
             transform: Translate {
                 y: notchPanel.reveal ? 0 : -(notchContainer.height + 16)
                 Behavior on y {
                     enabled: Config.animDuration > 0 && notchPanel.shouldAutoHide
-                    NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic }
+                    NumberAnimation {
+                        duration: Config.animDuration / 2
+                        easing.type: Easing.OutCubic
+                    }
                 }
             }
 
@@ -272,8 +332,9 @@ PanelWindow {
             property bool popupHovered: false
 
             readonly property bool shouldShowNotificationPopup: {
-                // Mostrar solo si hay notificaciones y el notch está expandido
-                if (!notchPanel.hasActiveNotifications || !notchPanel.screenNotchOpen) return false;
+                // Mostrar solo si hay notificaciones y el notch esta expandido
+                if (!notchPanel.hasActiveNotifications || !notchPanel.screenNotchOpen)
+                    return false;
 
                 // NO mostrar si estamos en el launcher (widgets tab con currentTab === 0)
                 if (screenVisibilities.dashboard) {

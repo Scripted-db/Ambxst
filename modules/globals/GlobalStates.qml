@@ -333,7 +333,7 @@ Singleton {
 
     // Shell config sections and their properties
     readonly property var _shellSections: {
-        "bar": ["position", "launcherIcon", "launcherIconTint", "launcherIconFullTint", "launcherIconSize", "enableFirefoxPlayer", "screenList"],
+        "bar": ["position", "launcherIcon", "launcherIconTint", "launcherIconFullTint", "launcherIconSize", "enableFirefoxPlayer", "screenList", "pinnedOnStartup", "hoverToReveal", "hoverRegionHeight", "showPinButton", "availableOnFullscreen"],
         "notch": ["theme", "hoverRegionHeight"],
         "workspaces": ["shown", "showAppIcons", "alwaysShowNumbers", "showNumbers", "dynamic"],
         "overview": ["rows", "columns", "scale", "workspaceSpacing"],

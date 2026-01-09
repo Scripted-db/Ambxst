@@ -592,6 +592,12 @@ Singleton {
             property list<string> screenList: []
             property bool enableFirefoxPlayer: false
             property list<var> barColor: [["surface", 0.0]]
+            // Auto-hide properties
+            property bool pinnedOnStartup: true
+            property bool hoverToReveal: true
+            property int hoverRegionHeight: 8
+            property bool showPinButton: true
+            property bool availableOnFullscreen: false
         }
     }
 
