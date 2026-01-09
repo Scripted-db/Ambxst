@@ -207,6 +207,17 @@ QtObject {
     property Process lensProcess: Process {
         id: lensProcess
         // command set dynamically
+        stdout: StdioCollector {}
+        stderr: StdioCollector {}
+        onExited: exitCode => {
+            if (exitCode === 0) {
+                console.log("Screenshot: Google Lens script executed successfully")
+            } else {
+                console.warn("Screenshot: Google Lens script failed with exit code " + exitCode)
+                console.warn("Screenshot: stderr: " + lensProcess.stderr.text)
+                root.errorOccurred("Failed to open Google Lens: " + lensProcess.stderr.text)
+            }
+        }
     }
 
     function freezeScreen() {
@@ -292,7 +303,25 @@ QtObject {
 
     function runLensScript() {
         var scriptPath = Qt.resolvedUrl("../../scripts/google_lens.sh").toString().replace("file://", "");
-        lensProcess.command = ["bash", scriptPath];
-        lensProcess.running = true;
+        
+        // Verify image exists before running script
+        verifyImageProcess.command = ["test", "-f", root.lensPath];
+        verifyImageProcess.running = true;
+    }
+    
+    property Process verifyImageProcess: Process {
+        id: verifyImageProcess
+        // command set dynamically
+        onExited: exitCode => {
+            if (exitCode === 0) {
+                // Image exists, proceed with lens script
+                var scriptPath = Qt.resolvedUrl("../../scripts/google_lens.sh").toString().replace("file://", "");
+                lensProcess.command = ["bash", scriptPath];
+                lensProcess.running = true;
+            } else {
+                console.warn("Screenshot: Image file not found at " + root.lensPath)
+                root.errorOccurred("Image file not ready for Google Lens")
+            }
+        }
     }
 }

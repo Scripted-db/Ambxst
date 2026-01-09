@@ -2,11 +2,69 @@
 # Upload image to uguu.se and open in Google Lens
 # Expects image at /tmp/image.png (captured by ScreenshotTool)
 
-if [[ ! -f /tmp/image.png ]]; then
-	notify-send "Google Lens" "No image found at /tmp/image.png"
+set -euo pipefail
+
+IMAGE_PATH="/tmp/image.png"
+
+# Verify image exists
+if [[ ! -f "$IMAGE_PATH" ]]; then
+	notify-send -u critical "Google Lens" "No image found at $IMAGE_PATH" >&2
+	echo "ERROR: Image file not found at $IMAGE_PATH" >&2
 	exit 1
 fi
 
-imageLink=$(curl -sF files[]=@/tmp/image.png 'https://uguu.se/upload' | jq -r '.files[0].url')
-xdg-open "https://lens.google.com/uploadbyurl?url=${imageLink}"
-rm /tmp/image.png
+# Verify image is readable
+if [[ ! -r "$IMAGE_PATH" ]]; then
+	notify-send -u critical "Google Lens" "Cannot read image at $IMAGE_PATH" >&2
+	echo "ERROR: Image file not readable at $IMAGE_PATH" >&2
+	exit 1
+fi
+
+# Check dependencies
+for cmd in curl jq xdg-open; do
+	if ! command -v "$cmd" &>/dev/null; then
+		notify-send -u critical "Google Lens" "Missing required command: $cmd" >&2
+		echo "ERROR: Missing required command: $cmd" >&2
+		exit 1
+	fi
+done
+
+# Upload to uguu.se with error handling
+echo "Uploading image to uguu.se..." >&2
+uploadResponse=$(curl -sS -f -F "files[]=@$IMAGE_PATH" 'https://uguu.se/upload' 2>&1)
+curlExit=$?
+
+if [[ $curlExit -ne 0 ]]; then
+	notify-send -u critical "Google Lens" "Upload failed (curl error $curlExit)" >&2
+	echo "ERROR: Upload failed with curl exit code $curlExit" >&2
+	echo "Response: $uploadResponse" >&2
+	exit 1
+fi
+
+# Parse response
+imageLink=$(echo "$uploadResponse" | jq -r '.files[0].url' 2>&1)
+jqExit=$?
+
+if [[ $jqExit -ne 0 ]] || [[ -z "$imageLink" ]] || [[ "$imageLink" == "null" ]]; then
+	notify-send -u critical "Google Lens" "Failed to parse upload response" >&2
+	echo "ERROR: Failed to parse upload response" >&2
+	echo "Response: $uploadResponse" >&2
+	exit 1
+fi
+
+echo "Image uploaded successfully: $imageLink" >&2
+
+# Open in Google Lens
+lensUrl="https://lens.google.com/uploadbyurl?url=${imageLink}"
+echo "Opening in Google Lens: $lensUrl" >&2
+
+if ! xdg-open "$lensUrl" 2>&1; then
+	notify-send -u critical "Google Lens" "Failed to open browser" >&2
+	echo "ERROR: Failed to open browser" >&2
+	exit 1
+fi
+
+# Clean up
+rm -f "$IMAGE_PATH"
+notify-send "Google Lens" "Image opened in browser successfully"
+echo "Success: Google Lens opened" >&2
