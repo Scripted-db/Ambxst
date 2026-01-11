@@ -185,7 +185,6 @@ QtObject {
         ini += `inactiveForeground=${inactive}\n`
 
         const home = Quickshell.env("HOME")
-        const ambxstDir = home + "/.config/Ambxst"
         const qt5Dir = home + "/.config/qt5ct/colors"
         const qt6Dir = home + "/.config/qt6ct/colors"
 
@@ -193,8 +192,8 @@ QtObject {
         
         // Single command to ensure dirs and write files
         const cmd = `
-            mkdir -p "${ambxstDir}" "${qt5Dir}" "${qt6Dir}" && \\
-            echo "${ini}" | tee "${ambxstDir}/ambxst.colors" "${qt5Dir}/ambxst.colors" "${qt6Dir}/ambxst.colors" > /dev/null
+            mkdir -p "${qt5Dir}" "${qt6Dir}" && \\
+            echo "${ini}" | tee "${qt5Dir}/ambxst.colors" "${qt6Dir}/ambxst.colors" > /dev/null
         `
         
         writerProcess.command = ["sh", "-c", cmd]

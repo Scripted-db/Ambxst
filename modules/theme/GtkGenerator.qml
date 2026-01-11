@@ -44,14 +44,15 @@ QtObject {
         const home = Quickshell.env("HOME")
         const gtk3Dir = home + "/.config/gtk-3.0"
         const gtk4Dir = home + "/.config/gtk-4.0"
-        const ambxstDir = home + "/.config/Ambxst"
 
         writer.text = css
         
-        // Write to GTK 3/4 and Ambxst config
+        // Write to GTK 3/4 and reload theme
         const cmd = `
-            mkdir -p "${gtk3Dir}" "${gtk4Dir}" "${ambxstDir}" && \\
-            echo "${css}" | tee "${gtk3Dir}/gtk.css" "${gtk4Dir}/gtk.css" "${ambxstDir}/gtk.css" > /dev/null
+            mkdir -p "${gtk3Dir}" "${gtk4Dir}" && \\
+            echo "${css}" | tee "${gtk3Dir}/gtk.css" "${gtk4Dir}/gtk.css" > /dev/null && \\
+            gsettings set org.gnome.desktop.interface gtk-theme "" && \\
+            gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3
         `
         
         writerProcess.command = ["sh", "-c", cmd]
