@@ -1269,7 +1269,8 @@ Singleton {
                     "modifiers": bindObj.modifiers || [],
                     "key": bindObj.key || "",
                     "dispatcher": bindObj.dispatcher || "",
-                    "argument": bindObj.argument || ""
+                    "argument": bindObj.argument || "",
+                    "flags": bindObj.flags || ""
                 };
             }
 
@@ -1442,9 +1443,10 @@ Singleton {
                     }
                     property JsonObject widgets: JsonObject {
                         property list<string> modifiers: ["SUPER"]
-                        property string key: "R"
+                        property string key: "Super_L"
                         property string dispatcher: "global"
                         property string argument: "ambxst:dashboard-widgets"
+                        property string flags: "r"
                     }
                 }
                 property JsonObject system: JsonObject {

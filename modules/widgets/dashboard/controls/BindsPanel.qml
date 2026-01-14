@@ -233,7 +233,7 @@ Item {
                 {
                     "dispatcher": bindData.dispatcher || "",
                     "argument": bindData.argument || "",
-                    "flags": ""
+                    "flags": bindData.flags || ""
                 }
             ];
         } else {
@@ -321,6 +321,7 @@ Item {
                 };
                 adapter.ambxst[section][bindName].modifiers = firstKey.modifiers || [];
                 adapter.ambxst[section][bindName].key = firstKey.key || "";
+                adapter.ambxst[section][bindName].flags = root.editActions[0].flags || "";
                 // dispatcher and argument are fixed for ambxst binds
             }
         } else if (root.isCreatingNew) {
@@ -998,7 +999,11 @@ Item {
                                     color: Colors.overBackground
                                     verticalAlignment: Text.AlignVCenter
                                     selectByMouse: true
-                                    onTextChanged: root.editName = text
+                                    onTextChanged: {
+                                        if (root.editName !== text) {
+                                            root.editName = text
+                                        }
+                                    }
 
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
@@ -1269,7 +1274,11 @@ Item {
                                     selectByMouse: true
                                     onTextChanged: {
                                         if (root.editKeys.length > root.currentKeyPage) {
-                                            root.updateCurrentKey(root.editKeys[root.currentKeyPage].modifiers || [], text);
+                                            const currentKey = root.editKeys[root.currentKeyPage];
+                                            const keyVal = currentKey.key || "";
+                                            if (keyVal !== text) {
+                                                root.updateCurrentKey(currentKey.modifiers || [], text);
+                                            }
                                         }
                                     }
 
@@ -1285,12 +1294,12 @@ Item {
                         }
 
                         // =====================
-                        // ACTIONS SECTION (only for custom binds)
+                        // ACTIONS SECTION (custom binds & flags for ambxst)
                         // =====================
                         ColumnLayout {
                             Layout.fillWidth: true
                             spacing: 8
-                            visible: !root.isEditingAmbxst
+                            // visible: !root.isEditingAmbxst - Removed to allow editing flags for Ambxst binds
 
                             // Actions section header with pager controls
                             RowLayout {
@@ -1308,7 +1317,7 @@ Item {
 
                                 // Page indicator
                                 Text {
-                                    visible: root.editActions.length > 1
+                                    visible: root.editActions.length > 1 && !root.isEditingAmbxst
                                     text: (root.currentActionPage + 1) + " / " + root.editActions.length
                                     font.family: Config.theme.font
                                     font.pixelSize: Styling.fontSize(-1)
@@ -1318,7 +1327,7 @@ Item {
                                 // Remove action button
                                 StyledRect {
                                     id: removeActionBtn
-                                    visible: root.editActions.length > 1
+                                    visible: root.editActions.length > 1 && !root.isEditingAmbxst
                                     variant: removeActionBtnArea.containsMouse ? "focus" : "common"
                                     Layout.preferredWidth: 28
                                     Layout.preferredHeight: 28
@@ -1349,7 +1358,7 @@ Item {
                                 // Previous action button
                                 StyledRect {
                                     id: prevActionBtn
-                                    visible: root.editActions.length > 1
+                                    visible: root.editActions.length > 1 && !root.isEditingAmbxst
                                     variant: prevActionBtnArea.containsMouse ? "focus" : "common"
                                     Layout.preferredWidth: 28
                                     Layout.preferredHeight: 28
@@ -1380,7 +1389,7 @@ Item {
                                 // Next action button
                                 StyledRect {
                                     id: nextActionBtn
-                                    visible: root.editActions.length > 1
+                                    visible: root.editActions.length > 1 && !root.isEditingAmbxst
                                     variant: nextActionBtnArea.containsMouse ? "focus" : "common"
                                     Layout.preferredWidth: 28
                                     Layout.preferredHeight: 28
@@ -1411,6 +1420,7 @@ Item {
                                 // Add action button
                                 StyledRect {
                                     id: addActionBtn
+                                    visible: !root.isEditingAmbxst
                                     variant: addActionBtnArea.containsMouse ? "primaryfocus" : "primary"
                                     Layout.preferredWidth: 28
                                     Layout.preferredHeight: 28
@@ -1445,6 +1455,7 @@ Item {
                                 Layout.preferredHeight: 44
                                 variant: dispatcherInput.activeFocus ? "focus" : "common"
                                 radius: Styling.radius(-2)
+                                opacity: root.isEditingAmbxst ? 0.6 : 1.0
 
                                 TextInput {
                                     id: dispatcherInput
@@ -1456,13 +1467,16 @@ Item {
                                     color: Colors.overBackground
                                     verticalAlignment: Text.AlignVCenter
                                     selectByMouse: true
+                                    readOnly: root.isEditingAmbxst
                                     onTextChanged: {
                                         if (root.editActions.length > root.currentActionPage) {
                                             const currentAction = root.editActions[root.currentActionPage];
-                                            root.updateCurrentAction(text, currentAction.argument || "", currentAction.flags || "", currentAction.compositor || {
-                                                "type": "hyprland",
-                                                "layouts": []
-                                            });
+                                            if (currentAction.dispatcher !== text) {
+                                                root.updateCurrentAction(text, currentAction.argument || "", currentAction.flags || "", currentAction.compositor || {
+                                                    "type": "hyprland",
+                                                    "layouts": []
+                                                });
+                                            }
                                         }
                                     }
 
@@ -1491,6 +1505,7 @@ Item {
                                 Layout.preferredHeight: 44
                                 variant: argumentInput.activeFocus ? "focus" : "common"
                                 radius: Styling.radius(-2)
+                                opacity: root.isEditingAmbxst ? 0.6 : 1.0
 
                                 TextInput {
                                     id: argumentInput
@@ -1502,13 +1517,16 @@ Item {
                                     color: Colors.overBackground
                                     verticalAlignment: Text.AlignVCenter
                                     selectByMouse: true
+                                    readOnly: root.isEditingAmbxst
                                     onTextChanged: {
                                         if (root.editActions.length > root.currentActionPage) {
                                             const currentAction = root.editActions[root.currentActionPage];
-                                            root.updateCurrentAction(currentAction.dispatcher || "", text, currentAction.flags || "", currentAction.compositor || {
-                                                "type": "hyprland",
-                                                "layouts": []
-                                            });
+                                            if (currentAction.argument !== text) {
+                                                root.updateCurrentAction(currentAction.dispatcher || "", text, currentAction.flags || "", currentAction.compositor || {
+                                                    "type": "hyprland",
+                                                    "layouts": []
+                                                });
+                                            }
                                         }
                                     }
 
@@ -1551,10 +1569,12 @@ Item {
                                     onTextChanged: {
                                         if (root.editActions.length > root.currentActionPage) {
                                             const currentAction = root.editActions[root.currentActionPage];
-                                            root.updateCurrentAction(currentAction.dispatcher || "", currentAction.argument || "", text, currentAction.compositor || {
-                                                "type": "hyprland",
-                                                "layouts": []
-                                            });
+                                            if (currentAction.flags !== text) {
+                                                root.updateCurrentAction(currentAction.dispatcher || "", currentAction.argument || "", text, currentAction.compositor || {
+                                                    "type": "hyprland",
+                                                    "layouts": []
+                                                });
+                                            }
                                         }
                                     }
 
