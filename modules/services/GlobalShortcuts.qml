@@ -10,7 +10,24 @@ Item {
     id: root
 
     readonly property string appId: "ambxst"
-    readonly property int mediaSeekStepMs: 5000
+    readonly property string ipcPipe: "/tmp/ambxst_ipc.pipe"
+
+    // High-performance Pipe Listener (Daemon mode)
+    // Creates a named pipe and listens for commands continuously
+    Process {
+        id: pipeListener
+        command: ["bash", "-c", "rm -f " + root.ipcPipe + "; mkfifo " + root.ipcPipe + "; tail -f " + root.ipcPipe]
+        running: true
+        
+        stdout: SplitParser {
+            onRead: data => {
+                const cmd = data.trim();
+                if (cmd !== "") {
+                    root.run(cmd);
+                }
+            }
+        }
+    }
 
     IpcHandler {
         target: "ambxst"
