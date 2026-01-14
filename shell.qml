@@ -190,45 +190,14 @@ ShellRoot {
 
         Loader {
             id: screenshotLoader
-            active: true
+            active: GlobalStates.screenshotToolVisible
             required property ShellScreen modelData
             sourceComponent: ScreenshotTool {
-                screen: screenshotLoader.modelData
-            }
-            
-            Connections {
-                target: GlobalStates
-                function onScreenshotToolVisibleChanged() {
-                    if (screenshotLoader.status === Loader.Ready) {
-                        if (GlobalStates.screenshotToolVisible) {
-                            screenshotLoader.item.open();
-                        } else {
-                            screenshotLoader.item.close();
-                        }
-                    }
-                }
-            }
-            
-            Connections {
-                target: screenshotLoader.item
-                ignoreUnknownSignals: true
-                function onVisibleChanged() {
-                    if (!screenshotLoader.item.visible && GlobalStates.screenshotToolVisible) {
-                        GlobalStates.screenshotToolVisible = false;
-                    }
-                }
+                targetScreen: screenshotLoader.modelData
             }
         }
     }
 
-    Connections {
-        target: GlobalStates
-        function onScreenshotToolVisibleChanged() {
-            if (GlobalStates.screenshotToolVisible) {
-                Screenshot.freezeScreen()
-            }
-        }
-    }
 
     // Screen Record Tool
     Loader {

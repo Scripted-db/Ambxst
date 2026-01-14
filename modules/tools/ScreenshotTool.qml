@@ -7,12 +7,15 @@ import Quickshell.Hyprland
 import qs.modules.theme
 import qs.modules.components
 import qs.modules.services
+import qs.modules.globals
 import qs.config
 
 PanelWindow {
     id: screenshotPopup
-    required property var screen
-
+    
+    // Screen property to be set by the Loader
+    required property var targetScreen
+    screen: targetScreen
 
     anchors {
         top: true
@@ -24,14 +27,53 @@ PanelWindow {
     color: "transparent"
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.keyboardFocus: screenshotPopup.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
     // Visible only when explicitly opened
     visible: state !== "idle"
     exclusionMode: ExclusionMode.Ignore
 
     property string state: "idle" // idle, loading, active, processing
-    property string currentMode: "region" // region, window, screen
+    
+    Component.onCompleted: {
+        // Auto-open if created while the tool is supposed to be visible
+        if (GlobalStates.screenshotToolVisible) {
+            open();
+        }
+    }
+    
+    // Bind to GlobalStates for synchronization
+    property string currentMode: GlobalStates.screenshotCaptureMode
+    
+    onCurrentModeChanged: {
+        if (GlobalStates.screenshotCaptureMode !== currentMode) {
+            GlobalStates.screenshotCaptureMode = currentMode
+        }
+        
+        // Update grid index to match mode
+        var idx = -1;
+        for (var i = 0; i < modes.length; i++) {
+            if (modes[i].name === currentMode) {
+                idx = i;
+                break;
+            }
+        }
+        
+        if (idx !== -1 && modeGrid && modeGrid.currentIndex !== idx) {
+             modeGrid.currentIndex = idx
+        }
+    }
+    
+    // Listen for global changes
+    Connections {
+        target: GlobalStates
+        function onScreenshotCaptureModeChanged() {
+            if (screenshotPopup.currentMode !== GlobalStates.screenshotCaptureMode) {
+                screenshotPopup.currentMode = GlobalStates.screenshotCaptureMode
+            }
+        }
+    }
+
     property var activeWindows: []
 
     property var modes: [
@@ -53,56 +95,61 @@ PanelWindow {
     ]
 
     function open() {
-        // Reset to default state
         if (modeGrid)
             modeGrid.currentIndex = 0;
-        screenshotPopup.currentMode = "region";
+        GlobalStates.screenshotCaptureMode = "region";
 
         screenshotPopup.state = "loading";
-        // Screenshot.freezeScreen() is now called centrally in shell.qml
+        
+        // Trigger freeze (Service will batch it for all monitors)
+        Screenshot.freezeScreen();
     }
 
     function close() {
         screenshotPopup.state = "idle";
+        GlobalStates.screenshotToolVisible = false;
     }
 
     function executeCapture() {
         if (screenshotPopup.currentMode === "screen") {
-            Screenshot.processFullscreen();
-            screenshotPopup.close();
+            // Fullscreen capture for THIS monitor
+            Screenshot.processMonitorScreen(screenshotPopup.targetScreen.name);
+            close();
         } else if (screenshotPopup.currentMode === "region") {
-            // Check if rect exists
             if (Screenshot.selectionW > 0) {
                 Screenshot.processRegion(Screenshot.selectionX, Screenshot.selectionY, Screenshot.selectionW, Screenshot.selectionH);
-                screenshotPopup.close();
+                close();
             }
         } else if (screenshotPopup.currentMode === "window") {
-            // If enter pressed in window mode, maybe capture the one under cursor?
+            // Window mode capture handled by tap
         }
     }
 
-    // Connect to global Screenshot singleton signals
     Connections {
         target: Screenshot
-        function onScreenshotCaptured(path) {
-            previewImage.source = "";
-            previewImage.source = "file://" + path;
-            screenshotPopup.state = "active";
-            // Reset selection
-            Screenshot.selectionW = 0;
-            Screenshot.selectionH = 0;
-            // Fetch windows if we are in window mode, or pre-fetch
-            Screenshot.fetchWindows();
-
-            // Force focus on the overlay window content
-            modeGrid.forceActiveFocus();
+        // New signal for per-monitor readiness
+        function onMonitorScreenshotReady(monitorName, path) {
+            if (monitorName === screenshotPopup.targetScreen.name) {
+                previewImage.source = "";
+                previewImage.source = "file://" + path;
+                screenshotPopup.state = "active";
+                
+                // Reset selection
+                Screenshot.selectionW = 0;
+                Screenshot.selectionH = 0;
+                
+                // Fetch windows if needed (idempotent call)
+                Screenshot.fetchWindows();
+                
+                modeGrid.forceActiveFocus();
+            }
         }
         function onWindowListReady(windows) {
             screenshotPopup.activeWindows = windows;
         }
         function onErrorOccurred(msg) {
             console.warn("Screenshot Error:", msg);
-            screenshotPopup.close();
+            close();
         }
     }
 
@@ -135,33 +182,24 @@ PanelWindow {
         anchors.fill: parent
         focus: true
 
-        Keys.onEscapePressed: screenshotPopup.close()
+        Keys.onEscapePressed: close()
 
         // 1. The "Frozen" Image
-        // Wrapper to clip the image to this screen's bounds
         Item {
             anchors.fill: parent
             clip: true
             
             Image {
                 id: previewImage
-                // No anchors.fill: parent
-                fillMode: Image.Pad
-                
-                // Scale the image so 1 image pixel = 1 physical screen pixel
-                // On a scale 2 monitor, this means image logical width = sourceWidth / 2
-                width: sourceSize.width / screenshotPopup.screen.scale
-                height: sourceSize.height / screenshotPopup.screen.scale
-                
-                // Position to show the part of the image corresponding to this screen
-                x: -screenshotPopup.screen.x
-                y: -screenshotPopup.screen.y
+                // Now we display a monitor-specific image which exactly matches our bounds
+                fillMode: Image.Stretch
+                anchors.fill: parent
                 
                 visible: screenshotPopup.state === "active"
             }
         }
 
-        // 2. Dimmer (Dark overlay)
+        // 2. Dimmer
         Rectangle {
             anchors.fill: parent
             color: "black"
@@ -169,20 +207,21 @@ PanelWindow {
             visible: screenshotPopup.state === "active" && screenshotPopup.currentMode !== "screen"
         }
 
-        // 3. Window Selection Highlights
+        // 3. Window Selection
         Item {
             anchors.fill: parent
             visible: screenshotPopup.state === "active" && screenshotPopup.currentMode === "window"
 
             Repeater {
                 model: screenshotPopup.activeWindows
-                // Only show windows relevant to this screen (roughly)
-                // Actually, window coordinates are global, so we shift them by screen offset
                 delegate: Rectangle {
+                    // Window coords are global logical.
+                    // Map to local.
                     x: modelData.at[0] - screenshotPopup.screen.x
                     y: modelData.at[1] - screenshotPopup.screen.y
                     width: modelData.size[0]
                     height: modelData.size[1]
+                    
                     color: "transparent"
                     border.color: hoverHandler.hovered ? Styling.srItem("overprimary") : "transparent"
                     border.width: 2
@@ -199,15 +238,16 @@ PanelWindow {
 
                     TapHandler {
                         onTapped: {
+                            // Pass global coords
                             Screenshot.processRegion(modelData.at[0], modelData.at[1], modelData.size[0], modelData.size[1]);
-                            screenshotPopup.close();
+                            close();
                         }
                     }
                 }
             }
         }
 
-        // 4. Region Selection (Drag) and Screen Capture (Click)
+        // 4. Region Selection
         MouseArea {
             id: regionArea
             anchors.fill: parent
@@ -219,16 +259,14 @@ PanelWindow {
             property bool selecting: false
 
             onPressed: mouse => {
-                if (screenshotPopup.currentMode === "screen") {
-                    // Immediate capture for screen mode
-                    return;
-                }
+                if (screenshotPopup.currentMode === "screen") return;
 
-                // Convert local mouse to global coordinates
+                // Calculate global coordinates
                 var globalX = mouse.x + screenshotPopup.screen.x;
                 var globalY = mouse.y + screenshotPopup.screen.y;
 
                 startPointGlobal = Qt.point(globalX, globalY);
+                
                 Screenshot.selectionX = globalX;
                 Screenshot.selectionY = globalY;
                 Screenshot.selectionW = 0;
@@ -238,14 +276,13 @@ PanelWindow {
 
             onClicked: {
                 if (screenshotPopup.currentMode === "screen") {
-                    Screenshot.processFullscreen();
-                    screenshotPopup.close();
+                    Screenshot.processMonitorScreen(screenshotPopup.targetScreen.name);
+                    close();
                 }
             }
 
             onPositionChanged: mouse => {
-                if (!selecting)
-                    return;
+                if (!selecting) return;
                 
                 var currentGlobalX = mouse.x + screenshotPopup.screen.x;
                 var currentGlobalY = mouse.y + screenshotPopup.screen.y;
@@ -262,24 +299,22 @@ PanelWindow {
             }
 
             onReleased: {
-                if (!selecting)
-                    // for screen mode click
-                    return;
+                if (!selecting) return;
                 selecting = false;
                 
                 if (Screenshot.selectionW > 5 && Screenshot.selectionH > 5) {
                     Screenshot.processRegion(Screenshot.selectionX, Screenshot.selectionY, Screenshot.selectionW, Screenshot.selectionH);
-                    screenshotPopup.close();
+                    close();
                 }
             }
         }
 
-        // Visual Selection Rect
+        // Visual Selection Rect (Synced)
         Rectangle {
             id: selectionRect
             visible: screenshotPopup.state === "active" && screenshotPopup.currentMode === "region"
             
-            // Map global selection back to local coordinates
+            // Map global selection to local
             x: Screenshot.selectionX - screenshotPopup.screen.x
             y: Screenshot.selectionY - screenshotPopup.screen.y
             width: Screenshot.selectionW
@@ -296,24 +331,20 @@ PanelWindow {
             }
         }
 
-        // 5. Controls UI (Bottom Bar)
+        // 5. Controls UI
         Rectangle {
             id: controlsBar
             anchors.bottom: parent.bottom
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottomMargin: 50
-
-            // Padding of 16px around the content
             width: modeGrid.width + 32
             height: modeGrid.height + 32
-
             radius: Styling.radius(20)
             color: Colors.background
             border.color: Colors.surface
             border.width: 1
             visible: screenshotPopup.state === "active"
 
-            // Catch-all MouseArea
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
