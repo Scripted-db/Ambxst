@@ -42,7 +42,7 @@ PopupWindow {
     property real popupScale: 0.9
 
     // Bar position detection
-    readonly property string barPosition: bar?.position ?? "top"
+    readonly property string barPosition: bar?.barPosition ?? "top"
     readonly property bool barAtTop: barPosition === "top"
     readonly property bool barAtBottom: barPosition === "bottom"
     readonly property bool barAtLeft: barPosition === "left"
@@ -58,10 +58,32 @@ PopupWindow {
     implicitWidth: totalWidth
     implicitHeight: totalHeight
 
-    // Calculate popup anchor point based on bar position
+    // Anchor positioning
+    // The anchor.rect defines where the popup window's top-left corner will be placed
+    // relative to the anchorItem's top-left corner
     anchor.item: anchorItem
-    anchor.rect.x: barVertical ? (barAtLeft ? anchorItem.width + visualMargin - shadowMargin : -totalWidth + shadowMargin - visualMargin) : (anchorItem.width - totalWidth) / 2
-    anchor.rect.y: barVertical ? (anchorItem.height - totalHeight) / 2 : (barAtTop ? anchorItem.height + visualMargin - shadowMargin : -totalHeight + shadowMargin - visualMargin)
+    anchor.rect.x: {
+        if (barVertical) {
+            // Left bar: popup appears to the right of the button
+            if (barAtLeft)
+                return anchorItem.width + visualMargin - shadowMargin;
+            // Right bar: popup appears to the left of the button
+            return -totalWidth + shadowMargin - visualMargin;
+        }
+        // Top/Bottom bar: center horizontally relative to button
+        return (anchorItem.width - totalWidth) / 2;
+    }
+    anchor.rect.y: {
+        if (barVertical) {
+            // Left/Right bar: center vertically relative to button
+            return (anchorItem.height - totalHeight) / 2;
+        }
+        // Top bar: popup appears below the button
+        if (barAtTop)
+            return anchorItem.height + visualMargin - shadowMargin;
+        // Bottom bar: popup appears above the button
+        return -totalHeight + shadowMargin - visualMargin;
+    }
     anchor.rect.width: 0
     anchor.rect.height: 0
 
@@ -139,6 +161,11 @@ PopupWindow {
     function open() {
         if (visible)
             return;
+
+        // Debug positioning
+        console.log("BarPopup OPEN - position:", barPosition, 
+                    "anchorItem:", anchorItem.width, "x", anchorItem.height,
+                    "rect.x:", anchor.rect.x, "rect.y:", anchor.rect.y);
 
         // Set logical state immediately
         isOpen = true;
