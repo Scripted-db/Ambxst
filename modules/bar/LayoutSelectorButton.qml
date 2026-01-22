@@ -15,6 +15,10 @@ Item {
     property bool vertical: bar.orientation === "vertical"
     property bool isHovered: false
     property bool layerEnabled: true
+    
+    property real radius: 0
+    property real startRadius: radius
+    property real endRadius: radius
 
     // Popup visibility state (tracks intent, not animation)
     property bool popupOpen: layoutPopup.isOpen
@@ -60,6 +64,11 @@ Item {
         variant: root.popupOpen ? "primary" : "bg"
         anchors.fill: parent
         enableShadow: root.layerEnabled
+
+        topLeftRadius: root.vertical ? root.startRadius : root.startRadius
+        topRightRadius: root.vertical ? root.startRadius : root.endRadius
+        bottomLeftRadius: root.vertical ? root.endRadius : root.startRadius
+        bottomRightRadius: root.vertical ? root.endRadius : root.endRadius
 
         Rectangle {
             anchors.fill: parent

@@ -589,6 +589,7 @@ Singleton {
             property bool launcherIconTint: true
             property bool launcherIconFullTint: true
             property int launcherIconSize: 24
+            property string pillStyle: "default"
             property list<string> screenList: []
             property bool enableFirefoxPlayer: false
             property list<var> barColor: [["surface", 0.0]]

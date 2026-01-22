@@ -17,6 +17,12 @@ Button {
     property bool iconFullTint: false
     property int iconSize: 18
     property bool enableShadow: true
+    // Radius handling
+    property real radius: 0
+    property bool vertical: false // Set by parent if needed, or inferred? ToggleButton doesn't know orientation usually.
+    // We will let parent set start/end radius directly or use radius as fallback
+    property real startRadius: radius
+    property real endRadius: radius
 
     implicitWidth: 36
     implicitHeight: 36
@@ -25,8 +31,16 @@ Button {
     readonly property bool isIconPath: buttonIcon.length > 1
 
     background: StyledRect {
+        id: bg
         variant: "bg"
         enableShadow: root.enableShadow && Config.showBackground
+        
+        // Map start/end to corners based on vertical property
+        topLeftRadius: root.vertical ? root.startRadius : root.startRadius
+        topRightRadius: root.vertical ? root.startRadius : root.endRadius
+        bottomLeftRadius: root.vertical ? root.endRadius : root.startRadius
+        bottomRightRadius: root.vertical ? root.endRadius : root.endRadius
+
         Rectangle {
             anchors.fill: parent
             color: parent.item || "transparent"

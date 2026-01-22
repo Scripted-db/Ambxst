@@ -707,6 +707,27 @@ Item {
                             }
                         }
 
+                        SelectorRow {
+                            label: "Pill Style"
+                            options: [
+                                {
+                                    label: "Default",
+                                    value: "default"
+                                },
+                                {
+                                    label: "Squished",
+                                    value: "squished"
+                                }
+                            ]
+                            value: Config.bar.pillStyle ?? "default"
+                            onValueSelected: newValue => {
+                                if (newValue !== Config.bar.pillStyle) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.pillStyle = newValue;
+                                }
+                            }
+                        }
+
                         ToggleRow {
                             label: "Enable Firefox Player"
                             checked: Config.bar.enableFirefoxPlayer ?? false

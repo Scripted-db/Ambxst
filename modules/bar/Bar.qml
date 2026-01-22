@@ -64,6 +64,11 @@ PanelWindow {
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
     readonly property bool notchOpen: screenVisibilities ? (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
 
+    // Radius logic for "Squished" style
+    readonly property real outerRadius: Styling.radius(0)
+    readonly property real innerRadius: (Config.bar.pillStyle === "squished") ? Styling.radius(0) / 2 : Styling.radius(0)
+    readonly property bool pinButtonVisible: Config.bar?.showPinButton ?? true
+
     // Reveal logic
     readonly property bool reveal: {
         // If not auto-hiding, always reveal
@@ -379,6 +384,8 @@ PanelWindow {
 
                 LauncherButton {
                     id: launcherButton
+                    startRadius: panel.outerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 Workspaces {
@@ -386,12 +393,16 @@ PanelWindow {
                     bar: QtObject {
                         property var screen: panel.screen
                     }
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 LayoutSelectorButton {
                     id: layoutSelectorButton
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: (panel.pinButtonVisible && !(integratedDockEnabled && integratedDockPosition !== "start")) ? panel.innerRadius : panel.outerRadius
                 }
 
                 // Pin button (horizontal)
@@ -409,6 +420,18 @@ PanelWindow {
                             id: pinButtonBg
                             variant: panel.pinned ? "primary" : "bg"
                             enableShadow: Config.showBackground
+                            
+                            // PinButton is typically last in group 1 (unless IntegratedDock follows)
+                            // If integratedDockEnabled, Pin is usually Inner/Inner or Inner/Outer depending on dock position logic?
+                            // Assuming basic structure: Pin is last of left group
+                            property real startRadius: panel.innerRadius
+                            property real endRadius: panel.outerRadius
+                            
+                            topLeftRadius: startRadius
+                            bottomLeftRadius: startRadius
+                            topRightRadius: endRadius
+                            bottomRightRadius: endRadius
+
                             Rectangle {
                                 anchors.fill: parent
                                 color: Styling.srItem("overprimary")
@@ -494,37 +517,51 @@ PanelWindow {
 
                 PresetsButton {
                     id: presetsButton
+                    startRadius: panel.outerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 ToolsButton {
                     id: toolsButton
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 SysTray {
                     bar: panel
                     layer.enabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 ControlsButton {
                     id: controlsButton
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 Bar.BatteryIndicator {
                     id: batteryIndicator
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 Clock {
                     id: clockComponent
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 PowerButton {
                     id: powerButton
+                    startRadius: panel.innerRadius
+                    endRadius: panel.outerRadius
                 }
             }
 
@@ -538,19 +575,30 @@ PanelWindow {
                 LauncherButton {
                     id: launcherButtonVert
                     Layout.preferredHeight: 36
+                    startRadius: panel.outerRadius
+                    endRadius: panel.innerRadius
+                    vertical: true
                 }
 
                 SysTray {
                     bar: panel
                     layer.enabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 ToolsButton {
                     id: toolsButtonVert
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
+                    vertical: true
                 }
 
                 PresetsButton {
                     id: presetsButtonVert
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
+                    vertical: true
                 }
 
                 // Center Group Container
@@ -581,6 +629,8 @@ PanelWindow {
                             bar: panel
                             layerEnabled: Config.showBackground
                             Layout.alignment: Qt.AlignHCenter
+                            startRadius: panel.innerRadius
+                            endRadius: panel.innerRadius
                         }
 
                         Workspaces {
@@ -590,6 +640,8 @@ PanelWindow {
                                 property var screen: panel.screen
                             }
                             Layout.alignment: Qt.AlignHCenter
+                            startRadius: panel.innerRadius
+                            endRadius: panel.innerRadius
                         }
 
                         // Pin button (vertical)
@@ -607,6 +659,15 @@ PanelWindow {
                                     id: pinButtonVBg
                                     variant: panel.pinned ? "primary" : "bg"
                                     enableShadow: Config.showBackground
+                                    
+                                    property real startRadius: panel.innerRadius
+                                    property real endRadius: panel.innerRadius
+                                    
+                                    topLeftRadius: startRadius
+                                    topRightRadius: startRadius
+                                    bottomLeftRadius: endRadius
+                                    bottomRightRadius: endRadius
+
                                     Rectangle {
                                         anchors.fill: parent
                                         color: Styling.srItem("overprimary")
@@ -669,23 +730,32 @@ PanelWindow {
                     id: controlsButtonVert
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 Bar.BatteryIndicator {
                     id: batteryIndicatorVert
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 Clock {
                     id: clockComponentVert
                     bar: panel
                     layerEnabled: Config.showBackground
+                    startRadius: panel.innerRadius
+                    endRadius: panel.innerRadius
                 }
 
                 PowerButton {
                     id: powerButtonVert
                     Layout.preferredHeight: 36
+                    startRadius: panel.innerRadius
+                    endRadius: panel.outerRadius
+                    vertical: true
                 }
             }
         }

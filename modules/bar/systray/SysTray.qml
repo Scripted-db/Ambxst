@@ -4,11 +4,20 @@ import Quickshell.Services.SystemTray
 import qs.modules.theme
 import qs.modules.components
 
-StyledRect {
+    StyledRect {
     variant: "bg"
     id: root
 
+    topLeftRadius: root.vertical ? root.startRadius : root.startRadius
+    topRightRadius: root.vertical ? root.startRadius : root.endRadius
+    bottomLeftRadius: root.vertical ? root.endRadius : root.startRadius
+    bottomRightRadius: root.vertical ? root.endRadius : root.endRadius
+
     required property var bar
+    
+    property real radius: 0
+    property real startRadius: radius
+    property real endRadius: radius
 
     // Orientación derivada de la barra
     property bool vertical: bar.orientation === "vertical"

@@ -24,6 +24,10 @@ Item {
     property list<int> dynamicWorkspaceIds: []
     property int effectiveWorkspaceCount: Config.workspaces.dynamic ? dynamicWorkspaceIds.length : Config.workspaces.shown
     property int widgetPadding: 4
+    property real radius: Styling.radius(0)
+    property real startRadius: radius
+    property real endRadius: radius
+    
     property int baseSize: 36
     property int workspaceButtonSize: baseSize - widgetPadding * 2
     property int workspaceButtonWidth: workspaceButtonSize
@@ -159,6 +163,11 @@ Item {
         variant: "bg"
         anchors.fill: parent
         enableShadow: Config.showBackground
+        
+        topLeftRadius: orientation === "vertical" ? workspacesWidget.startRadius : workspacesWidget.startRadius
+        topRightRadius: orientation === "vertical" ? workspacesWidget.startRadius : workspacesWidget.endRadius
+        bottomLeftRadius: orientation === "vertical" ? workspacesWidget.endRadius : workspacesWidget.startRadius
+        bottomRightRadius: orientation === "vertical" ? workspacesWidget.endRadius : workspacesWidget.endRadius
     }
 
     WheelHandler {
@@ -200,7 +209,7 @@ Item {
                 width: (modelData.end - modelData.start + 1) * workspaceButtonWidth
                 height: workspaceButtonWidth
 
-                radius: Styling.radius(0) > 0 ? Math.max(Styling.radius(0) - widgetPadding, 0) : 0
+                radius: workspacesWidget.startRadius > 0 ? Math.max(workspacesWidget.startRadius - widgetPadding, 0) : 0
 
                 opacity: Config.theme.srFocus.opacity
 
@@ -251,7 +260,7 @@ Item {
                 width: workspaceButtonWidth
                 height: (modelData.end - modelData.start + 1) * workspaceButtonWidth
 
-                radius: Styling.radius(0) > 0 ? Math.max(Styling.radius(0) - widgetPadding, 0) : 0
+                radius: workspacesWidget.startRadius > 0 ? Math.max(workspacesWidget.startRadius - widgetPadding, 0) : 0
 
                 opacity: Config.theme.srFocus.opacity
 
@@ -299,9 +308,9 @@ Item {
 
         radius: {
             const currentWorkspaceHasWindows = Hyprland.workspaces.values.some(ws => ws.id === (monitor?.activeWorkspace?.id || 1) && HyprlandData.windowList.some(w => w.workspace.id === ws.id));
-            if (Config.roundness === 0)
+            if (workspacesWidget.startRadius === 0)
                 return 0;
-            return currentWorkspaceHasWindows ? Config.roundness > 0 ? Math.max(Config.roundness - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitHeight / 2;
+            return currentWorkspaceHasWindows ? workspacesWidget.startRadius > 0 ? Math.max(workspacesWidget.startRadius - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitHeight / 2;
         }
 
         anchors.verticalCenter: parent.verticalCenter
@@ -354,9 +363,9 @@ Item {
 
         radius: {
             const currentWorkspaceHasWindows = Hyprland.workspaces.values.some(ws => ws.id === (monitor?.activeWorkspace?.id || 1) && HyprlandData.windowList.some(w => w.workspace.id === ws.id));
-            if (Config.roundness === 0)
+            if (workspacesWidget.startRadius === 0)
                 return 0;
-            return currentWorkspaceHasWindows ? Config.roundness > 0 ? Math.max(Config.roundness - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitWidth / 2;
+            return currentWorkspaceHasWindows ? workspacesWidget.startRadius > 0 ? Math.max(workspacesWidget.startRadius - parent.widgetPadding - activeWorkspaceMargin, 0) : 0 : implicitWidth / 2;
         }
 
         anchors.horizontalCenter: parent.horizontalCenter
