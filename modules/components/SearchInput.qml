@@ -57,7 +57,7 @@ StyledRect {
 
         Text {
             text: root.iconText
-            font.family: Config.theme.font
+            font.family: Icons.font
             font.pixelSize: 20
             color: Styling.srItem("overprimary")
             visible: root.iconText.length > 0

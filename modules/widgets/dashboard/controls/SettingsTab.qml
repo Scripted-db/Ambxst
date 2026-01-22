@@ -185,7 +185,6 @@ Rectangle {
                     width: parent.width
                     height: 36
                     placeholderText: "Search..."
-                    iconText: Icons.magnifyingGlass
                     clearOnEscape: true
 
                     onSearchTextChanged: text => {
