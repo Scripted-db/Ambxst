@@ -717,6 +717,7 @@ Singleton {
 
         adapter: JsonAdapter {
             property string theme: "default"
+            property string position: "top"
             property int hoverRegionHeight: 8
         }
     }
@@ -3331,6 +3332,38 @@ Singleton {
     // Notch configuration
     property QtObject notch: notchLoader.adapter
     property string notchTheme: notch.theme
+    property string notchPosition: notch.position
+
+    onNotchPositionChanged: {
+        if (!initialLoadComplete || !dockReady) return;
+
+        // If notch moves to bottom
+        if (notchPosition === "bottom") {
+            // Check for conflict with Dock (if Dock is bottom)
+            if (dock.position === "bottom") {
+                console.log("Notch moved to bottom, adjusting Dock position...");
+                // Move Dock based on Bar position to avoid overcrowding
+                if (bar.position === "left") {
+                    dock.position = "right";
+                } else {
+                    dock.position = "left";
+                }
+                // Trigger save
+                GlobalStates.markShellChanged();
+            }
+        } 
+        // If notch moves to top
+        else if (notchPosition === "top") {
+            // Optional: Move Dock back to bottom if it was displaced?
+            // User implied "change with this". A safe default is restoring to bottom 
+            // if it's currently on the sides, assuming Bottom is the preferred Dock state.
+            if (dock.position === "left" || dock.position === "right") {
+                console.log("Notch moved to top, restoring Dock to bottom...");
+                dock.position = "bottom";
+                GlobalStates.markShellChanged();
+            }
+        }
+    }
 
     // Hyprland configuration
     property QtObject hyprland: hyprlandLoader.adapter

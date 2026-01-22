@@ -846,6 +846,29 @@ Item {
                             label: ""
                             options: [
                                 {
+                                    label: "Top",
+                                    value: "top",
+                                    icon: Icons.arrowUp
+                                },
+                                {
+                                    label: "Bottom",
+                                    value: "bottom",
+                                    icon: Icons.arrowDown
+                                }
+                            ]
+                            value: Config.notch.position ?? "top"
+                            onValueSelected: newValue => {
+                                if (newValue !== Config.notch.position) {
+                                    GlobalStates.markShellChanged();
+                                    Config.notch.position = newValue;
+                                }
+                            }
+                        }
+
+                        SelectorRow {
+                            label: ""
+                            options: [
+                                {
                                     label: "Default",
                                     value: "default"
                                 },

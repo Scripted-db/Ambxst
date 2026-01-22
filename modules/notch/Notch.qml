@@ -30,6 +30,8 @@ Item {
     property int defaultHeight: Config.showBackground ? (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 44) : 44) : (screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 40) : 40)
     property int islandHeight: screenNotchOpen || hasActiveNotifications ? Math.max(stackContainer.height, 36) : 36
 
+    readonly property string position: Config.notchPosition ?? "top"
+
     // Corner size calculation for dynamic width (only for default theme)
     readonly property int cornerSize: Config.roundness > 0 ? Config.roundness + 4 : 0
     readonly property int totalCornerWidth: Config.notchTheme === "default" ? cornerSize * 2 : 0
@@ -71,10 +73,10 @@ Item {
 
         property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
 
-        topLeftRadius: 0
-        topRightRadius: 0
-        bottomLeftRadius: defaultRadius
-        bottomRightRadius: defaultRadius
+        topLeftRadius: notchContainer.position === "bottom" ? defaultRadius : 0
+        topRightRadius: notchContainer.position === "bottom" ? defaultRadius : 0
+        bottomLeftRadius: notchContainer.position === "top" ? defaultRadius : 0
+        bottomRightRadius: notchContainer.position === "top" ? defaultRadius : 0
 
         Behavior on bottomLeftRadius {
             enabled: Config.animDuration > 0
@@ -86,6 +88,24 @@ Item {
         }
 
         Behavior on bottomRightRadius {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
+            }
+        }
+
+        Behavior on topLeftRadius {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: screenNotchOpen || hasActiveNotifications ? Easing.OutBack : Easing.OutQuart
+                easing.overshoot: screenNotchOpen || hasActiveNotifications ? 1.2 : 1.0
+            }
+        }
+
+        Behavior on topRightRadius {
             enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration
@@ -116,14 +136,15 @@ Item {
     // Left corner mask
     Item {
         id: leftCornerMaskPart
-        anchors.top: parent.top
+        anchors.top: notchContainer.position === "top" ? parent.top : undefined
+        anchors.bottom: notchContainer.position === "bottom" ? parent.bottom : undefined
         anchors.left: parent.left
         width: Config.notchTheme === "default" && Config.roundness > 0 ? Config.roundness + 4 : 0
         height: width
 
         RoundCorner {
             anchors.fill: parent
-            corner: RoundCorner.CornerEnum.TopRight
+            corner: notchContainer.position === "top" ? RoundCorner.CornerEnum.TopRight : RoundCorner.CornerEnum.BottomRight
             size: Math.max(parent.width, 1)
             color: "white"
         }
@@ -132,7 +153,8 @@ Item {
         // Center rect mask
         Rectangle {
             id: centerMaskPart
-            anchors.top: parent.top
+            anchors.top: notchContainer.position === "top" ? parent.top : undefined
+            anchors.bottom: notchContainer.position === "bottom" ? parent.bottom : undefined
             anchors.left: leftCornerMaskPart.right
             anchors.right: rightCornerMaskPart.left
             height: parent.height
@@ -147,14 +169,15 @@ Item {
     // Right corner mask
     Item {
         id: rightCornerMaskPart
-        anchors.top: parent.top
+        anchors.top: notchContainer.position === "top" ? parent.top : undefined
+        anchors.bottom: notchContainer.position === "bottom" ? parent.bottom : undefined
         anchors.right: parent.right
         width: Config.notchTheme === "default" && Config.roundness > 0 ? Config.roundness + 4 : 0
         height: width
 
         RoundCorner {
             anchors.fill: parent
-            corner: RoundCorner.CornerEnum.TopLeft
+            corner: notchContainer.position === "top" ? RoundCorner.CornerEnum.TopLeft : RoundCorner.CornerEnum.BottomLeft
             size: Math.max(parent.width, 1)
             color: "white"
         }
@@ -171,10 +194,10 @@ Item {
         property int defaultRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
         property int islandRadius: Config.roundness > 0 ? (screenNotchOpen || hasActiveNotifications ? Config.roundness + 20 : Config.roundness + 4) : 0
 
-        property int topLeftRadius: Config.notchTheme === "default" ? 0 : islandRadius
-        property int topRightRadius: Config.notchTheme === "default" ? 0 : islandRadius
-        property int bottomLeftRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
-        property int bottomRightRadius: Config.notchTheme === "island" ? islandRadius : defaultRadius
+        property int topLeftRadius: Config.notchTheme === "default" ? (notchContainer.position === "bottom" ? defaultRadius : 0) : islandRadius
+        property int topRightRadius: Config.notchTheme === "default" ? (notchContainer.position === "bottom" ? defaultRadius : 0) : islandRadius
+        property int bottomLeftRadius: Config.notchTheme === "island" ? islandRadius : (notchContainer.position === "top" ? defaultRadius : 0)
+        property int bottomRightRadius: Config.notchTheme === "island" ? islandRadius : (notchContainer.position === "top" ? defaultRadius : 0)
 
         // Fondo del notch solo para theme "island"
         StyledRect {
@@ -436,42 +459,93 @@ Item {
             // Offset to move path inward by half the border width
             var offset = borderWidth / 2;
             
-            var rTop = Config.roundness > 0 ? Config.roundness + 4 : 0;
-            var bl = notchRect.bottomLeftRadius;
-            var br = notchRect.bottomRightRadius;
+            // "Corner" radius (the smooth connection to the screen edge)
+            var rCorner = Config.roundness > 0 ? Config.roundness + 4 : 0;
             var wCenter = notchRect.width;
-            var yBottom = height - offset;
 
             ctx.beginPath();
-            if (rTop > 0) {
-                // Start at top-left, adjusted inward
-                ctx.moveTo(offset, offset);
-                // Left top corner arc - center at (offset, rTop), radius reduced by offset
-                ctx.arc(offset, rTop, rTop - offset, 3 * Math.PI / 2, 2 * Math.PI);
-                // This ends at (rTop, rTop)
-            } else {
-                ctx.moveTo(offset, offset);
-                ctx.lineTo(rTop, rTop);
+
+            if (notchContainer.position === "top") {
+                var bl = notchRect.bottomLeftRadius;
+                var br = notchRect.bottomRightRadius;
+                var yBottom = height - offset;
+
+                if (rCorner > 0) {
+                    // Start at top-left, adjusted inward
+                    ctx.moveTo(offset, offset);
+                    // Left top corner arc - center at (offset, rCorner), radius reduced by offset
+                    ctx.arc(offset, rCorner, rCorner - offset, 3 * Math.PI / 2, 2 * Math.PI);
+                    // This ends at (rCorner, rCorner)
+                } else {
+                    ctx.moveTo(offset, offset);
+                    ctx.lineTo(rCorner, rCorner);
+                }
+                // Left vertical line down
+                ctx.lineTo(rCorner, yBottom - bl);
+                // Bottom left corner
+                if (bl > 0) {
+                    ctx.arcTo(rCorner, yBottom, rCorner + bl, yBottom, bl - offset);
+                }
+                // Bottom horizontal line
+                ctx.lineTo(rCorner + wCenter - br, yBottom);
+                // Bottom right corner
+                if (br > 0) {
+                    ctx.arcTo(rCorner + wCenter, yBottom, rCorner + wCenter, yBottom - br, br - offset);
+                }
+                // Right vertical line up
+                ctx.lineTo(rCorner + wCenter, rCorner);
+                // Right top corner arc - center at (width - offset, rCorner), from 180° to 270°
+                if (rCorner > 0) {
+                    ctx.arc(width - offset, rCorner, rCorner - offset, Math.PI, 3 * Math.PI / 2);
+                }
+            } else { // Bottom position
+                var tl = notchRect.topLeftRadius;
+                var tr = notchRect.topRightRadius;
+                var yTop = offset;
+                var yBottom = height - offset;
+
+                if (rCorner > 0) {
+                    // Start at bottom-left
+                    ctx.moveTo(offset, yBottom);
+                    // Left bottom corner arc (concave)
+                    ctx.arc(offset, height - rCorner, rCorner - offset, Math.PI / 2, 0, true); 
+                    // Note: Canvas arc is clockwise by default. To emulate the "RoundCorner" feel (inverted), 
+                    // we need to draw it such that it curves from (offset, yBottom) inwards to (rCorner, height-rCorner).
+                    // Actually, let's mirror the top logic:
+                    // Center at (offset, height - rCorner)
+                    // Start angle: PI/2 (90 deg - bottom)
+                    // End angle: 0 (0 deg - right)
+                    // Counter-clockwise (true) to curve "in"
+                } else {
+                    ctx.moveTo(offset, yBottom);
+                    ctx.lineTo(rCorner, height - rCorner);
+                }
+                
+                // Left vertical line up
+                ctx.lineTo(rCorner, yTop + tl);
+                
+                // Top left corner
+                if (tl > 0) {
+                    ctx.arcTo(rCorner, yTop, rCorner + tl, yTop, tl - offset);
+                }
+                
+                // Top horizontal line
+                ctx.lineTo(rCorner + wCenter - tr, yTop);
+                
+                // Top right corner
+                if (tr > 0) {
+                    ctx.arcTo(rCorner + wCenter, yTop, rCorner + wCenter, yTop + tr, tr - offset);
+                }
+                
+                // Right vertical line down
+                ctx.lineTo(rCorner + wCenter, height - rCorner);
+                
+                // Right bottom corner arc
+                if (rCorner > 0) {
+                     ctx.arc(width - offset, height - rCorner, rCorner - offset, Math.PI, Math.PI / 2, true);
+                }
             }
-            // Left vertical line down
-            ctx.lineTo(rTop, yBottom - bl);
-            // Bottom left corner
-            if (bl > 0) {
-                ctx.arcTo(rTop, yBottom, rTop + bl, yBottom, bl - offset);
-            }
-            // Bottom horizontal line
-            ctx.lineTo(rTop + wCenter - br, yBottom);
-            // Bottom right corner
-            if (br > 0) {
-                ctx.arcTo(rTop + wCenter, yBottom, rTop + wCenter, yBottom - br, br - offset);
-            }
-            // Right vertical line up
-            ctx.lineTo(rTop + wCenter, rTop);
-            // Right top corner arc - center at (width - offset, rTop), from 180° to 270°
-            if (rTop > 0) {
-                ctx.arc(width - offset, rTop, rTop - offset, Math.PI, 3 * Math.PI / 2);
-                // This ends at (width - offset - (rTop - offset), offset) = (width - rTop, offset)
-            }
+
             ctx.stroke();
         }
         Connections {

@@ -27,15 +27,31 @@ Scope {
     // Position configuration with fallback logic to avoid bar collision
     readonly property string userPosition: Config.dock?.position ?? "bottom"
     readonly property string barPosition: Config.bar?.position ?? "top"
+    readonly property string notchPosition: Config.notchPosition ?? "top"
 
-    // Effective position: if dock and bar are on the same side, dock moves to fallback
+    // Effective position:
+    // 1. If notch is bottom, dock MUST move to left/right (unless explicitly set to vertical)
+    // 2. If bar and dock are on the same side, dock moves to fallback
     readonly property string position: {
+        // Notch Priority Logic:
+        // If notch is at the bottom, dock cannot be at the bottom.
+        if (notchPosition === "bottom" && userPosition === "bottom") {
+            // Default fallback if notch is taking the bottom slot
+            // If bar is left, go right. Otherwise go left.
+            return (barPosition === "left") ? "right" : "left";
+        }
+
+        // Bar Collision Logic:
         if (userPosition !== barPosition) {
             return userPosition;
         }
         // Collision detected - apply fallback
         switch (userPosition) {
         case "bottom":
+            // If notch is bottom, force side dock. If bar is bottom, force side dock.
+            if (notchPosition === "bottom" || barPosition === "bottom") {
+                 return (barPosition === "left") ? "right" : "left";
+            }
             return "left";
         case "left":
             return "right";
