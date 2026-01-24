@@ -14,5 +14,6 @@ var data = {
     "hoverToReveal": true,
     "hoverRegionHeight": 8,
     "showPinButton": true,
-    "availableOnFullscreen": false
+    "availableOnFullscreen": false,
+    "use12hFormat": false
 }
