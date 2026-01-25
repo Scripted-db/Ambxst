@@ -12,6 +12,7 @@ import qs.modules.widgets.powermenu
 import qs.modules.widgets.tools
 import qs.modules.services
 import qs.modules.components
+import qs.modules.widgets.launcher
 import qs.config
 import "./NotchNotificationView.qml"
 
@@ -74,7 +75,7 @@ PanelWindow {
     readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
 
     // Notch state properties
-    readonly property bool screenNotchOpen: screenVisibilities ? (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
+    readonly property bool screenNotchOpen: screenVisibilities ? (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools) : false
     readonly property bool hasActiveNotifications: Notifications.popupList.length > 0
 
     // Hover state with delay to prevent flickering
@@ -134,7 +135,7 @@ PanelWindow {
         windows: {
             let windowList = [notchPanel];
             // Agregar la barra de esta pantalla al focus grab cuando el notch este abierto
-            if (barPanelRef && (screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools)) {
+            if (barPanelRef && (screenVisibilities.launcher || screenVisibilities.dashboard || screenVisibilities.powermenu || screenVisibilities.tools)) {
                 windowList.push(barPanelRef);
             }
             return windowList;
@@ -167,6 +168,12 @@ PanelWindow {
     Component {
         id: defaultViewComponent
         DefaultView {}
+    }
+
+    // Launcher view component
+    Component {
+        id: launcherViewComponent
+        LauncherView {}
     }
 
     // Dashboard view component
@@ -289,6 +296,7 @@ PanelWindow {
                 layer.effect: Shadow {}
 
                 defaultViewComponent: defaultViewComponent
+                launcherViewComponent: launcherViewComponent
                 dashboardViewComponent: dashboardViewComponent
                 powermenuViewComponent: powermenuViewComponent
                 toolsMenuViewComponent: toolsMenuViewComponent
@@ -416,6 +424,19 @@ PanelWindow {
     // Listen for dashboard and powermenu state changes
     Connections {
         target: screenVisibilities
+
+        function onLauncherChanged() {
+            if (screenVisibilities.launcher) {
+                notchContainer.stackView.push(launcherViewComponent);
+                Qt.callLater(() => notchContainer.forceActiveFocus());
+            } else {
+                if (notchContainer.stackView.depth > 1) {
+                    notchContainer.stackView.pop();
+                    notchContainer.isShowingDefault = true;
+                    notchContainer.isShowingNotifications = false;
+                }
+            }
+        }
 
         function onDashboardChanged() {
             if (screenVisibilities.dashboard) {

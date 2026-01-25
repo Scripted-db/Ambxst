@@ -11,9 +11,6 @@ import qs.modules.widgets.dashboard.widgets
 import qs.modules.widgets.dashboard.controls
 import qs.modules.widgets.dashboard.wallpapers
 import qs.modules.widgets.dashboard.assistant
-import qs.modules.widgets.dashboard.tmux
-import qs.modules.widgets.dashboard.clipboard
-import qs.modules.widgets.dashboard.emoji
 import qs.modules.widgets.dashboard.metrics
 import qs.config
 

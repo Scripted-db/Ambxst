@@ -1413,44 +1413,51 @@ Singleton {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "A"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-assistant"
+                        property string argument: "ambxst run assistant"
                     }
                     property JsonObject clipboard: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "V"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-clipboard"
+                        property string argument: "ambxst run clipboard"
                     }
                     property JsonObject emoji: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "PERIOD"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-emoji"
+                        property string argument: "ambxst run emoji"
                     }
                     property JsonObject notes: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "N"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-notes"
+                        property string argument: "ambxst run notes"
                     }
                     property JsonObject tmux: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "T"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-tmux"
+                        property string argument: "ambxst run tmux"
                     }
                     property JsonObject wallpapers: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "COMMA"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-wallpapers"
+                        property string argument: "ambxst run wallpapers"
                     }
-                    property JsonObject widgets: JsonObject {
+                    property JsonObject launcher: JsonObject {
                         property list<string> modifiers: ["SUPER"]
                         property string key: "Super_L"
                         property string dispatcher: "exec"
-                        property string argument: "ambxst run dashboard-widgets"
+                        property string argument: "ambxst run launcher"
                         property string flags: "r"
+                    }
+                    property JsonObject dashboard: JsonObject {
+                        property list<string> modifiers: ["SUPER", "SHIFT"]
+                        property string key: "D"
+                        property string dispatcher: "exec"
+                        property string argument: "ambxst run dashboard"
+                        property string flags: ""
                     }
                 }
                 property JsonObject system: JsonObject {
@@ -1529,13 +1536,14 @@ Singleton {
             // Functions to get defaults
             readonly property var defaultAmbxstBinds: {
                 "dashboard": {
-                    "assistant": { "modifiers": ["SUPER"], "key": "A", "dispatcher": "exec", "argument": "ambxst run dashboard-assistant", "flags": "" },
-                    "clipboard": { "modifiers": ["SUPER"], "key": "V", "dispatcher": "exec", "argument": "ambxst run dashboard-clipboard", "flags": "" },
-                    "emoji": { "modifiers": ["SUPER"], "key": "PERIOD", "dispatcher": "exec", "argument": "ambxst run dashboard-emoji", "flags": "" },
-                    "notes": { "modifiers": ["SUPER"], "key": "N", "dispatcher": "exec", "argument": "ambxst run dashboard-notes", "flags": "" },
-                    "tmux": { "modifiers": ["SUPER"], "key": "T", "dispatcher": "exec", "argument": "ambxst run dashboard-tmux", "flags": "" },
-                    "wallpapers": { "modifiers": ["SUPER"], "key": "COMMA", "dispatcher": "exec", "argument": "ambxst run dashboard-wallpapers", "flags": "" },
-                    "widgets": { "modifiers": ["SUPER"], "key": "Super_L", "dispatcher": "exec", "argument": "ambxst run dashboard-widgets", "flags": "r" }
+                    "assistant": { "modifiers": ["SUPER"], "key": "A", "dispatcher": "exec", "argument": "ambxst run assistant", "flags": "" },
+                    "clipboard": { "modifiers": ["SUPER"], "key": "V", "dispatcher": "exec", "argument": "ambxst run clipboard", "flags": "" },
+                    "emoji": { "modifiers": ["SUPER"], "key": "PERIOD", "dispatcher": "exec", "argument": "ambxst run emoji", "flags": "" },
+                    "notes": { "modifiers": ["SUPER"], "key": "N", "dispatcher": "exec", "argument": "ambxst run notes", "flags": "" },
+                    "tmux": { "modifiers": ["SUPER"], "key": "T", "dispatcher": "exec", "argument": "ambxst run tmux", "flags": "" },
+                    "wallpapers": { "modifiers": ["SUPER"], "key": "COMMA", "dispatcher": "exec", "argument": "ambxst run wallpapers", "flags": "" },
+                    "launcher": { "modifiers": ["SUPER"], "key": "Super_L", "dispatcher": "exec", "argument": "ambxst run launcher", "flags": "r" },
+                    "dashboard": { "modifiers": ["SUPER", "SHIFT"], "key": "D", "dispatcher": "exec", "argument": "ambxst run dashboard", "flags": "" }
                 },
                 "system": {
                     "config": { "modifiers": ["SUPER", "SHIFT"], "key": "C", "dispatcher": "exec", "argument": "ambxst run config", "flags": "" },

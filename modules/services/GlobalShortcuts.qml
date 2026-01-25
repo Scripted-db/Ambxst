@@ -32,17 +32,23 @@ Item {
     function run(command) {
         console.log("IPC run command received:", command);
         switch (command) {
+            // Launcher (Standalone Notch Module)
+            case "launcher": toggleLauncher(); break;
+            case "clipboard": toggleLauncherWithPrefix(Config.prefix.clipboard + " "); break;
+            case "emoji": toggleLauncherWithPrefix(Config.prefix.emoji + " "); break;
+            case "tmux": toggleLauncherWithPrefix(Config.prefix.tmux + " "); break;
+            case "notes": toggleLauncherWithPrefix(Config.prefix.notes + " "); break;
+
             // Dashboard
+            case "dashboard": toggleDashboardTab(0); break;
+            case "wallpapers": toggleDashboardTab(1); break;
+            case "assistant": toggleDashboardTab(3); break;
             case "dashboard-widgets": toggleDashboardTab(0); break;
             case "dashboard-wallpapers": toggleDashboardTab(1); break;
             case "dashboard-kanban": toggleDashboardTab(2); break;
             case "dashboard-assistant": toggleDashboardTab(3); break;
             case "dashboard-controls": GlobalStates.settingsWindowVisible = !GlobalStates.settingsWindowVisible; break;
-            case "dashboard-clipboard": toggleDashboardWithPrefix(Config.prefix.clipboard + " "); break;
-            case "dashboard-emoji": toggleDashboardWithPrefix(Config.prefix.emoji + " "); break;
-            case "dashboard-tmux": toggleDashboardWithPrefix(Config.prefix.tmux + " "); break;
-            case "dashboard-notes": toggleDashboardWithPrefix(Config.prefix.notes + " "); break;
-            
+
             // System
             case "overview": toggleSimpleModule("overview"); break;
             case "powermenu": toggleSimpleModule("powermenu"); break;
@@ -82,6 +88,43 @@ Item {
             Visibilities.setActiveModule("");
         } else {
             Visibilities.setActiveModule(moduleName);
+        }
+    }
+
+    function toggleLauncher() {
+        if (Visibilities.currentActiveModule === "launcher" && GlobalStates.widgetsTabCurrentIndex === 0 && GlobalStates.launcherSearchText === "") {
+            Visibilities.setActiveModule("");
+        } else {
+            GlobalStates.widgetsTabCurrentIndex = 0;
+            GlobalStates.launcherSearchText = "";
+            GlobalStates.launcherSelectedIndex = -1;
+            Visibilities.setActiveModule("launcher");
+        }
+    }
+
+    function toggleLauncherWithPrefix(prefix) {
+        const isActive = Visibilities.currentActiveModule === "launcher";
+        let tabIndex = 0;
+        const p = prefix.trim();
+        if (p === Config.prefix.clipboard) tabIndex = 1;
+        else if (p === Config.prefix.emoji) tabIndex = 2;
+        else if (p === Config.prefix.tmux) tabIndex = 3;
+        else if (p === Config.prefix.notes) tabIndex = 4;
+
+        if (isActive && GlobalStates.widgetsTabCurrentIndex === tabIndex && GlobalStates.launcherSearchText === prefix) {
+            Visibilities.setActiveModule("");
+            GlobalStates.clearLauncherState();
+            return;
+        }
+
+        GlobalStates.widgetsTabCurrentIndex = tabIndex;
+        if (!isActive) {
+            Visibilities.setActiveModule("launcher");
+            Qt.callLater(() => {
+                GlobalStates.launcherSearchText = prefix;
+            });
+        } else {
+            GlobalStates.launcherSearchText = prefix;
         }
     }
 
