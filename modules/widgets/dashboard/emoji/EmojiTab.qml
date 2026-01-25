@@ -29,6 +29,9 @@ Rectangle {
     property var recentEmojis: []
     property var filteredEmojis: []
 
+    property real recentX: 0
+    readonly property bool isAtRecent: selectedIndex === 0 && emojisModel.count > 0 && emojisModel.get(0).isRecentContainer
+
     // Skin tone support
     property var skinTones: [
         { name: "Light", modifier: "🏻", emoji: "👋🏻" },
@@ -518,20 +521,26 @@ Rectangle {
                                 }
                                 positionViewAtIndex(currentIndex, ListView.Contain);
                             }
+                            
+                            onContentXChanged: updateRecentX()
+                            onCurrentItemChanged: updateRecentX()
+                            
+                            function updateRecentX() {
+                                if (currentItem && root.selectedIndex === delegateRoot.index) {
+                                    root.recentX = currentItem.x - contentX + 4; // +4 for internal padding
+                                }
+                            }
 
                             delegate: Rectangle {
                                 width: 48; height: 48; color: "transparent"
-                                property bool isSelected: root.selectedIndex === delegateRoot.index && root.selectedRecentIndex === model.index
                                 
-                                StyledRect {
-                                    anchors.centerIn: parent; width: 40; height: 40
-                                    radius: Styling.radius(4)
-                                    variant: isSelected ? "primary" : "common"
-                                    Text {
-                                        anchors.centerIn: parent; text: model.emojiData.emoji; font.pixelSize: 24
-                                        color: isSelected ? Styling.srItem("primary") : Colors.overSurface
-                                    }
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: model.emojiData.emoji
+                                    font.pixelSize: 24
+                                    color: Colors.overSurface
                                 }
+
                                 MouseArea {
                                     anchors.fill: parent; hoverEnabled: true
                                     onEntered: { root.selectedIndex = delegateRoot.index; root.selectedRecentIndex = model.index; }
@@ -562,12 +571,12 @@ Rectangle {
                         Row {
                             anchors.fill: parent; anchors.margins: 8; spacing: 8
                             StyledRect {
-                                id: iconBg; width: 38; height: 32; radius: Styling.radius(-4)
+                                id: iconBg; width: 32; height: 32; radius: Styling.radius(-4)
                                 variant: isSelected && root.expandedItemIndex !== index ? "overprimary" : "common"
                                 Text { anchors.centerIn: parent; text: emojiData.emoji; font.pixelSize: 24; color: iconBg.item }
                             }
                             Text {
-                                width: parent.width - 46; height: parent.height
+                                width: parent.width - 40; height: parent.height
                                 text: emojiData.search; color: isSelected ? (root.expandedItemIndex === index ? Colors.overSurface : Styling.srItem("primary")) : Colors.overSurface
                                 font.family: Config.theme.font; font.weight: Font.Bold; font.pixelSize: Config.theme.fontSize
                                 elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter
@@ -613,16 +622,19 @@ Rectangle {
             }
 
             highlight: Item {
-                width: emojiList.width
+                id: listHighlight
+                width: root.isAtRecent ? 40 : emojiList.width
                 height: {
                     if (emojiList.currentIndex === -1) return 0;
                     var item = emojisModel.get(emojiList.currentIndex);
-                    if (item && item.isRecentContainer) return 0; // No vertical highlight for recent container
+                    if (item && item.isRecentContainer) return 40; // Rect height for recent emoji
                     if (item && item.emojiData && item.emojiData.skin_tone_support && emojiList.currentIndex === root.expandedItemIndex) {
                         return 48 + 4 + (36 * Math.min(3, root.skinTones.length)) + 8;
                     }
                     return 48;
                 }
+                
+                x: root.isAtRecent ? root.recentX : 0
                 y: {
                     var yPos = 0;
                     for (var i = 0; i < emojiList.currentIndex && i < emojisModel.count; i++) {
@@ -633,15 +645,19 @@ Rectangle {
                         }
                         yPos += h;
                     }
+                    if (root.isAtRecent) yPos += 4; // Center vertically in recent container
                     return yPos;
                 }
+
+                Behavior on x { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic } }
+                Behavior on width { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic } }
                 Behavior on y { NumberAnimation { duration: Config.animDuration / 2; easing.type: Easing.OutCubic } }
                 Behavior on height { NumberAnimation { duration: Config.animDuration; easing.type: Easing.OutQuart } }
 
                 StyledRect {
                     anchors.fill: parent; radius: Styling.radius(4)
                     variant: root.expandedItemIndex === emojiList.currentIndex ? "pane" : "primary"
-                    visible: root.selectedIndex > 0 || (root.selectedIndex === 0 && emojisModel.count > 0 && !emojisModel.get(0).isRecentContainer)
+                    visible: root.selectedIndex >= 0
                 }
             }
             highlightFollowsCurrentItem: false
