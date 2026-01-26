@@ -101,6 +101,8 @@ Item {
     implicitWidth: root.isVertical ? dockSize + totalMargin + shadowSpace * 2 : dockContent.implicitWidth + shadowSpace * 2
     implicitHeight: root.isVertical ? dockContent.implicitHeight + shadowSpace * 2 : dockSize + totalMargin + shadowSpace * 2
 
+    readonly property int frameOffset: Config.bar?.frameEnabled ? (Config.bar?.frameThickness ?? 6) : 0
+
     // The hitbox for the mask
     readonly property Item dockHitbox: dockMouseArea
 
@@ -116,12 +118,23 @@ Item {
         hoverEnabled: true
 
         // Size
-        width: root.isVertical ? (root.reveal ? root.dockSize + root.totalMargin + root.shadowSpace : (Config.dock?.hoverRegionHeight ?? 4)) : dockContent.implicitWidth + 20
-        height: root.isVertical ? dockContent.implicitHeight + 20 : (root.reveal ? root.dockSize + root.totalMargin + root.shadowSpace : (Config.dock?.hoverRegionHeight ?? 4))
+        width: root.isVertical ? (root.reveal ? root.dockSize + root.totalMargin + root.shadowSpace : (Config.dock?.hoverRegionHeight ?? 4) + root.frameOffset) : dockContent.implicitWidth + 20
+        height: root.isVertical ? dockContent.implicitHeight + 20 : (root.reveal ? root.dockSize + root.totalMargin + root.shadowSpace : (Config.dock?.hoverRegionHeight ?? 4) + root.frameOffset)
 
         // Position using x/y
-        x: root.isBottom ? (parent.width - width) / 2 : (root.isLeft ? 0 : parent.width - width)
-        y: root.isVertical ? (parent.height - height) / 2 : parent.height - height
+        x: {
+            const base = root.isBottom ? (parent.width - width) / 2 : (root.isLeft ? 0 : parent.width - width);
+            // If left, keep at 0 to cover the frame area. If right, keep at right edge.
+            if (root.isLeft) return 0;
+            if (root.isRight) return parent.width - width;
+            return base;
+        }
+        y: {
+            const base = root.isVertical ? (parent.height - height) / 2 : parent.height - height;
+            // If bottom, keep at bottom edge to cover the frame area.
+            if (root.isBottom) return parent.height - height;
+            return base;
+        }
 
         Behavior on x {
             enabled: Config.animDuration > 0
@@ -178,8 +191,17 @@ Item {
             }
 
             // Position using x/y
-            x: root.isBottom ? (parent.width - width) / 2 : (root.isLeft ? root.edgeSideMargin : parent.width - width - root.edgeSideMargin)
-            y: root.isVertical ? (parent.height - height) / 2 : parent.height - height - root.edgeSideMargin
+            x: {
+                const base = root.isBottom ? (parent.width - width) / 2 : (root.isLeft ? root.edgeSideMargin : parent.width - width - root.edgeSideMargin);
+                if (root.isLeft) return base + root.frameOffset;
+                if (root.isRight) return base - root.frameOffset;
+                return base;
+            }
+            y: {
+                const base = root.isVertical ? (parent.height - height) / 2 : parent.height - height - root.edgeSideMargin;
+                if (root.isBottom) return base - root.frameOffset;
+                return base;
+            }
 
             Behavior on x {
                 enabled: Config.animDuration > 0

@@ -70,7 +70,6 @@ Item {
     readonly property real innerRadius: (Config.bar.pillStyle === "squished") ? Styling.radius(0) / 2 : Styling.radius(0)
     readonly property bool pinButtonVisible: Config.bar?.showPinButton ?? true
 
-    // Reveal logic
     readonly property bool reveal: {
         // If not auto-hiding, always reveal
         if (!shouldAutoHide)
@@ -81,8 +80,8 @@ Item {
             return false;
         }
 
-        // Show if: hovering (when enabled), notch hovering (when at top), notch open, or no active window
-        return hoverActive || notchHoverActive || notchOpen || !ToplevelManager.activeToplevel?.activated;
+        // Show if: hovering, notch hovering (when at top), notch open, or no active window
+        return isMouseOverBar || hoverActive || notchHoverActive || notchOpen || !ToplevelManager.activeToplevel?.activated;
     }
 
     // Timer to delay hiding the bar after mouse leaves
@@ -99,15 +98,17 @@ Item {
 
     // Watch for mouse state changes
     onIsMouseOverBarChanged: {
-        // Only process hover if hoverToReveal is enabled
-        if (!(Config.bar?.hoverToReveal ?? true))
-            return;
-
         if (isMouseOverBar) {
             hideDelayTimer.stop();
             hoverActive = true;
         } else {
-            hideDelayTimer.restart();
+            // Si está fijada, podemos resetear el hoverActive inmediatamente
+            // Si está en auto-hide, usamos el timer para dar margen
+            if (shouldAutoHide) {
+                hideDelayTimer.restart();
+            } else {
+                hoverActive = false;
+            }
         }
     }
 
@@ -133,6 +134,8 @@ Item {
     readonly property bool dockAtStart: integratedDockEnabled && integratedDockPosition === "start"
     readonly property bool dockAtEnd: integratedDockEnabled && integratedDockPosition === "end"
 
+    readonly property int frameOffset: Config.bar?.frameEnabled ? (Config.bar?.frameThickness ?? 6) : 0
+
     // The hitbox for the mask
     property alias barHitbox: barMouseArea
 
@@ -146,6 +149,13 @@ Item {
             bottom: barPosition !== "top" ? parent.bottom : null
             left: barPosition !== "right" ? parent.left : null
             right: barPosition !== "left" ? parent.right : null
+            
+            // Margins are only for when revealed. 
+            // When hidden, we want the MouseArea to stay at the edge for hover.
+            topMargin: 0
+            bottomMargin: 0
+            leftMargin: 0
+            rightMargin: 0
         }
 
         // Position and size based on bar position
@@ -156,7 +166,7 @@ Item {
                 PropertyChanges {
                     target: barMouseArea
                     width: root.width
-                    height: root.reveal ? bar.height : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4)
+                    height: root.reveal ? bar.height + root.frameOffset : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset
                 }
             },
             State {
@@ -165,7 +175,7 @@ Item {
                 PropertyChanges {
                     target: barMouseArea
                     width: root.width
-                    height: root.reveal ? bar.height : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4)
+                    height: root.reveal ? bar.height + root.frameOffset : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset
                 }
             },
             State {
@@ -173,7 +183,7 @@ Item {
                 when: root.barPosition === "left"
                 PropertyChanges {
                     target: barMouseArea
-                    width: root.reveal ? bar.width : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4)
+                    width: root.reveal ? bar.width + root.frameOffset : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset
                     height: root.height
                 }
             },
@@ -182,7 +192,7 @@ Item {
                 when: root.barPosition === "right"
                 PropertyChanges {
                     target: barMouseArea
-                    width: root.reveal ? bar.width : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4)
+                    width: root.reveal ? bar.width + root.frameOffset : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset
                     height: root.height
                 }
             }
@@ -206,6 +216,19 @@ Item {
         // Bar content inside MouseArea (clicks pass through to children)
         Item {
             id: bar
+
+            anchors {
+                top: root.barPosition === "top" ? parent.top : undefined
+                bottom: root.barPosition === "bottom" ? parent.bottom : undefined
+                left: root.barPosition === "left" ? parent.left : undefined
+                right: root.barPosition === "right" ? parent.right : undefined
+
+                topMargin: root.barPosition === "top" ? root.frameOffset : 0
+                bottomMargin: root.barPosition === "bottom" ? root.frameOffset : 0
+                leftMargin: root.barPosition === "left" ? root.frameOffset : 0
+                rightMargin: root.barPosition === "right" ? root.frameOffset : 0
+            }
+
 
             layer.enabled: true
             layer.effect: Shadow {}
@@ -260,65 +283,37 @@ Item {
                 State {
                     name: "top"
                     when: root.barPosition === "top"
-                    AnchorChanges {
-                        target: bar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: undefined
-                    }
                     PropertyChanges {
                         target: bar
-                        width: undefined
+                        width: root.width
                         height: 44
                     }
                 },
                 State {
                     name: "bottom"
                     when: root.barPosition === "bottom"
-                    AnchorChanges {
-                        target: bar
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: undefined
-                        anchors.bottom: parent.bottom
-                    }
                     PropertyChanges {
                         target: bar
-                        width: undefined
+                        width: root.width
                         height: 44
                     }
                 },
                 State {
                     name: "left"
                     when: root.barPosition === "left"
-                    AnchorChanges {
-                        target: bar
-                        anchors.left: parent.left
-                        anchors.right: undefined
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                    }
                     PropertyChanges {
                         target: bar
                         width: 44
-                        height: undefined
+                        height: root.height
                     }
                 },
                 State {
                     name: "right"
                     when: root.barPosition === "right"
-                    AnchorChanges {
-                        target: bar
-                        anchors.left: undefined
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                    }
                     PropertyChanges {
                         target: bar
                         width: 44
-                        height: undefined
+                        height: root.height
                     }
                 }
             ]
