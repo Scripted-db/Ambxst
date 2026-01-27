@@ -14,22 +14,21 @@ Item {
     readonly property int cornerSize: Config.theme.enableCorners ? Styling.radius(4) : 0
     readonly property bool isHorizontal: position === "top" || position === "bottom"
     readonly property bool cornersVisible: Config.theme.enableCorners && cornerSize > 0
-    readonly property bool frameEnabled: Config.bar?.frameEnabled ?? false
 
     // StyledRect expandido que cubre bar + corners
     StyledRect {
         id: barBackground
         variant: "barbg"
-        radius: frameEnabled ? Styling.radius(0) : 0
+        radius: 0
         enableBorder: false
 
-        // Posicion y tamaño expandidos para cubrir corners solo si frame no está habilitado
-        x: (!frameEnabled && position === "right") ? -cornerSize : 0
-        y: (!frameEnabled && position === "bottom") ? -cornerSize : 0
-        width: root.width + (frameEnabled ? 0 : (isHorizontal ? 0 : cornerSize))
-        height: root.height + (frameEnabled ? 0 : (isHorizontal ? cornerSize : 0))
+        // Posicion y tamaño expandidos para cubrir corners
+        x: (position === "right") ? -cornerSize : 0
+        y: (position === "bottom") ? -cornerSize : 0
+        width: root.width + (isHorizontal ? 0 : cornerSize)
+        height: root.height + (isHorizontal ? cornerSize : 0)
 
-        layer.enabled: !frameEnabled
+        layer.enabled: true
         layer.effect: MultiEffect {
             maskEnabled: true
             maskSource: barMask
