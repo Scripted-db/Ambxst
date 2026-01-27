@@ -172,9 +172,13 @@ ClippingRectangle {
     layer.effect: Shadow {}
 
     // Border overlay to avoid ClippingRectangle artifacts
-    Rectangle {
+    ClippingRectangle {
         anchors.fill: parent
         radius: root.radius
+        topLeftRadius: root.topLeftRadius
+        topRightRadius: root.topRightRadius
+        bottomLeftRadius: root.bottomLeftRadius
+        bottomRightRadius: root.bottomRightRadius
         color: "transparent"
         border.color: Config.resolveColor(borderData[0])
         border.width: borderData[1]
