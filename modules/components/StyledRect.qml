@@ -68,31 +68,36 @@ ClippingRectangle {
         width: 256
         height: 32 // Increase height to avoid interpolation artifacts at non-integer scales
         visible: false
-        
+
         onPaint: {
             var ctx = getContext("2d");
             ctx.clearRect(0, 0, width, height);
-            
+
             var stops = root.gradientStops;
-            if (!stops || stops.length === 0) return;
+            if (!stops || stops.length === 0)
+                return;
 
             var grad = ctx.createLinearGradient(0, 0, width, 0);
             for (var i = 0; i < stops.length; i++) {
                 var s = stops[i];
                 grad.addColorStop(s[1], Config.resolveColor(s[0]));
             }
-            
+
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, width, height);
         }
-        
+
         Connections {
             target: root
-            function onGradientStopsChanged() { linearGradientCanvas.requestPaint(); }
+            function onGradientStopsChanged() {
+                linearGradientCanvas.requestPaint();
+            }
         }
         Connections {
             target: Colors
-            function onLoaded() { linearGradientCanvas.requestPaint(); }
+            function onLoaded() {
+                linearGradientCanvas.requestPaint();
+            }
         }
         Component.onCompleted: requestPaint()
     }

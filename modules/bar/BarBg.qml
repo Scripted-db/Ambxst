@@ -106,10 +106,14 @@ Item {
             RoundCorner {
                 anchors.fill: parent
                 corner: {
-                    if (root.position === "top") return RoundCorner.CornerEnum.TopLeft
-                    if (root.position === "bottom") return RoundCorner.CornerEnum.BottomLeft
-                    if (root.position === "left") return RoundCorner.CornerEnum.TopLeft
-                    if (root.position === "right") return RoundCorner.CornerEnum.TopRight
+                    if (root.position === "top")
+                        return RoundCorner.CornerEnum.TopLeft;
+                    if (root.position === "bottom")
+                        return RoundCorner.CornerEnum.BottomLeft;
+                    if (root.position === "left")
+                        return RoundCorner.CornerEnum.TopLeft;
+                    if (root.position === "right")
+                        return RoundCorner.CornerEnum.TopRight;
                 }
                 size: Math.max(cornerSize, 1)
                 color: "white"
@@ -164,10 +168,14 @@ Item {
             RoundCorner {
                 anchors.fill: parent
                 corner: {
-                    if (root.position === "top") return RoundCorner.CornerEnum.TopRight
-                    if (root.position === "bottom") return RoundCorner.CornerEnum.BottomRight
-                    if (root.position === "left") return RoundCorner.CornerEnum.BottomLeft
-                    if (root.position === "right") return RoundCorner.CornerEnum.BottomRight
+                    if (root.position === "top")
+                        return RoundCorner.CornerEnum.TopRight;
+                    if (root.position === "bottom")
+                        return RoundCorner.CornerEnum.BottomRight;
+                    if (root.position === "left")
+                        return RoundCorner.CornerEnum.BottomLeft;
+                    if (root.position === "right")
+                        return RoundCorner.CornerEnum.BottomRight;
                 }
                 size: Math.max(cornerSize, 1)
                 color: "white"
