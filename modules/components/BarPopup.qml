@@ -58,6 +58,11 @@ PopupWindow {
     implicitWidth: totalWidth
     implicitHeight: totalHeight
 
+    // Frame detection
+    readonly property bool frameEnabled: Config.bar?.frameEnabled ?? false
+    readonly property int frameThickness: Config.bar?.frameThickness ?? 0
+    readonly property int effectiveFrameOffset: frameEnabled ? frameThickness : 0
+
     // Anchor positioning
     // The anchor.rect defines where the popup window's top-left corner will be placed
     // relative to the anchorItem's top-left corner
@@ -66,9 +71,9 @@ PopupWindow {
         if (barVertical) {
             // Left bar: popup appears to the right of the button
             if (barAtLeft)
-                return anchorItem.width + visualMargin - shadowMargin;
+                return anchorItem.width + visualMargin + effectiveFrameOffset - shadowMargin;
             // Right bar: popup appears to the left of the button
-            return -totalWidth + shadowMargin - visualMargin;
+            return -totalWidth + shadowMargin - visualMargin - effectiveFrameOffset;
         }
         // Top/Bottom bar: center horizontally relative to button
         return (anchorItem.width - totalWidth) / 2;
@@ -80,9 +85,9 @@ PopupWindow {
         }
         // Top bar: popup appears below the button
         if (barAtTop)
-            return anchorItem.height + visualMargin - shadowMargin;
+            return anchorItem.height + visualMargin + effectiveFrameOffset - shadowMargin;
         // Bottom bar: popup appears above the button
-        return -totalHeight + shadowMargin - visualMargin;
+        return -totalHeight + shadowMargin - visualMargin - effectiveFrameOffset;
     }
     anchor.rect.width: 0
     anchor.rect.height: 0
