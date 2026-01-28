@@ -61,7 +61,8 @@ Item {
     }
 
     // Should auto-hide: when bar is NOT same side (always), unpinned OR when fullscreen OR keepHidden
-    readonly property bool shouldAutoHide: (Config.notch?.keepHidden ?? false) || barPosition !== notchPosition || !barPinned || activeWindowFullscreen
+    // Note: keepHidden is ignored if notch and bar are on the same side
+    readonly property bool shouldAutoHide: ((Config.notch?.keepHidden ?? false) && barPosition !== notchPosition) || barPosition !== notchPosition || !barPinned || activeWindowFullscreen
 
     // Check if the bar for this screen is vertical
     readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
@@ -79,7 +80,8 @@ Item {
     // Reveal logic:
     readonly property bool reveal: {
         // If keepHidden is true, ONLY show on interaction
-        if (Config.notch?.keepHidden ?? false) {
+        // UNLESS notch and bar are on same side (e.g. both top), then keepHidden is IGNORED for sync consistency
+        if ((Config.notch?.keepHidden ?? false) && barPosition !== notchPosition) {
             return (screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive);
         }
 
@@ -89,12 +91,6 @@ Item {
         // Show on interaction (hover, open, notifications)
         // This works even in fullscreen, ensuring hover always works
         if (screenNotchOpen || hasActiveNotifications || hoverActive || barHoverActive) {
-            return true;
-        }
-        
-        // Show on desktop (no active window) - but NOT if fullscreen mode forced auto-hide
-        // (activeWindowFullscreen implies there IS an active window)
-        if (!activeWindowFullscreen && !ToplevelManager.activeToplevel?.activated) {
             return true;
         }
         

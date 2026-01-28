@@ -56,20 +56,24 @@ Item {
     // Track if mouse is over bar area
     readonly property bool isMouseOverBar: barMouseArea.containsMouse
 
-    // Check if notch hover is active (for synchronized reveal when bar is at top)
+    // Check if notch hover is active (for synchronized reveal when bar is at same side)
+    // NOTE: We access Visibilities.notchPanels directly because UnifiedShellPanel registers itself as the panel ref
     readonly property var notchPanelRef: Visibilities.notchPanels[screen.name]
+    readonly property string notchPosition: Config.notchPosition ?? "top"
     readonly property bool notchHoverActive: {
-        if (barPosition !== "top")
+        if (barPosition !== notchPosition)
             return false;
         
-        // Check if notch is being hovered (using the property we check in NotchContent.qml)
         if (notchPanelRef) {
-            // First check if 'hoverActive' exists directly on the panel content
-            if (typeof notchPanelRef.hoverActive !== 'undefined')
+            // UnifiedShellPanel exposes 'notchHoverActive' property alias pointing to notchContent.hoverActive
+            // We need to check if that property exists on the panel object
+            if (typeof notchPanelRef.notchHoverActive !== 'undefined') {
+                return notchPanelRef.notchHoverActive;
+            }
+            // Fallback for compatibility
+            if (typeof notchPanelRef.hoverActive !== 'undefined') {
                 return notchPanelRef.hoverActive;
-                
-            // Fallback to checking children or specific exported properties if needed
-            // But usually the panel content itself exposes hoverActive
+            }
         }
         return false;
     }
