@@ -18,14 +18,21 @@ Item {
     // New logic: padding 4 if opaque (>1%), 0 if transparent
     readonly property real bgOpacity: Config.theme.srBarBg.opacity
     readonly property int padding: bgOpacity < 0.01 ? 0 : 4
-    readonly property int borderWidth: Config.theme.srBarBg.border[1]
+
+    // Displacement logic: only when !containBar
+    // Uses Config.theme.srBg.border[1] as requested
+    readonly property int borderWidth: Config.theme.srBg.border[1]
+    readonly property int displacement: !Config.bar.containBar ? borderWidth : 0
+
+    // Combined outer margin for screen/frame edges
+    readonly property int outerMargin: 4 + displacement
 
     // StyledRect expanded that covers bar + corners
     StyledRect {
         id: barBackground
         variant: "barbg"
         radius: Config.bar.containBar ? Styling.radius(4) : 0
-        enableBorder: false
+        enableBorder: true
 
         // Position and size expanded to cover corners
         x: (position === "right") ? -cornerSize : 0

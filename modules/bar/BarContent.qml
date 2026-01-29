@@ -154,18 +154,23 @@ Item {
     readonly property bool dockAtEnd: integratedDockEnabled && integratedDockPosition === "end"
 
     readonly property int frameOffset: Config.bar?.frameEnabled ? (Config.bar?.frameThickness ?? 6) : 0
-    readonly property int borderWidth: Config.theme.srBarBg.border[1]
-    
-    // Displacement logic: only when !containBar
-    readonly property int barDisplacement: !Config.bar.containBar ? root.borderWidth : 0
 
-    // Size derived from barBg padding
+    // Size derived from barBg properties
     readonly property int barPadding: barBg.padding
+    readonly property int topOuterMargin: (orientation === "vertical" || barPosition === "top") ? barBg.outerMargin : 0
+    readonly property int bottomOuterMargin: (orientation === "vertical" || barPosition === "bottom") ? barBg.outerMargin : 0
+    readonly property int leftOuterMargin: (orientation === "horizontal" || barPosition === "left") ? barBg.outerMargin : 0
+    readonly property int rightOuterMargin: (orientation === "horizontal" || barPosition === "right") ? barBg.outerMargin : 0
+
     readonly property int contentImplicitWidth: orientation === "horizontal" ? horizontalLayout.implicitWidth : verticalLayout.implicitWidth
     readonly property int contentImplicitHeight: orientation === "horizontal" ? horizontalLayout.implicitHeight : verticalLayout.implicitHeight
     
     readonly property int barTargetWidth: orientation === "vertical" ? (contentImplicitWidth + 2 * barPadding) : 0
     readonly property int barTargetHeight: orientation === "horizontal" ? (contentImplicitHeight + 2 * barPadding) : 0
+
+    // Total size including frame and outer margins for the hitbox
+    readonly property int totalBarWidth: barTargetWidth + (2 * root.frameOffset) + root.leftOuterMargin + root.rightOuterMargin
+    readonly property int totalBarHeight: barTargetHeight + (2 * root.frameOffset) + root.topOuterMargin + root.bottomOuterMargin
 
     // Shadow logic for bar components
     readonly property bool shadowsEnabled: Config.showBackground && (!Config.bar.containBar || Config.bar.keepBarShadow)
@@ -178,9 +183,10 @@ Item {
         id: barMouseArea
         hoverEnabled: true
 
-        // Size includes displacement
-        width: root.orientation === "horizontal" ? root.width : (root.reveal ? root.barTargetWidth + root.frameOffset + root.barDisplacement : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset + root.barDisplacement)
-        height: root.orientation === "vertical" ? root.height : (root.reveal ? root.barTargetHeight + root.frameOffset + root.barDisplacement : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset + root.barDisplacement)
+        // Size includes margins
+        width: root.orientation === "horizontal" ? root.width : (root.reveal ? root.totalBarWidth : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset + barBg.displacement)
+        height: root.orientation === "vertical" ? root.height : (root.reveal ? root.totalBarHeight : Math.max(Config.bar?.hoverRegionHeight ?? 8, 4) + root.frameOffset + barBg.displacement)
+
 
         // Position using x/y
         x: {
@@ -232,10 +238,10 @@ Item {
                 left: (root.barPosition === "left" || root.orientation === "horizontal") ? parent.left : undefined
                 right: (root.barPosition === "right" || root.orientation === "horizontal") ? parent.right : undefined
 
-                topMargin: root.frameOffset + (root.barPosition === "top" ? root.barDisplacement : 0)
-                bottomMargin: root.frameOffset + (root.barPosition === "bottom" ? root.barDisplacement : 0)
-                leftMargin: root.frameOffset + (root.barPosition === "left" ? root.barDisplacement : 0)
-                rightMargin: root.frameOffset + (root.barPosition === "right" ? root.barDisplacement : 0)
+                topMargin: (root.barPosition === "top" || root.orientation === "vertical") ? (root.frameOffset + root.topOuterMargin) : root.frameOffset
+                bottomMargin: (root.barPosition === "bottom" || root.orientation === "vertical") ? (root.frameOffset + root.bottomOuterMargin) : root.frameOffset
+                leftMargin: (root.barPosition === "left" || root.orientation === "horizontal") ? (root.frameOffset + root.leftOuterMargin) : root.frameOffset
+                rightMargin: (root.barPosition === "right" || root.orientation === "horizontal") ? (root.frameOffset + root.rightOuterMargin) : root.frameOffset
             }
 
 
@@ -258,18 +264,18 @@ Item {
                     if (!root.shouldAutoHide)
                         return 0;
                     if (root.barPosition === "left")
-                        return root.reveal ? 0 : -bar.width - root.barDisplacement;
+                        return root.reveal ? 0 : -bar.width - (root.frameOffset + root.leftOuterMargin);
                     if (root.barPosition === "right")
-                        return root.reveal ? 0 : bar.width + root.barDisplacement;
+                        return root.reveal ? 0 : bar.width + (root.frameOffset + root.rightOuterMargin);
                     return 0;
                 }
                 y: {
                     if (!root.shouldAutoHide)
                         return 0;
                     if (root.barPosition === "top")
-                        return root.reveal ? 0 : -bar.height - root.barDisplacement;
+                        return root.reveal ? 0 : -bar.height - (root.frameOffset + root.topOuterMargin);
                     if (root.barPosition === "bottom")
-                        return root.reveal ? 0 : bar.height + root.barDisplacement;
+                        return root.reveal ? 0 : bar.height + (root.frameOffset + root.bottomOuterMargin);
                     return 0;
                 }
                 Behavior on x {
