@@ -85,6 +85,7 @@ PanelWindow {
     
     // Helper properties for shadow logic
     readonly property bool keepBarShadow: Config.bar.keepBarShadow ?? false
+    readonly property bool keepBarBorder: Config.bar.keepBarBorder ?? false
     readonly property bool containBar: Config.bar.containBar ?? false
 
     Component.onCompleted: {

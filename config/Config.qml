@@ -604,6 +604,7 @@ Singleton {
             property bool use12hFormat: false
             property bool containBar: false
             property bool keepBarShadow: false
+            property bool keepBarBorder: false
         }
     }
 

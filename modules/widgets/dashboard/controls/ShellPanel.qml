@@ -899,6 +899,18 @@ Item {
                                 }
                             }
                         }
+
+                        ToggleRow {
+                            label: "Keep Bar Border"
+                            checked: Config.bar.keepBarBorder ?? false
+                            visible: Config.bar.containBar ?? false
+                            onToggled: value => {
+                                if (value !== Config.bar.keepBarBorder) {
+                                    GlobalStates.markShellChanged();
+                                    Config.bar.keepBarBorder = value;
+                                }
+                            }
+                        }
                     }
 
                     Separator {

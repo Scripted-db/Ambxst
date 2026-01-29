@@ -19,5 +19,6 @@ var data = {
     "availableOnFullscreen": false,
     "use12hFormat": false,
     "containBar": false,
-    "keepBarShadow": false
+    "keepBarShadow": false,
+    "keepBarBorder": false
 }
