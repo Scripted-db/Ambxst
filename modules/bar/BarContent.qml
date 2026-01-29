@@ -221,14 +221,14 @@ Item {
         }
 
         Behavior on width {
-            enabled: Config.animDuration > 0 && root.shouldAutoHide && root.orientation === "vertical"
+            enabled: Config.animDuration > 0 && root.orientation === "vertical"
             NumberAnimation {
                 duration: Config.animDuration / 4
                 easing.type: Easing.OutCubic
             }
         }
         Behavior on height {
-            enabled: Config.animDuration > 0 && root.shouldAutoHide && root.orientation === "horizontal"
+            enabled: Config.animDuration > 0 && root.orientation === "horizontal"
             NumberAnimation {
                 duration: Config.animDuration / 4
                 easing.type: Easing.OutCubic
@@ -258,7 +258,7 @@ Item {
             // Opacity animation
             opacity: root.reveal ? 1 : 0
             Behavior on opacity {
-                enabled: Config.animDuration > 0 && root.shouldAutoHide
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                     easing.type: Easing.OutCubic
@@ -286,14 +286,14 @@ Item {
                     return 0;
                 }
                 Behavior on x {
-                    enabled: Config.animDuration > 0 && root.shouldAutoHide
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutCubic
                     }
                 }
                 Behavior on y {
-                    enabled: Config.animDuration > 0 && root.shouldAutoHide
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutCubic

@@ -13,6 +13,7 @@ import qs.modules.widgets.tools
 import qs.modules.services
 import qs.modules.components
 import qs.modules.widgets.launcher
+import qs.modules.bar.workspaces
 import qs.config
 import "./NotchNotificationView.qml"
 
@@ -25,6 +26,25 @@ Item {
     // Get this screen's visibility state
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
     readonly property bool isScreenFocused: Hyprland.focusedMonitor && Hyprland.focusedMonitor.name === screen.name
+
+    // Monitor reference
+    readonly property var hyprlandMonitor: Hyprland.monitorFor(screen)
+
+    // Check if there are any windows on the current monitor and workspace
+    readonly property bool hasWindows: {
+        if (!hyprlandMonitor) return false;
+        const activeWorkspaceId = hyprlandMonitor.activeWorkspace.id;
+        const monId = hyprlandMonitor.id;
+        const wins = HyprlandData.windowList;
+        for (let i = 0; i < wins.length; i++) {
+            // We only care about windows on the current monitor and workspace
+            // that are not floating (floating windows usually don't trigger auto-hide)
+            if (wins[i].monitor === monId && wins[i].workspace.id === activeWorkspaceId && !wins[i].floating) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // Get the bar position for this screen
     readonly property string barPosition: Config.bar?.position ?? "top"
@@ -53,17 +73,39 @@ Item {
         return false;
     }
 
-    // Fullscreen detection - check if active toplevel is fullscreen
+    // Fullscreen detection - check if active toplevel is fullscreen on this screen
     readonly property bool activeWindowFullscreen: {
+        if (!hyprlandMonitor) return false;
+        
+        const activeWorkspaceId = hyprlandMonitor.activeWorkspace.id;
+        const monId = hyprlandMonitor.id;
+        
+        // Check active toplevel first (fast path)
         const toplevel = ToplevelManager.activeToplevel;
-        if (!toplevel || !toplevel.activated)
-            return false;
-        return toplevel.fullscreen === true;
+        if (toplevel && toplevel.fullscreen && Hyprland.focusedMonitor.id === monId) {
+             return true;
+        }
+
+        // Check all windows on this monitor (robust path)
+        const wins = HyprlandData.windowList;
+        for (let i = 0; i < wins.length; i++) {
+            if (wins[i].monitor === monId && wins[i].fullscreen && wins[i].workspace.id === activeWorkspaceId) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    // Should auto-hide: when bar is NOT same side (always), unpinned OR when fullscreen OR keepHidden
-    // Note: keepHidden is ignored if notch and bar are on the same side
-    readonly property bool shouldAutoHide: ((Config.notch?.keepHidden ?? false) && barPosition !== notchPosition) || barPosition !== notchPosition || !barPinned || activeWindowFullscreen
+    // Should auto-hide logic:
+    // 1. If notch and bar are on different sides: hide if keepHidden is ON, OR if windows/fullscreen are present
+    // 2. If notch and bar are on same side: hide only if bar is unpinned OR if fullscreen is present
+    readonly property bool shouldAutoHide: {
+        if (barPosition !== notchPosition) {
+            if (Config.notch?.keepHidden ?? false) return true;
+            return hasWindows || activeWindowFullscreen;
+        }
+        return !barPinned || activeWindowFullscreen;
+    }
 
     // Check if the bar for this screen is vertical
     readonly property bool isBarVertical: barPosition === "left" || barPosition === "right"
@@ -173,7 +215,7 @@ Item {
         y: root.notchPosition === "top" ? 0 : parent.height - height
 
         Behavior on height {
-            enabled: Config.animDuration > 0 && root.shouldAutoHide
+            enabled: Config.animDuration > 0
             NumberAnimation {
                 duration: Config.animDuration / 4
                 easing.type: Easing.OutCubic
@@ -215,7 +257,7 @@ Item {
             // Opacity animation
             opacity: root.reveal ? 1 : 0
             Behavior on opacity {
-                enabled: Config.animDuration > 0 && root.shouldAutoHide
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                     easing.type: Easing.OutCubic
@@ -232,7 +274,7 @@ Item {
                         return (Math.max(notchContainer.height, 50) + 16);
                 }
                 Behavior on y {
-                    enabled: Config.animDuration > 0 && root.shouldAutoHide
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutCubic
@@ -294,7 +336,7 @@ Item {
             // Apply same reveal animation as notch
             opacity: root.reveal ? 1 : 0
             Behavior on opacity {
-                enabled: Config.animDuration > 0 && root.shouldAutoHide
+                enabled: Config.animDuration > 0
                 NumberAnimation {
                     duration: Config.animDuration / 2
                     easing.type: Easing.OutCubic
@@ -310,7 +352,7 @@ Item {
                         return (notchContainer.height + 16);
                 }
                 Behavior on y {
-                    enabled: Config.animDuration > 0 && root.shouldAutoHide
+                    enabled: Config.animDuration > 0
                     NumberAnimation {
                         duration: Config.animDuration / 2
                         easing.type: Easing.OutCubic
