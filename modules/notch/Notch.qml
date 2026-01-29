@@ -11,6 +11,7 @@ import qs.config
 Item {
     id: notchContainer
 
+    property bool unifiedEffectActive: false
     z: 1000
 
     property Component defaultViewComponent
@@ -219,7 +220,7 @@ Item {
             anchors.fill: parent
             layer.enabled: false
             clip: false // Desactivar clip para que no corte el border
-            enableBorder: true // En island sí usar border de StyledRect
+            enableBorder: !notchContainer.unifiedEffectActive // En island sí usar border de StyledRect, a menos que el unified shader esté activo
             animateRadius: false // Custom animation below
 
             // Usar el islandRadius como radius base también
@@ -452,7 +453,7 @@ Item {
         readonly property int borderWidth: borderData[1]
         readonly property color borderColor: Config.resolveColor(borderData[0])
 
-        visible: Config.notchTheme === "default" && borderWidth > 0
+        visible: Config.notchTheme === "default" && borderWidth > 0 && !notchContainer.unifiedEffectActive
 
         onPaint: {
             if (Config.notchTheme !== "default")

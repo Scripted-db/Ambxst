@@ -20,6 +20,7 @@ Item {
     id: root
 
     required property ShellScreen screen
+    property bool unifiedEffectActive: false
 
     // Get this screen's visibility state
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
@@ -242,6 +243,7 @@ Item {
             // Center notch
             Notch {
                 id: notchContainer
+                unifiedEffectActive: root.unifiedEffectActive
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: root.notchPosition === "top" ? parent.top : undefined
                 anchors.bottom: root.notchPosition === "bottom" ? parent.bottom : undefined

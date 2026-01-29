@@ -55,6 +55,8 @@ PanelWindow {
     readonly property alias hoverActive: barContent.hoverActive // Default hoverActive points to bar
     readonly property alias notch_hoverActive: notchContent.hoverActive // Used by bar to check notch
 
+    readonly property bool unifiedEffectActive: true // Flag to notify children to disable internal borders
+
     readonly property var hyprlandMonitor: Hyprland.monitorFor(targetScreen)
     readonly property bool hasFullscreenWindow: {
         if (!hyprlandMonitor) return false;
@@ -133,7 +135,7 @@ PanelWindow {
     }
 
     // ═══════════════════════════════════════════════════════════════
-    // VISUAL CONTENT (Unified Shadow Wrapper)
+    // VISUAL CONTENT (Unified Shadow & Border Wrapper)
     // ═══════════════════════════════════════════════════════════════
 
     Item {
@@ -154,18 +156,19 @@ PanelWindow {
         }
     }
 
+    UnifiedPanelEffect {
+        id: unifiedEffect
+        anchors.fill: parent
+        sourceItem: visualContent
+        maskEnabled: barCutout.visible
+        maskSource: shadowMask
+        maskInverted: true
+    }
+
     Item {
-        id: visualContainer
+        id: visualContent
         anchors.fill: parent
         
-        // Apply a single unified shadow to the composite of all components
-        layer.enabled: true
-        layer.effect: Shadow {
-            maskEnabled: barCutout.visible
-            maskSource: shadowMask
-            maskInverted: true
-        }
-
         ScreenFrameContent {
             id: frameContent
             anchors.fill: parent
@@ -197,6 +200,7 @@ PanelWindow {
 
         DockContent {
             id: dockContent
+            unifiedEffectActive: unifiedPanel.unifiedEffectActive
             anchors.fill: parent
             screen: unifiedPanel.targetScreen
             z: 3
@@ -213,6 +217,7 @@ PanelWindow {
 
         NotchContent {
             id: notchContent
+            unifiedEffectActive: unifiedPanel.unifiedEffectActive
             anchors.fill: parent
             screen: unifiedPanel.targetScreen
             z: 4

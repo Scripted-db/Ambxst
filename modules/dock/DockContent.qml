@@ -18,6 +18,7 @@ Item {
     id: root
 
     required property ShellScreen screen
+    property bool unifiedEffectActive: false
     
     // Pass pinned state from parent or config
     readonly property bool keepHidden: Config.dock?.keepHidden ?? false
@@ -383,6 +384,7 @@ Item {
                 variant: "bg"
                 // enableShadow: true
                 radius: Styling.radius(4)
+                enableBorder: !root.unifiedEffectActive
             }
 
             // Horizontal layout
@@ -665,7 +667,7 @@ Item {
                 readonly property int borderWidth: borderData[1]
                 readonly property color borderColor: Config.resolveColor(borderData[0])
 
-                visible: root.isDefault && borderWidth > 0
+                visible: root.isDefault && borderWidth > 0 && !root.unifiedEffectActive
 
                 onPaint: {
                     if (!root.isDefault) return;
