@@ -43,7 +43,7 @@ void main() {
     
     // Dilation for border
     float dilatedAlpha = 0.0;
-    float bw = clamp(ubuf.borderWidth, 0.0, 8.0);
+    float bw = max(ubuf.borderWidth, 0.0);
     if (bw > 0.0) {
         for (int i = 0; i < 24; i++) {
             float angle = float(i) * (2.0 * 3.14159265 / 24.0);
