@@ -12,7 +12,7 @@ import qs.config
 
 StyledRect {
     id: player
-    variant: "pane"
+    variant: "transparent"
 
     property real playerRadius: Config.roundness > 0 ? Config.roundness + 4 : 0
     property bool playersListExpanded: false
@@ -99,12 +99,92 @@ StyledRect {
         }
     }
 
+    // Background art layers
+    Image {
+        id: backgroundArtBlurred
+        anchors.fill: parent
+        source: MprisController.activePlayer?.trackArtUrl ?? ""
+        fillMode: Image.PreserveAspectCrop
+        visible: false
+        asynchronous: true
+    }
+
+    MultiEffect {
+        id: blurredEffect
+        anchors.fill: parent
+        source: backgroundArtBlurred
+        blurEnabled: true
+        blurMax: 32
+        blur: 0.75
+        opacity: player.hasArtwork ? 0.5 : 0.0
+        visible: player.hasArtwork
+        Behavior on opacity {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutQuart
+            }
+        }
+    }
+
+    Image {
+        id: backgroundArtFull
+        anchors.fill: parent
+        source: MprisController.activePlayer?.trackArtUrl ?? ""
+        fillMode: Image.PreserveAspectCrop
+        visible: false
+        asynchronous: true
+    }
+
+    MultiEffect {
+        id: fullArtEffect
+        anchors.fill: parent
+        source: backgroundArtFull
+        maskEnabled: true
+        maskSource: innerAreaMask
+        maskInverted: true
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1.0
+        opacity: player.hasArtwork ? 1.0 : 0.0
+        visible: player.hasArtwork
+        Behavior on opacity {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutQuart
+            }
+        }
+    }
+
+    Item {
+        id: innerAreaMask
+        anchors.fill: parent
+        visible: false
+        layer.enabled: true
+        Rectangle {
+            x: 4
+            y: 4
+            width: parent.width - 8
+            height: parent.height - 8
+            radius: player.radius - 4
+            color: "white"
+        }
+    }
+
     StyledRect {
         id: innerPlayer
-        variant: "internalbg"
+        variant: "transparent"
         anchors.fill: parent
         anchors.margins: 4
         radius: player.radius - 4
+        backgroundOpacity: 0
+        Behavior on backgroundOpacity {
+            enabled: Config.animDuration > 0
+            NumberAnimation {
+                duration: Config.animDuration
+                easing.type: Easing.OutQuart
+            }
+        }
 
         implicitHeight: mainLayout.implicitHeight + mainLayout.anchors.margins * 2
 
