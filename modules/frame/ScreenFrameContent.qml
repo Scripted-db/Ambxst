@@ -65,8 +65,7 @@ Item {
 
     // Bar expansion logic (synchronized with bar reveal)
     // Only expand if frame is enabled and bar is being contained
-    // We add +1 to baseThickness to ensure full coverage when containBar is enabled.
-    readonly property int barExpansion: (frameEnabled && configContainBar) ? Math.round((barSize + baseThickness + 1) * _barAnimProgress) : 0
+    readonly property int barExpansion: (frameEnabled && configContainBar) ? Math.round((barSize + baseThickness) * _barAnimProgress) : 0
 
     // --- Side-Specific Thickness Restoration ---
 

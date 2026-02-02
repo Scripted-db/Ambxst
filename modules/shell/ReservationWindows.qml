@@ -70,6 +70,9 @@ Item {
             
             // Add extra thickness if containing bar (only if frame is actually enabled)
             if (containBar && frameEnabled) {
+                // zone already includes (actualFrameSize + borderWidth) from the start.
+                // When containing the bar, we add another frame thickness unit for the inner side,
+                // but NOT another border, as the border only exists at the screen edge.
                 zone += actualFrameSize;
             }
         }
