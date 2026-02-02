@@ -32,6 +32,27 @@ Item {
 
     readonly property bool expandedState: contentHoverHandler.hovered || notchHovered || isNavigating || Visibilities.playerMenuOpen
 
+    property bool mediaHoverExpanded: false
+
+    Timer {
+        id: mediaHoverTimer
+        interval: 1000
+        running: expandedState && activePlayer !== null && !hasActiveNotifications && !mediaHoverExpanded
+        onTriggered: mediaHoverExpanded = true
+    }
+
+    onExpandedStateChanged: {
+        if (!expandedState) {
+            mediaHoverExpanded = false;
+        }
+    }
+
+    onActivePlayerChanged: {
+        if (!activePlayer) {
+            mediaHoverExpanded = false;
+        }
+    }
+
     property real mainRowMargin: 16
 
     Behavior on mainRowMargin {
@@ -49,7 +70,7 @@ Item {
     readonly property real notificationMinWidth: expandedState ? 420 : 320
     readonly property real notificationContainerHeight: notificationView.implicitHeight + notificationPaddingTop + notificationPaddingBottom
 
-    implicitWidth: Math.round(hasActiveNotifications ? Math.max(notificationMinWidth + (notificationPadding * 2), mainRowContentWidth) : mainRowContentWidth)
+    implicitWidth: Math.round((hasActiveNotifications || mediaHoverExpanded) ? Math.max(notificationMinWidth + (notificationPadding * 2), mainRowContentWidth) : mainRowContentWidth)
 
     implicitHeight: hasActiveNotifications ? mainRowHeight + notificationContainerHeight : mainRowHeight
 
