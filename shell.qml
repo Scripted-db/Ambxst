@@ -90,8 +90,6 @@ ShellRoot {
                 }
                 barPosition: unifiedPanel.barPosition
                 barPinned: unifiedPanel.pinned
-                barReveal: unifiedPanel.reveal
-                barFullscreen: unifiedPanel.activeWindowFullscreen
                 barSize: (unifiedPanel.barPosition === "left" || unifiedPanel.barPosition === "right") ? unifiedPanel.barTargetWidth : unifiedPanel.barTargetHeight
                 barOuterMargin: unifiedPanel.barOuterMargin
 
@@ -107,8 +105,6 @@ ShellRoot {
                 }
                 dockPosition: unifiedPanel.dockPosition
                 dockPinned: unifiedPanel.dockPinned
-                dockReveal: unifiedPanel.dockReveal
-                dockFullscreen: unifiedPanel.dockFullscreen
                 
                 frameEnabled: Config.bar?.frameEnabled ?? false
                 frameThickness: Config.bar?.frameThickness ?? 6

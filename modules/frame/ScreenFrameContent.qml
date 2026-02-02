@@ -14,48 +14,24 @@ Item {
     required property ShellScreen targetScreen
     property bool hasFullscreenWindow: false
 
-    // These properties are now handled by parent ScreenFrame
-    // but we can expose aliases or simple properties for drawing
-    
-    // We expect the parent to set these, but we can't 'required property' them 
-    // easily if they are not passed in instantiation inside ScreenFrame.
-    // However, ScreenFrame DOES instantiate this.
-    // But in QML scope, 'ScreenFrame' properties are accessible if we are a child.
-    
-    // Let's rely on parent properties injection or direct access if needed, 
-    // but better to keep it clean.
-    
-    // Actually, ScreenFrame.qml defines 'frameContent' inside it.
-    // We can just use parent properties or aliases.
-    
-    // BUT to keep it standalone-ish or at least type-safe:
-    // We will re-read Config here OR rely on parent.
-    // Ideally, we shouldn't duplicate logic.
-    
     readonly property bool frameEnabled: Config.bar?.frameEnabled ?? false
     
-    readonly property real targetThickness: {
-        if (hasFullscreenWindow) return 0;
-        const value = Config.bar?.frameThickness;
-        if (typeof value !== "number")
-            return 6;
-        return Math.max(1, Math.min(Math.round(value), 40));
-    }
+    // Reference the bar/dock content to get states
+    readonly property var barPanel: Visibilities.barPanels[targetScreen.name]
+    readonly property var dockPanel: Visibilities.dockPanels[targetScreen.name]
+    
+    readonly property bool barHovered: barPanel ? (barPanel.barHoverActive || barPanel.notchHoverActive || barPanel.notchOpen) : false
+    // dockPanel.reveal is already true when it's pinned, we need to know if it's actually "visible" or being hovered to reveal
+    readonly property bool dockHovered: dockPanel ? (dockPanel.reveal && (dockPanel.activeWindowFullscreen || dockPanel.keepHidden || !dockPanel.pinned)) : false
 
-    property real thickness: targetThickness
-    Behavior on thickness {
-        enabled: Config.animDuration > 0
-        NumberAnimation {
-            duration: Config.animDuration
-            easing.type: Easing.OutCubic
-        }
+    readonly property real baseThickness: {
+        const base = Config.bar?.frameThickness ?? 6;
+        return Math.max(1, Math.min(Math.round(base), 40));
     }
 
     readonly property bool containBar: Config.bar?.containBar ?? false
     readonly property string barPos: Config.bar?.position ?? "top"
 
-    // Reference the bar content to get dynamic size
-    readonly property var barPanel: Visibilities.barPanels[targetScreen.name]
     readonly property int barSize: {
         if (!barPanel) return 44; // Fallback
         const isHoriz = barPos === "top" || barPos === "bottom";
@@ -74,19 +50,36 @@ Item {
     }
 
     // This must match ScreenFrame.qml logic EXACTLY
-    // ScreenFrame: barExpansion = barSize + thickness
-    readonly property int barExpansion: Math.round((barSize + thickness) * _barAnimProgress)
+    // ScreenFrame: barExpansion = barSize + baseThickness
+    readonly property int barExpansion: Math.round((barSize + baseThickness) * _barAnimProgress)
 
-    readonly property int topThickness: thickness + ((containBar && barPos === "top") ? barExpansion : 0)
-    readonly property int bottomThickness: thickness + ((containBar && barPos === "bottom") ? barExpansion : 0)
-    readonly property int leftThickness: thickness + ((containBar && barPos === "left") ? barExpansion : 0)
-    readonly property int rightThickness: thickness + ((containBar && barPos === "right") ? barExpansion : 0)
+    readonly property int topThickness: {
+        let t = baseThickness;
+        if (hasFullscreenWindow && !(barHovered && barPos === "top") && !(dockHovered && dockPanel.position === "top")) t = 0;
+        return t + ((containBar && barPos === "top") ? barExpansion : 0);
+    }
+    readonly property int bottomThickness: {
+        let t = baseThickness;
+        if (hasFullscreenWindow && !(barHovered && barPos === "bottom") && !(dockHovered && dockPanel.position === "bottom")) t = 0;
+        return t + ((containBar && barPos === "bottom") ? barExpansion : 0);
+    }
+    readonly property int leftThickness: {
+        let t = baseThickness;
+        if (hasFullscreenWindow && !(barHovered && barPos === "left") && !(dockHovered && dockPanel.position === "left")) t = 0;
+        return t + ((containBar && barPos === "left") ? barExpansion : 0);
+    }
+    readonly property int rightThickness: {
+        let t = baseThickness;
+        if (hasFullscreenWindow && !(barHovered && barPos === "right") && !(dockHovered && dockPanel.position === "right")) t = 0;
+        return t + ((containBar && barPos === "right") ? barExpansion : 0);
+    }
 
-    readonly property int actualFrameSize: frameEnabled ? thickness : 0
+    readonly property int actualFrameSize: frameEnabled ? baseThickness : 0
 
     readonly property int borderWidth: Config.theme.srBg.border[1]
     
-    readonly property real targetInnerRadius: root.hasFullscreenWindow ? 0 : Styling.radius(4 + borderWidth)
+    // innerRadius restoration logic
+    readonly property real targetInnerRadius: (root.hasFullscreenWindow && !barHovered && !dockHovered) ? 0 : Styling.radius(4 + borderWidth)
     property real innerRadius: targetInnerRadius
     Behavior on innerRadius {
         enabled: Config.animDuration > 0

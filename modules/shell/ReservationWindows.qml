@@ -8,21 +8,17 @@ Item {
 
     required property ShellScreen screen
 
-    // States from Bar and Dock
+    // State properties for Bar and Dock
     property bool barEnabled: true
     property string barPosition: Config.bar?.position ?? "top"
     property bool barPinned: true
-    property bool barReveal: true
-    property bool barFullscreen: false
     property int barSize: 0
     property int barOuterMargin: 0
     property bool containBar: Config.bar?.containBar ?? false
 
-    // Force update when any bar state changes
+    // Force update when any relevant bar state changes
     onBarEnabledChanged: updateAllZones();
     onBarPinnedChanged: updateAllZones();
-    onBarRevealChanged: updateAllZones();
-    onBarFullscreenChanged: updateAllZones();
     onBarSizeChanged: updateAllZones();
     onBarOuterMarginChanged: updateAllZones();
     onContainBarChanged: updateAllZones();
@@ -50,16 +46,12 @@ Item {
     property bool dockEnabled: true
     property string dockPosition: "bottom"
     property bool dockPinned: true
-    property bool dockReveal: true
-    property bool dockFullscreen: false
     property int dockHeight: (Config.dock?.height ?? 56) + (Config.dock?.margin ?? 8) + (isDefaultDock ? 0 : (Config.dock?.margin ?? 8))
     property bool isDefaultDock: (Config.dock?.theme ?? "default") === "default"
 
     onDockEnabledChanged: updateAllZones();
     onDockPositionChanged: updateAllZones();
     onDockPinnedChanged: updateAllZones();
-    onDockRevealChanged: updateAllZones();
-    onDockFullscreenChanged: updateAllZones();
     onDockHeightChanged: updateAllZones();
 
     property bool frameEnabled: Config.bar?.frameEnabled ?? false
@@ -78,10 +70,11 @@ Item {
     function getExtraZone(side) {
         if (!Config.barReady) return 0;
         
+        // Base zone is frame + border (static area)
         let zone = actualFrameSize > 0 ? actualFrameSize + borderWidth : 0;
 
-        // Bar zone
-        if (barEnabled && barPosition === side && barPinned && barReveal && !barFullscreen) {
+        // Bar zone - only reserve if pinned (static)
+        if (barEnabled && barPosition === side && barPinned) {
             if (zone === 0) zone = borderWidth;
             zone += barSize + barOuterMargin;
             // Add extra thickness if containing bar
@@ -90,8 +83,8 @@ Item {
             }
         }
 
-        // Dock zone
-        if (dockEnabled && dockPosition === side && dockPinned && dockReveal && !dockFullscreen) {
+        // Dock zone - only reserve if pinned (static)
+        if (dockEnabled && dockPosition === side && dockPinned) {
             if (zone === 0) zone = borderWidth;
             zone += dockHeight;
         }
