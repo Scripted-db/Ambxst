@@ -1078,6 +1078,7 @@ Singleton {
                 property int workTime: 1500
                 property int restTime: 300
                 property bool autoStart: false
+                property bool syncSpotify: false
             }
         }
     }

@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import qs.modules.theme
 import qs.modules.components
+import qs.modules.services
 import qs.config
 
 Item {
@@ -52,6 +53,36 @@ Item {
     property int totalTime: Config.system.pomodoro.workTime
     property real visualProgress: 1.0
 
+    readonly property var spotifyPlayer: {
+        for (let player of MprisController.filteredPlayers) {
+            if (player.dbusName.toLowerCase().includes("spotify")) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    function updateSpotify() {
+        if (!Config.system.pomodoro.syncSpotify || !root.spotifyPlayer) return;
+        
+        let spotify = root.spotifyPlayer;
+        if (root.isRunning && root.isWorkSession) {
+            if (!spotify.isPlaying && spotify.canPlay) spotify.play();
+        } else {
+            if (spotify.isPlaying && spotify.canPause) spotify.pause();
+        }
+    }
+
+    onIsRunningChanged: updateSpotify()
+    onIsWorkSessionChanged: updateSpotify()
+    
+    Connections {
+        target: Config.system.pomodoro
+        function onSyncSpotifyChanged() {
+            root.updateSpotify();
+        }
+    }
+
     readonly property bool isResuming: !isRunning && !alarmActive && timeLeft > 0 && 
                                       timeLeft < (isWorkSession ? Config.system.pomodoro.workTime : Config.system.pomodoro.restTime)
 
@@ -64,6 +95,7 @@ Item {
         
         if (!isRunning) {
             let configTime = isWorkSession ? Config.system.pomodoro.workTime : Config.system.pomodoro.restTime;
+            // If we are at the beginning of a session, ensure totalTime is synced
             if (timeLeft === configTime) {
                 totalTime = timeLeft;
             }
@@ -101,23 +133,37 @@ Item {
     }
 
     function startAlarm() {
+        let finishedSession = isWorkSession ? "Work" : "Rest";
         isRunning = false;
         alarmActive = true;
         visualProgress = 0; // Ensure it's exactly 0
-        alarmSound.loops = Config.system.pomodoro.autoStart ? 4 : SoundEffect.Infinite;
-        alarmSound.play();
+        alarmSound.loops = Config.system.pomodoro.autoStart ? 2 : SoundEffect.Infinite;
+        
+        // Play alarm if going to rest (Work finished) OR if spotify sync is disabled/spotify not found
+        if (root.isWorkSession || !(Config.system.pomodoro.syncSpotify && root.spotifyPlayer)) {
+            alarmSound.play();
+        } else if (Config.system.pomodoro.autoStart) {
+            // If no sound and auto, clear alarm state immediately
+            alarmActive = false;
+        }
 
-        // Send notification with actions
-        let sessionType = isWorkSession ? "Work" : "Rest";
-        notifyProcess.command = [
+        if (Config.system.pomodoro.autoStart) {
+            nextSession();
+        }
+
+        // Prepare notification command before running
+        let cmd = [
             "notify-send",
-            "--wait",
-            "--action=check=Check",
-            "--action=stop=Stop",
             "-a", "Pomodoro",
             "Pomodoro",
-            sessionType + " session finished!"
+            finishedSession + " session finished!"
         ];
+        
+        // Add wait and actions ONLY if notify-send supports them (most modern ones do)
+        // Note: Removing --wait can help if the process hangs
+        cmd.splice(1, 0, "--wait", "--action=check=Check", "--action=stop=Stop");
+        
+        notifyProcess.command = cmd;
         notifyProcess.running = true;
     }
 
@@ -142,7 +188,6 @@ Item {
         onPlayingChanged: {
             if (!playing && alarmActive && Config.system.pomodoro.autoStart) {
                 stopAlarm();
-                nextSession();
             }
         }
     }
@@ -196,42 +241,14 @@ Item {
                     enabled: !root.isRunning && !root.alarmActive
                     onClicked: {
                         root.isWorkSession = !root.isWorkSession;
-                        root.timeLeft = root.isWorkSession ? Config.system.pomodoro.workTime : Config.system.pomodoro.restTime;
+                        let configTime = root.isWorkSession ? Config.system.pomodoro.workTime : Config.system.pomodoro.restTime;
+                        root.timeLeft = configTime;
+                        root.totalTime = configTime;
                     }
                 }
             }
 
             Item { Layout.fillWidth: true }
-
-            // Auto Toggle
-            RowLayout {
-                spacing: 6
-                Text {
-                    text: "Auto"
-                    font.family: Config.theme.font
-                    font.pixelSize: Styling.fontSize(-2)
-                    color: Colors.outline
-                }
-                Item {
-                    width: 32; height: 18
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: 9
-                        color: Config.system.pomodoro.autoStart ? Styling.srItem("overprimary") : Colors.surfaceBright
-                        opacity: Config.system.pomodoro.autoStart ? 1.0 : 0.4
-                        Rectangle {
-                            x: Config.system.pomodoro.autoStart ? parent.width - 16 : 2
-                            y: 2; width: 14; height: 14; radius: 7
-                            color: Colors.background
-                            Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
-                        }
-                    }
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: Config.system.pomodoro.autoStart = !Config.system.pomodoro.autoStart
-                    }
-                }
-            }
 
             // Reset
             StyledRect {
@@ -335,8 +352,9 @@ Item {
                     if (root.timeLeft >= 60) {
                         root.timeLeft -= 60;
                         if (!root.isRunning) {
-                            if (root.isWorkSession) Config.system.pomodoro.workTime = Math.max(60, Config.system.pomodoro.workTime - 60);
-                            else Config.system.pomodoro.restTime = Math.max(60, Config.system.pomodoro.restTime - 60);
+                            root.totalTime = root.timeLeft;
+                            if (root.isWorkSession) Config.system.pomodoro.workTime = root.timeLeft;
+                            else Config.system.pomodoro.restTime = root.timeLeft;
                         }
                     }
                 }
@@ -370,8 +388,76 @@ Item {
                 onClicked: {
                     root.timeLeft += 60;
                     if (!root.isRunning) {
-                        if (root.isWorkSession) Config.system.pomodoro.workTime += 60;
-                        else Config.system.pomodoro.restTime += 60;
+                        root.totalTime = root.timeLeft;
+                        if (root.isWorkSession) Config.system.pomodoro.workTime = root.timeLeft;
+                        else Config.system.pomodoro.restTime = root.timeLeft;
+                    }
+                }
+            }
+        }
+
+        // Settings Row
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 20
+
+            // Auto Toggle
+            RowLayout {
+                spacing: 8
+                Text {
+                    text: "Auto"
+                    font.family: Config.theme.font
+                    font.pixelSize: Styling.fontSize(-1)
+                    color: Colors.outline
+                }
+                Item {
+                    Layout.preferredWidth: 36; Layout.preferredHeight: 20
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 10
+                        color: Config.system.pomodoro.autoStart ? Styling.srItem("overprimary") : Colors.surfaceBright
+                        opacity: Config.system.pomodoro.autoStart ? 1.0 : 0.4
+                        Rectangle {
+                            x: Config.system.pomodoro.autoStart ? parent.width - 18 : 2
+                            y: 2; width: 16; height: 16; radius: 8
+                            color: Colors.background
+                            Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: Config.system.pomodoro.autoStart = !Config.system.pomodoro.autoStart
+                    }
+                }
+            }
+
+            // Sync Spotify Toggle
+            RowLayout {
+                spacing: 8
+                Text {
+                    text: "Sync Spotify"
+                    font.family: Config.theme.font
+                    font.pixelSize: Styling.fontSize(-1)
+                    color: Colors.outline
+                }
+                Item {
+                    Layout.preferredWidth: 36; Layout.preferredHeight: 20
+                    Rectangle {
+                        anchors.fill: parent
+                        radius: 10
+                        color: Config.system.pomodoro.syncSpotify ? Styling.srItem("overprimary") : Colors.surfaceBright
+                        opacity: Config.system.pomodoro.syncSpotify ? 1.0 : 0.4
+                        Rectangle {
+                            x: Config.system.pomodoro.syncSpotify ? parent.width - 18 : 2
+                            y: 2; width: 16; height: 16; radius: 8
+                            color: Colors.background
+                            Behavior on x { NumberAnimation { duration: 200; easing.type: Easing.OutQuart } }
+                        }
+                    }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: Config.system.pomodoro.syncSpotify = !Config.system.pomodoro.syncSpotify
                     }
                 }
             }

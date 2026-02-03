@@ -41,6 +41,7 @@ var data = {
     "pomodoro": {
         "workTime": 1500,
         "restTime": 300,
-        "autoStart": false
+        "autoStart": false,
+        "syncSpotify": false
     }
 }
