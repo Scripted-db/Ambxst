@@ -69,7 +69,7 @@ Item {
                         icon: Icons.sync,
                         tooltip: "Scan for devices",
                         enabled: BluetoothService.enabled,
-                        loading: BluetoothService.discovering,
+                        loading: BluetoothService.discovering || BluetoothService.isUpdating,
                         onClicked: function () {
                             BluetoothService.startDiscovery();
                         }

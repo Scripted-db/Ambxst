@@ -71,7 +71,7 @@ Item {
                         icon: Icons.sync,
                         tooltip: "Rescan networks",
                         enabled: NetworkService.wifiEnabled,
-                        loading: NetworkService.wifiScanning,
+                        loading: NetworkService.wifiScanning || NetworkService.isUpdating,
                         onClicked: function () {
                             NetworkService.rescanWifi();
                         }

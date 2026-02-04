@@ -21,6 +21,7 @@ Singleton {
     // Queue for batching updateInfo calls
     property var pendingInfoUpdates: []
     property bool isProcessingInfoQueue: false
+    property bool isUpdating: false
 
     property var suspendConnections: Connections {
         target: SuspendManager
@@ -100,60 +101,136 @@ Singleton {
         }
     }
 
-    // Control functions
-    function toggle() {
-        setEnabled(!enabled);
-    }
-
-    function setEnabled(value: bool) {
-        if (SuspendManager.isSuspending) return;
-        toggleProcess.command = ["bluetoothctl", "power", value ? "on" : "off"];
-        toggleProcess.running = true;
-    }
-
-    function startDiscovery() {
-        if (enabled && !SuspendManager.isSuspending) {
-            discovering = true;
-            scanProcess.command = ["bluetoothctl", "scan", "on"];
-            scanProcess.running = true;
-            // Stop scanning after 15 seconds
-            scanTimer.restart();
+    Component {
+        id: asyncProcessComp
+        Process {
+            id: internalProc
+            property var resolve
+            property var reject
+            property string buffer: ""
+            property string errorBuffer: ""
+            
+            stdout: SplitParser {
+                onRead: data => internalProc.buffer += data + "\n"
+            }
+            
+            stderr: SplitParser {
+                onRead: data => internalProc.errorBuffer += data + "\n"
+            }
+            
+            onExited: (exitCode, exitStatus) => {
+                if (exitCode === 0) resolve(buffer.trim());
+                else reject(errorBuffer.trim() || `Process exited with code ${exitCode}`);
+                destroy();
+            }
         }
     }
 
-    function stopDiscovery() {
+    function runAsync(command, environment = {}) {
+        return new Promise((resolve, reject) => {
+            const proc = asyncProcessComp.createObject(root, {
+                command: command,
+                environment: environment,
+                resolve: resolve,
+                reject: reject
+            });
+            proc.running = true;
+        });
+    }
+
+    // Control functions
+    function setEnabled(value: bool): void {
+        if (SuspendManager.isSuspending) return;
+        isUpdating = true;
+        runAsync(["bluetoothctl", "power", value ? "on" : "off"]).then(() => {
+            updateStatus();
+            if (value) updateDevices();
+            isUpdating = false;
+        }).catch(e => {
+            isUpdating = false;
+        });
+    }
+
+    function toggle(): void {
+        setEnabled(!enabled);
+    }
+
+    function startDiscovery(): void {
+        if (enabled && !SuspendManager.isSuspending) {
+            discovering = true;
+            runAsync(["bluetoothctl", "scan", "on"]).then(() => {
+                scanTimer.restart();
+            }).catch(e => {
+                discovering = false;
+            });
+        }
+    }
+
+    function stopDiscovery(): void {
         discovering = false;
-        stopScanProcess.command = ["bluetoothctl", "scan", "off"];
-        stopScanProcess.running = true;
-        scanTimer.stop();
+        runAsync(["bluetoothctl", "scan", "off"]).then(() => {
+            scanTimer.stop();
+        }).catch(e => {});
     }
 
-    function connectDevice(address: string) {
-        connectProcess.command = ["bluetoothctl", "connect", address];
-        connectProcess.running = true;
+    function connectDevice(address: string): void {
+        isUpdating = true;
+        runAsync(["bluetoothctl", "connect", address]).then(() => {
+            updateDevices();
+            isUpdating = false;
+        }).catch(e => {
+            isUpdating = false;
+        });
     }
 
-    function disconnectDevice(address: string) {
-        disconnectProcess.command = ["bluetoothctl", "disconnect", address];
-        disconnectProcess.running = true;
+    function disconnectDevice(address: string): void {
+        isUpdating = true;
+        runAsync(["bluetoothctl", "disconnect", address]).then(() => {
+            updateDevices();
+            isUpdating = false;
+        }).catch(e => {
+            isUpdating = false;
+        });
     }
 
-    function pairDevice(address: string) {
-        pairProcess.command = ["bluetoothctl", "pair", address];
-        pairProcess.running = true;
+    function pairDevice(address: string): void {
+        isUpdating = true;
+        runAsync(["bluetoothctl", "pair", address]).then(() => {
+            updateDevices();
+            isUpdating = false;
+        }).catch(e => {
+            isUpdating = false;
+        });
     }
 
-    function trustDevice(address: string) {
-        trustProcess.command = ["bluetoothctl", "trust", address];
-        trustProcess.running = true;
+    function trustDevice(address: string): void {
+        runAsync(["bluetoothctl", "trust", address]).catch(e => {});
     }
 
-    function removeDevice(address: string) {
-        removeProcess.command = ["bluetoothctl", "remove", address];
-        removeProcess.running = true;
+    function removeDevice(address: string): void {
+        isUpdating = true;
+        runAsync(["bluetoothctl", "remove", address]).then(() => {
+            updateDevices();
+            isUpdating = false;
+        }).catch(e => {
+            isUpdating = false;
+        });
+    }
+
+    Timer {
+        id: updateDebouncer
+        interval: 200
+        repeat: false
+        onTriggered: root.performUpdate()
     }
 
     function updateStatus() {
+        updateDebouncer.restart();
+    }
+
+    function performUpdate() {
+        if (isUpdating) return;
+        isUpdating = true;
         checkPowerProcess.running = true;
     }
 
@@ -175,57 +252,6 @@ Singleton {
     }
 
     // Processes
-    Process {
-        id: toggleProcess
-        running: false
-        onExited: {
-            root.updateStatus();
-            if (root.enabled) {
-                root.updateDevices();
-            }
-        }
-    }
-
-    Process {
-        id: scanProcess
-        running: false
-        onExited: root.updateDevices()
-    }
-
-    Process {
-        id: stopScanProcess
-        running: false
-    }
-
-    Process {
-        id: connectProcess
-        running: false
-        onExited: root.updateDevices()
-    }
-
-    Process {
-        id: disconnectProcess
-        running: false
-        onExited: root.updateDevices()
-    }
-
-    Process {
-        id: pairProcess
-        running: false
-        onExited: root.updateDevices()
-    }
-
-    Process {
-        id: trustProcess
-        running: false
-    }
-
-    Process {
-        id: removeProcess
-        running: false
-        onExited: root.updateDevices()
-    }
-
     Process {
         id: checkPowerProcess
         command: ["bash", "-c", "bluetoothctl show | grep 'Powered:' | awk '{print $2}'"]
@@ -281,48 +307,50 @@ Singleton {
             const text = getDevicesProcess.buffer;
             getDevicesProcess.buffer = "";
             
-            const deviceLines = text.trim().split("\n").filter(l => l.startsWith("Device "));
-            const deviceAddresses = deviceLines.map(line => {
-                const parts = line.split(" ");
-                return {
-                    address: parts[1] || "",
-                    name: parts.slice(2).join(" ") || "Unknown"
-                };
-            }).filter(d => d.address);
+            Qt.callLater(() => {
+                const deviceLines = text.trim().split("\n").filter(l => l.startsWith("Device "));
+                const deviceAddresses = deviceLines.map(line => {
+                    const parts = line.split(" ");
+                    return {
+                        address: parts[1] || "",
+                        name: parts.slice(2).join(" ") || "Unknown"
+                    };
+                }).filter(d => d.address);
 
-            // Update existing devices and add new ones
-            const rDevices = root.devices;
-            
-            // Remove devices that no longer exist
-            const toRemove = rDevices.filter(rd => !deviceAddresses.find(d => d.address === rd.address));
-            for (const device of toRemove) {
-                const idx = rDevices.indexOf(device);
-                if (idx >= 0) {
-                    rDevices.splice(idx, 1);
-                    device.destroy();
+                // Update existing devices and add new ones
+                const rDevices = root.devices;
+                
+                // Remove devices that no longer exist
+                const toRemove = rDevices.filter(rd => !deviceAddresses.find(d => d.address === rd.address));
+                for (const device of toRemove) {
+                    const idx = rDevices.indexOf(device);
+                    if (idx >= 0) {
+                        rDevices.splice(idx, 1);
+                        device.destroy();
+                    }
                 }
-            }
-            
-            // Add or update devices
-            for (const deviceData of deviceAddresses) {
-                const existing = rDevices.find(d => d.address === deviceData.address);
-                if (existing) {
-                    existing.name = deviceData.name;
-                    root.queueInfoUpdate(existing);
-                } else {
-                    const newDevice = deviceComp.createObject(root, {
-                        address: deviceData.address,
-                        name: deviceData.name
-                    });
-                    rDevices.push(newDevice);
-                    root.queueInfoUpdate(newDevice);
+                
+                // Add or update devices
+                for (const deviceData of deviceAddresses) {
+                    const existing = rDevices.find(d => d.address === deviceData.address);
+                    if (existing) {
+                        existing.name = deviceData.name;
+                        root.queueInfoUpdate(existing);
+                    } else {
+                        const newDevice = deviceComp.createObject(root, {
+                            address: deviceData.address,
+                            name: deviceData.name
+                        });
+                        rDevices.push(newDevice);
+                        root.queueInfoUpdate(newDevice);
+                    }
                 }
-            }
-            
-            // If no devices to update, just refresh the list
-            if (deviceAddresses.length === 0) {
-                root.updateFriendlyList();
-            }
+                
+                // If no devices to update, just refresh the list
+                if (deviceAddresses.length === 0) {
+                    root.updateFriendlyList();
+                }
+            });
         }
     }
 

@@ -20,13 +20,51 @@ QtObject {
     // Connect with auto-trust for new devices
     function connect() {
         connecting = true;
+        let p;
         if (!trusted) {
             // Trust first, then connect
-            trustThenConnectProcess.command = ["bash", "-c", `bluetoothctl trust ${address} && bluetoothctl connect ${address}`];
-            trustThenConnectProcess.running = true;
+            p = BluetoothService.runAsync(["bluetoothctl", "trust", address]).then(() => {
+                return BluetoothService.runAsync(["bluetoothctl", "connect", address]);
+            });
         } else {
-            BluetoothService.connectDevice(address);
+            p = BluetoothService.connectDevice(address);
         }
+
+        return p.catch(e => {
+            console.error(`Failed to connect to ${address}: ${e}`);
+        }).finally(() => {
+            connecting = false;
+            updateInfo();
+        });
+    }
+
+    function updateInfo() {
+        return BluetoothService.runAsync(["bluetoothctl", "info", address]).then(text => {
+            Qt.callLater(() => {
+                const lines = text.split("\n");
+                for (const line of lines) {
+                    const trimmed = line.trim();
+                    if (trimmed.startsWith("Paired:")) {
+                        root.paired = trimmed.includes("yes");
+                    } else if (trimmed.startsWith("Connected:")) {
+                        root.connected = trimmed.includes("yes");
+                        if (root.connected) root.connecting = false;
+                    } else if (trimmed.startsWith("Trusted:")) {
+                        root.trusted = trimmed.includes("yes");
+                    } else if (trimmed.startsWith("Icon:")) {
+                        root.icon = trimmed.split(":")[1]?.trim() || "bluetooth";
+                    } else if (trimmed.startsWith("Battery Percentage:")) {
+                        const match = trimmed.match(/\((\d+)\)/);
+                        if (match) {
+                            root.battery = parseInt(match[1]) || -1;
+                        }
+                    }
+                }
+                root.infoUpdated();
+            });
+        }).catch(e => {
+            console.error(`Failed to get info for ${address}: ${e}`);
+        });
     }
 
     function disconnect() {
@@ -43,61 +81,5 @@ QtObject {
 
     function forget() {
         BluetoothService.removeDevice(address);
-    }
-
-    function updateInfo() {
-        infoProcess.command = ["bash", "-c", `bluetoothctl info ${address}`];
-        infoProcess.running = true;
-    }
-
-    property Process trustThenConnectProcess: Process {
-        running: false
-        environment: ({
-            LANG: "C",
-            LC_ALL: "C"
-        })
-        onExited: (exitCode, exitStatus) => {
-            root.connecting = false;
-            root.updateInfo();
-        }
-    }
-
-    property Process infoProcess: Process {
-        running: false
-        property string buffer: ""
-        environment: ({
-            LANG: "C",
-            LC_ALL: "C"
-        })
-        stdout: SplitParser {
-            onRead: data => {
-                infoProcess.buffer += data + "\n";
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            const text = infoProcess.buffer;
-            infoProcess.buffer = "";
-            
-            const lines = text.split("\n");
-            for (const line of lines) {
-                const trimmed = line.trim();
-                if (trimmed.startsWith("Paired:")) {
-                    root.paired = trimmed.includes("yes");
-                } else if (trimmed.startsWith("Connected:")) {
-                    root.connected = trimmed.includes("yes");
-                    if (root.connected) root.connecting = false;
-                } else if (trimmed.startsWith("Trusted:")) {
-                    root.trusted = trimmed.includes("yes");
-                } else if (trimmed.startsWith("Icon:")) {
-                    root.icon = trimmed.split(":")[1]?.trim() || "bluetooth";
-                } else if (trimmed.startsWith("Battery Percentage:")) {
-                    const match = trimmed.match(/\((\d+)\)/);
-                    if (match) {
-                        root.battery = parseInt(match[1]) || -1;
-                    }
-                }
-            }
-            root.infoUpdated();
-        }
     }
 }
