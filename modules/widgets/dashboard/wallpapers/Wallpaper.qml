@@ -1287,6 +1287,7 @@ PanelWindow {
                         property real texWidth: rawImage.width
                         property real texHeight: rawImage.height
 
+                        vertexShader: "palette.vert.qsb"
                         fragmentShader: "palette.frag.qsb"
                     }
                 }

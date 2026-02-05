@@ -87,6 +87,7 @@ Item {
                 property real texWidth: rawImage.width
                 property real texHeight: rawImage.height
 
+                vertexShader: "../widgets/dashboard/wallpapers/palette.vert.qsb"
                 fragmentShader: "../widgets/dashboard/wallpapers/palette.frag.qsb"
             }
         }

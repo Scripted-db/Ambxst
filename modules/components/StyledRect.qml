@@ -123,6 +123,7 @@ ClippingRectangle {
         property real canvasHeight: height
         property var gradTex: gradientTextureSource
 
+        vertexShader: "linear_gradient.vert.qsb"
         fragmentShader: "linear_gradient.frag.qsb"
     }
 
@@ -138,6 +139,7 @@ ClippingRectangle {
         property real canvasHeight: height
         property var gradTex: gradientTextureSource
 
+        vertexShader: "radial_gradient.vert.qsb"
         fragmentShader: "radial_gradient.frag.qsb"
     }
 

@@ -54,6 +54,7 @@ Item {
         property real radius: Math.max(root.shadowBlur * 32.0, 1.0)
         property vector2d texelSize: Qt.vector2d(1.0 / width, 1.0 / height)
         
+        vertexShader: "unified_pass1.vert.qsb"
         fragmentShader: "unified_pass1.frag.qsb"
     }
     
@@ -91,6 +92,7 @@ Item {
         property real maskEnabled: root.maskEnabled ? 1.0 : 0.0
         property real maskInverted: root.maskInverted ? 1.0 : 0.0
         
+        vertexShader: "unified_pass2.vert.qsb"
         fragmentShader: "unified_pass2.frag.qsb"
     }
 }

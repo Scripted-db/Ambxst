@@ -91,6 +91,7 @@ Item {
                 property real texWidth: root.width
                 property real texHeight: root.height
 
+                vertexShader: "../widgets/dashboard/wallpapers/palette.vert.qsb"
                 fragmentShader: "../widgets/dashboard/wallpapers/palette.frag.qsb"
             }
         }
