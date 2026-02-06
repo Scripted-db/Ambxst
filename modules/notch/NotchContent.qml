@@ -27,8 +27,9 @@ Item {
     readonly property var screenVisibilities: Visibilities.getForScreen(screen.name)
     readonly property bool isScreenFocused: Hyprland.focusedMonitor && Hyprland.focusedMonitor.name === screen.name
 
-    // Monitor reference
+    // Monitor reference and refrence to toplevels on monitor
     readonly property var hyprlandMonitor: Hyprland.monitorFor(screen)
+    readonly property var toplevels: hyprlandMonitor.activeWorkspace.toplevels.values
 
     // Check if there are any windows on the current monitor and workspace
     readonly property bool hasWindows: {
@@ -75,24 +76,14 @@ Item {
 
     // Fullscreen detection - check if active toplevel is fullscreen on this screen
     readonly property bool activeWindowFullscreen: {
-        if (!hyprlandMonitor) return false;
-        
-        const activeWorkspaceId = hyprlandMonitor.activeWorkspace.id;
-        const monId = hyprlandMonitor.id;
-        
-        // Check active toplevel first (fast path)
-        const toplevel = ToplevelManager.activeToplevel;
-        if (toplevel && toplevel.fullscreen && Hyprland.focusedMonitor.id === monId) {
-             return true;
-        }
+        if (!hyprlandMonitor || !toplevels) return false;
 
-        // Check all windows on this monitor (robust path)
-        const wins = HyprlandData.windowList;
-        for (let i = 0; i < wins.length; i++) {
-            if (wins[i].monitor === monId && wins[i].fullscreen && wins[i].workspace.id === activeWorkspaceId) {
-                return true;
+        // Check all toplevels on active workspcace
+        for (var i = 0; i < toplevels.length; i++)
+            // Checks first if the wayland handle is ready
+            if (toplevels[i].wayland && toplevels[i].wayland.fullscreen == true) {
+               return true;
             }
-        }
         return false;
     }
 
