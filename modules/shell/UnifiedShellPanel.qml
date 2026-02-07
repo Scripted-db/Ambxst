@@ -32,8 +32,7 @@ PanelWindow {
     WlrLayershell.namespace: "ambxst"
     WlrLayershell.layer: WlrLayer.Overlay
     exclusionMode: ExclusionMode.Ignore
-    
-    // Compatibility properties for Visibilities and other components
+
     readonly property alias barPosition: barContent.barPosition
     readonly property alias barPinned: barContent.pinned
     readonly property alias barHoverActive: barContent.hoverActive
@@ -42,36 +41,6 @@ PanelWindow {
     readonly property alias barTargetWidth: barContent.barTargetWidth
     readonly property alias barTargetHeight: barContent.barTargetHeight
     readonly property alias barOuterMargin: barContent.baseOuterMargin
-
-    /*
-    // BAR DISABLED FOR DEBUGGING
-    readonly property string barPosition: "top" // barContent.barPosition
-    readonly property bool barPinned: true // barContent.pinned
-    readonly property bool barHoverActive: false // barContent.hoverActive
-    readonly property bool barFullscreen: false // barContent.activeWindowFullscreen
-    readonly property bool barReveal: false // barContent.reveal
-    readonly property int barTargetWidth: 0 // barContent.barTargetWidth
-    readonly property int barTargetHeight: 0 // barContent.barTargetHeight
-    readonly property int barOuterMargin: 0 // barContent.baseOuterMargin
-
-    // DOCK DISABLED FOR DEBUGGING
-    readonly property string dockPosition: "bottom" // dockContent.position
-    readonly property bool dockPinned: false // dockContent.pinned
-    readonly property bool dockReveal: false // dockContent.reveal
-    readonly property bool dockFullscreen: false // dockContent.activeWindowFullscreen
-    readonly property int dockHeight: 0 // dockContent.dockSize + dockContent.totalMargin
-
-    // NOTCH DISABLED FOR DEBUGGING
-    readonly property bool notchHoverActive: false // notchContent.hoverActive
-    readonly property bool notchOpen: false // notchContent.screenNotchOpen
-    readonly property bool notchReveal: false // notchContent.reveal
-
-    // Generic names for external compatibility (Visibilities expects these on the panel object)
-    readonly property bool pinned: true // barContent.pinned
-    readonly property bool reveal: false // barContent.reveal
-    readonly property bool hoverActive: false // barContent.hoverActive // Default hoverActive points to bar
-    readonly property bool notch_hoverActive: false // notchContent.hoverActive // Used by bar to check notch
-    */
 
     readonly property alias dockPosition: dockContent.position
     readonly property alias dockPinned: dockContent.pinned
@@ -93,15 +62,16 @@ PanelWindow {
 
     readonly property var hyprlandMonitor: Hyprland.monitorFor(targetScreen)
     readonly property bool hasFullscreenWindow: {
-        if (!hyprlandMonitor) return false;
-        
+        if (!hyprlandMonitor)
+            return false;
+
         const activeWorkspaceId = hyprlandMonitor.activeWorkspace.id;
         const monId = hyprlandMonitor.id;
-        
+
         // Check active toplevel first (fast path)
         const toplevel = ToplevelManager.activeToplevel;
         if (toplevel && toplevel.fullscreen && Hyprland.focusedMonitor.id === monId) {
-             return true;
+            return true;
         }
 
         // Check all windows on this monitor (robust path)
@@ -116,7 +86,7 @@ PanelWindow {
 
     // Proxy properties for Bar/Notch synchronization
     // Note: BarContent and NotchContent already handle their internal sync using Visibilities.
-    
+
     // Helper properties for shadow logic
     readonly property bool keepBarShadow: Config.bar.keepBarShadow ?? false
     readonly property bool keepBarBorder: Config.bar.keepBarBorder ?? false
@@ -180,7 +150,10 @@ PanelWindow {
     Item {
         id: visualContent
         anchors.fill: parent
-        
+
+        layer.enabled: true
+        layer.effect: Shadow {}
+
         ScreenFrameContent {
             id: frameContent
             anchors.fill: parent
@@ -205,7 +178,7 @@ PanelWindow {
             visible: {
                 if (!(Config.dock?.enabled ?? false) || (Config.dock?.theme ?? "default") === "integrated")
                     return false;
-                
+
                 const list = Config.dock?.screenList ?? [];
                 if (!list || list.length === 0)
                     return true;
