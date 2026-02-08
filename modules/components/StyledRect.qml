@@ -89,6 +89,9 @@ ClippingRectangle {
             // Track cache version to know when to repaint
             property int cacheVersion: GradientCache.version
 
+            // Track if canvas has been painted at least once
+            property bool ready: false
+
             Canvas {
                 id: gradientCanvas
                 width: 256
@@ -113,6 +116,8 @@ ClippingRectangle {
                     ctx.fillRect(0, 0, width, height);
                 }
 
+                onPainted: textureContainer.ready = true
+
                 Component.onCompleted: requestPaint()
             }
 
@@ -123,6 +128,8 @@ ClippingRectangle {
                 smooth: true
                 wrapMode: ShaderEffectSource.ClampToEdge
                 visible: false
+                // Only capture when canvas is ready
+                live: textureContainer.ready
             }
 
             // Repaint when cache version changes (theme colors changed)
@@ -136,15 +143,15 @@ ClippingRectangle {
                 }
             }
 
-            // Expose the source for shaders
-            property alias source: gradientSource
+            // Expose the source for shaders (only when ready)
+            property var source: ready ? gradientSource : null
         }
     }
 
     // Linear gradient shader
     Loader {
         anchors.fill: parent
-        active: root.gradientType === "linear" && gradientTextureLoader.item !== null
+        active: root.gradientType === "linear" && gradientTextureLoader.item?.source !== null
 
         sourceComponent: ShaderEffect {
             opacity: root.rectOpacity
@@ -162,7 +169,7 @@ ClippingRectangle {
     // Radial gradient shader
     Loader {
         anchors.fill: parent
-        active: root.gradientType === "radial" && gradientTextureLoader.item !== null
+        active: root.gradientType === "radial" && gradientTextureLoader.item?.source !== null
 
         sourceComponent: ShaderEffect {
             opacity: root.rectOpacity
