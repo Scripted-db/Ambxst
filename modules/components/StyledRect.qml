@@ -116,8 +116,6 @@ ClippingRectangle {
                     ctx.fillRect(0, 0, width, height);
                 }
 
-                onPainted: textureContainer.ready = true
-
                 Component.onCompleted: requestPaint()
             }
 
@@ -128,18 +126,29 @@ ClippingRectangle {
                 smooth: true
                 wrapMode: ShaderEffectSource.ClampToEdge
                 visible: false
-                // Only capture when canvas is ready
-                live: textureContainer.ready
+                // Static texture - only updates when we manually call scheduleUpdate()
+                live: false
             }
 
             // Repaint when cache version changes (theme colors changed)
-            onCacheVersionChanged: gradientCanvas.requestPaint()
+            onCacheVersionChanged: {
+                gradientCanvas.requestPaint();
+            }
 
             // Repaint when gradient stops change (variant changed)
             Connections {
                 target: root
                 function onGradientStopsChanged() {
                     gradientCanvas.requestPaint();
+                }
+            }
+
+            // Update ShaderEffectSource after canvas paints
+            Connections {
+                target: gradientCanvas
+                function onPainted() {
+                    textureContainer.ready = true;
+                    gradientSource.scheduleUpdate();
                 }
             }
 
