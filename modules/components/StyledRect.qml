@@ -187,6 +187,6 @@ ClippingRectangle {
         color: "transparent"
         border.color: Config.resolveColor(borderData[0])
         border.width: borderData[1]
-        visible: root.enableBorder && (root.variant !== "bg" || Config.bar.keepBarBorder)
+        visible: root.enableBorder
     }
 }
