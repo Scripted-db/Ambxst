@@ -8,6 +8,7 @@ import Quickshell.Widgets
 import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 import qs.modules.theme
+import qs.modules.bar.workspaces
 import qs.modules.services
 import qs.modules.components
 import qs.config
@@ -36,10 +37,16 @@ Item {
     }
 
     readonly property string focusedTitle: {
-        const client = Hyprland.focusedClient;
-        const activeWs = Hyprland.focusedMonitor?.activeWorkspace?.id;
-        if (!client || client.workspace.id !== activeWs) return "";
-        return client.title;
+        const activeWsId = Hyprland.focusedMonitor?.activeWorkspace?.id;
+        if (!activeWsId) return "";
+        const windows = HyprlandData.workspaceWindowsMap[activeWsId] || [];
+        if (windows.length === 0) return "";
+        const best = windows.reduce((best, win) => {
+            const bestFocus = best?.focusHistoryID ?? Infinity;
+            const winFocus = win?.focusHistoryID ?? Infinity;
+            return winFocus < bestFocus ? win : best;
+        }, null);
+        return best ? best.title : "";
     }
 
     property string hostname: ""
