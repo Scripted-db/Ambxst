@@ -34,6 +34,8 @@ PanelWindow {
     property bool recordAudioOutput: false
     property bool recordAudioInput: false
 
+    property var focusedMonitor: null // List of monitor objects from hyprctl
+
     function getModes() {
         return [
             {
@@ -111,7 +113,12 @@ PanelWindow {
                 var h = Math.round(selectionRect.height);
                 var x = Math.round(selectionRect.x);
                 var y = Math.round(selectionRect.y);
+
+				x = x + screenrecordPopup.focusedMonitor.x;
+				y = y + screenrecordPopup.focusedMonitor.y;
+
                 var regionStr = w + "x" + h + "+" + x + "+" + y;
+
                 ScreenRecorder.startRecording(screenrecordPopup.recordAudioOutput, screenrecordPopup.recordAudioInput, "region", regionStr);
                 screenrecordPopup.close();
             }
@@ -125,6 +132,9 @@ PanelWindow {
 
     Connections {
         target: Screenshot
+        function onMonitorsListReady(monitors) {
+            screenrecordPopup.focusedMonitor = monitors.find(m => m.focused);
+        }
         function onWindowListReady(windows) {
             screenrecordPopup.activeWindows = windows;
         }
@@ -173,8 +183,8 @@ PanelWindow {
             Repeater {
                 model: screenrecordPopup.activeWindows
                 delegate: Rectangle {
-                    x: modelData.at[0]
-                    y: modelData.at[1]
+                    x: modelData.at[0] - screenrecordPopup.screen.x
+                    y: modelData.at[1] - screenrecordPopup.screen.y
                     width: modelData.size[0]
                     height: modelData.size[1]
                     color: "transparent"
@@ -193,11 +203,13 @@ PanelWindow {
 
                     TapHandler {
                         onTapped: {
-                            var w = Math.round(parent.width);
-                            var h = Math.round(parent.height);
-                            var x = Math.round(parent.x);
-                            var y = Math.round(parent.y);
+                            var w = Math.round(modelData.size[0]);
+                            var h = Math.round(modelData.size[1]);
+                            var x = Math.round(modelData.at[0]);
+                            var y = Math.round(modelData.at[1]);
+
                             var regionStr = w + "x" + h + "+" + x + "+" + y;
+
                             ScreenRecorder.startRecording(screenrecordPopup.recordAudioOutput, screenrecordPopup.recordAudioInput, "region", regionStr);
                             screenrecordPopup.close();
                         }
@@ -262,7 +274,12 @@ PanelWindow {
                     var h = Math.round(selectionRect.height);
                     var x = Math.round(selectionRect.x);
                     var y = Math.round(selectionRect.y);
+
+					x = x + screenrecordPopup.focusedMonitor.x;
+					y = y + screenrecordPopup.focusedMonitor.y;
+
                     var regionStr = w + "x" + h + "+" + x + "+" + y;
+
                     ScreenRecorder.startRecording(screenrecordPopup.recordAudioOutput, screenrecordPopup.recordAudioInput, "region", regionStr);
                     screenrecordPopup.close();
                 }
