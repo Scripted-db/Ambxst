@@ -20,9 +20,6 @@ Item {
     property real amplitudeMultiplier: 1.0 // Legacy support
     property real fullLength: width
     property bool animationsEnabled: true
-    
-    // Enable clipping on the root item to hide the scrolling part
-    clip: true
 
     // =========================================================================
     // Internal Logic
@@ -30,89 +27,103 @@ Item {
 
     property real actualAmplitude: amplitude * amplitudeMultiplier
     
-    // Calculate cycle length in pixels: width / frequency
-    // If frequency is 0, avoid division by zero
-    readonly property real cyclePx: (frequency > 0 && width > 0) ? (width / frequency) : width
+    // Wave Animation (Phase Shift)
+    property real wavePhase: 0
 
-    // Animation Phase (Translation)
-    // We animate 't' from 0 to 1 over the duration of one cycle
-    property real t: 0
-    
-    NumberAnimation on t {
+    Timer {
+        id: animationTimer
+        interval: 32 // ~30 fps target
         running: root.running && root.visible && root.animationsEnabled && root.width > 0
-        from: 0
-        to: 1
-        duration: 1000
-        loops: Animation.Infinite
+        repeat: true
+        onTriggered: {
+            if (root.width <= 0) return;
+
+            // Calculate phase shift per tick
+            // Wave equation: y = A * sin(kx - wt)
+            // k = 2PI / wavelength
+            // wavelength = width / frequency (pixels per cycle)
+            
+            let freq = (root.frequency > 0) ? root.frequency : 1;
+            let wavelength = root.width / freq;
+            
+            // Speed is pixels per second
+            // dx per tick = speed * dt
+            let dt = interval / 1000.0;
+            let dx = root.speed * dt;
+            
+            // Convert dx to dPhase
+            // phase = (dx / wavelength) * 2PI
+            let dPhase = (dx / wavelength) * Math.PI * 2;
+            
+            // Subtract phase to move wave right
+            root.wavePhase = (root.wavePhase - dPhase) % (Math.PI * 2);
+        }
     }
 
-    // Static Path Generation
-    property var staticPoints: []
-
-    function updateStaticPath() {
-        if (root.width <= 0) return;
-        
+    // Dynamic Point Generation
+    function generatePoints(phase) {
         let points = [];
+        if (root.width <= 0) return points;
+
         let w = root.width;
         let h = root.height;
-        let centerY = h / 2;
-        let freq = root.frequency > 0 ? root.frequency : 1;
+        let cy = h / 2;
         let amp = root.actualAmplitude;
+        let freq = (root.frequency > 0) ? root.frequency : 1;
         
-        // Cycle length in pixels
-        let cyclePx = w / freq;
-        
-        // Step size: 1px for smoothness
-        let step = 1; 
-        
-        // Generate points for Width + 1 Cycle
-        let totalWidth = w + cyclePx;
+        // Step size: 2px is a good balance for smoothness vs performance
+        let step = 2; 
 
-        for (let x = 0; x <= totalWidth + step; x += step) {
-            // Angle: Map x to angle where w = freq * 2PI
-            let angle = (x / w) * freq * 2 * Math.PI;
+        // Generate points covering 0 to width
+        // Because we animate phase, the wave slides through these fixed x-coordinates
+        for (let x = 0; x <= w + step; x += step) {
+            let cx = Math.min(x, w);
             
-            let yOffset = Math.sin(angle) * amp;
-            points.push(Qt.point(x, centerY + yOffset));
+            // Map x to angle: 0 -> 2PI * freq
+            let angle = (cx / w) * freq * 2 * Math.PI;
+            
+            // Apply phase
+            let yOffset = Math.sin(angle + phase) * amp;
+            
+            points.push(Qt.point(cx, cy + yOffset));
+            
+            if (cx >= w) break;
         }
-        root.staticPoints = points;
+        return points;
     }
 
-    onWidthChanged: updateStaticPath()
-    onHeightChanged: updateStaticPath()
-    onFrequencyChanged: updateStaticPath()
-    onActualAmplitudeChanged: updateStaticPath()
-    Component.onCompleted: updateStaticPath()
-
-    Shape {
-        id: shape
-        // Don't fill parent directly, let us control size
-        width: root.width + root.cyclePx
-        height: root.height
+    // Clipper Item to handle stroke caps extending beyond bounds
+    // We expand the clip rect by lineWidth to show round caps, but clip any large overflows
+    Item {
+        id: clipper
+        anchors.fill: parent
+        anchors.margins: -root.lineWidth 
+        clip: true 
         
-        // Animate X position of the whole Shape
-        x: -root.t * root.cyclePx
-        
-        // Use preferredRendererType: Shape.CurveRenderer for smooth lines
-        preferredRendererType: Shape.CurveRenderer
-        
-        // Disable internal clip of Shape if needed, but we clip at root
-        // clip: false 
-
-        ShapePath {
-            strokeColor: root.color
-            strokeWidth: root.lineWidth
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            joinStyle: ShapePath.RoundJoin
+        Shape {
+            // Position shape correctly relative to clipper (which starts at -margin)
+            x: root.lineWidth
+            y: root.lineWidth
+            width: root.width
+            height: root.height
             
-            // Start at 0 relative to Shape
-            startX: polyline.path.length > 0 ? polyline.path[0].x : 0
-            startY: polyline.path.length > 0 ? polyline.path[0].y : root.height / 2
+            // Use CurveRenderer for smooth anti-aliased lines
+            preferredRendererType: Shape.CurveRenderer
+            
+            ShapePath {
+                strokeColor: root.color
+                strokeWidth: root.lineWidth
+                fillColor: "transparent"
+                capStyle: ShapePath.RoundCap
+                joinStyle: ShapePath.RoundJoin
+                
+                startX: polyline.path.length > 0 ? polyline.path[0].x : 0
+                startY: polyline.path.length > 0 ? polyline.path[0].y : root.height / 2
 
-            PathPolyline {
-                id: polyline
-                path: root.staticPoints
+                PathPolyline {
+                    id: polyline
+                    path: root.generatePoints(root.wavePhase)
+                }
             }
         }
     }
