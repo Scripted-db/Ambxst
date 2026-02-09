@@ -34,7 +34,33 @@ Item {
         return frame ? "file://" + frame : "";
     }
 
-    readonly property string focusedTitle: Hyprland.focusedClient?.title ?? ""
+    property string focusedTitle: ""
+
+    Process {
+        id: activeWindowReader
+        command: ["bash", "-c", "hyprctl activewindow -j | jq -r .title"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const title = text.trim();
+                if (title && title !== "null") {
+                    compactPlayer.focusedTitle = title;
+                } else {
+                    compactPlayer.focusedTitle = "";
+                }
+            }
+        }
+    }
+
+    Connections {
+        target: Hyprland
+        function onRawEvent(event) {
+            if (event.name === "activewindow" || event.name === "windowtitle") {
+                activeWindowReader.running = true;
+            }
+        }
+    }
+
+    Component.onCompleted: activeWindowReader.running = true;
 
     property string hostname: ""
 
@@ -48,7 +74,7 @@ Item {
             onStreamFinished: {
                 const host = text.trim();
                 if (host) {
-                    compactPlayer.hostname = host.charAt(0).toUpperCase() + host.slice(1);
+                    compactPlayer.hostname = host;
                 }
             }
         }
