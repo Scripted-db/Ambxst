@@ -25,6 +25,7 @@ Singleton {
     // ============================================
     Process {
         id: checkPowerProfilesCtl
+        workingDirectory: "/"
         command: ["powerprofilesctl", "version"]
         running: false
         stdout: SplitParser {}
@@ -57,6 +58,7 @@ Singleton {
     // ============================================
     Process {
         id: checkTLP
+        workingDirectory: "/"
         command: ["/sbin/tlp", "--version"]
         running: false
         stdout: SplitParser {
@@ -86,6 +88,7 @@ Singleton {
     // ============================================
     Process {
         id: getProc
+        workingDirectory: "/"
         command: ["powerprofilesctl", "get"]
         running: false
         stdout: SplitParser {
@@ -105,6 +108,7 @@ Singleton {
     // ============================================
     Process {
         id: listProc
+        workingDirectory: "/"
         command: ["bash", "-c", "powerprofilesctl list 2>&1"]
         running: false
 
@@ -164,6 +168,7 @@ Singleton {
     // ============================================
     Process {
         id: getTLPProc
+        workingDirectory: "/"
         command: ["bash", "-c", "/sbin/tlp-stat -p 2>/dev/null | grep -i 'Active profile' | head -1"]
         running: false
         stdout: SplitParser {
@@ -202,6 +207,7 @@ Singleton {
     // ============================================
     Process {
         id: setProc
+        workingDirectory: "/"
         running: false
         stdout: SplitParser {}
         stderr: SplitParser {
@@ -306,4 +312,3 @@ Singleton {
         return profileName;
     }
 }
-
