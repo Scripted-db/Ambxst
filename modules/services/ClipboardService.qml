@@ -87,13 +87,19 @@ QtObject {
     property Process initDbProcess: Process {
         running: false
         
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.length > 0) console.warn("ClipboardService: DB Init Error: " + text)
+            }
+        }
+
         onExited: function(code) {
             if (code === 0) {
                 root._initialized = true;
                 ensureBinaryDataDir();
                 Qt.callLater(root.list);
             } else {
-                console.warn("ClipboardService: Failed to initialize database");
+                console.warn("ClipboardService: Failed to initialize database (Exit code: " + code + ")");
             }
         }
     }

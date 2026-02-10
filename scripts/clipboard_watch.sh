@@ -9,8 +9,13 @@ DATA_DIR="$4"
 
 # Function to check clipboard and output refresh signal on success
 check_clipboard() {
-	if "$CHECK_SCRIPT" "$DB_PATH" "$INSERT_SCRIPT" "$DATA_DIR" 2>/dev/null; then
+	# Drain stdin to avoid blocking wl-paste
+	cat >/dev/null
+
+	if "$CHECK_SCRIPT" "$DB_PATH" "$INSERT_SCRIPT" "$DATA_DIR"; then
 		echo "REFRESH_LIST"
+	else
+		echo "Check failed with code $?" >&2
 	fi
 }
 
