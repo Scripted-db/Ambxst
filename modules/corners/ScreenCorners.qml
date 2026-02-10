@@ -8,9 +8,10 @@ import qs.modules.bar.workspaces // For HyprlandData
 PanelWindow {
     id: screenCorners
 
+    readonly property var monitor: Hyprland.monitorFor(screen);
+
     // Fullscreen detection
     readonly property bool activeWindowFullscreen: {
-        const monitor = Hyprland.monitorFor(screen);
         if (!monitor)
             return false;
 
