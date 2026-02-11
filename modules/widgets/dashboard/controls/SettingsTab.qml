@@ -16,8 +16,8 @@ Rectangle {
     implicitWidth: 400
     implicitHeight: 300
     // 0: Network, 1: Bluetooth, 2: Mixer, 3: Effects, 4: Theme, 5: Binds, 6: System, 7: Shell
-    
-    property int currentSection: 0 
+
+    property int currentSection: 0
     property int selectedIndex: 0
     property string searchQuery: ""
 
@@ -47,7 +47,9 @@ Rectangle {
         searchInput.focusInput();
     }
 
-    SettingsIndex { id: searchIndex }
+    SettingsIndex {
+        id: searchIndex
+    }
 
     // Dynamic Settings Indexer
     Item {
@@ -63,17 +65,15 @@ Rectangle {
             id: indexerLoader
             active: settingsIndexer.isIndexing
             asynchronous: true
-            source: settingsIndexer.isIndexing && settingsIndexer.currentPanelIndex < contentArea.panelComponents.length 
-                    ? contentArea.panelComponents[settingsIndexer.currentPanelIndex].component 
-                    : ""
-            
+            source: settingsIndexer.isIndexing && settingsIndexer.currentPanelIndex < contentArea.panelComponents.length ? contentArea.panelComponents[settingsIndexer.currentPanelIndex].component : ""
+
             onStatusChanged: {
                 if (status === Loader.Ready && item) {
                     // Scrape
                     const sectionId = contentArea.panelComponents[settingsIndexer.currentPanelIndex].section;
                     const newItems = SettingsCrawler.crawl(item, sectionId);
                     settingsIndexer.aggregatedItems = settingsIndexer.aggregatedItems.concat(newItems);
-                    
+
                     // Move to next
                     settingsIndexer.currentPanelIndex++;
                 } else if (status === Loader.Error) {
@@ -111,8 +111,9 @@ Rectangle {
     property string pendingSubSection: ""
 
     function dispatchSubSection(sectionId, subSectionId) {
-        if (!subSectionId || subSectionId === "") return;
-        
+        if (!subSectionId || subSectionId === "")
+            return;
+
         // Panels that support subsections: Theme(4), System(6), Compositor(7), Shell(8)
         if ([4, 6, 7, 8].includes(sectionId)) {
             if (panelLoader.item && panelLoader.status === Loader.Ready) {
@@ -125,12 +126,13 @@ Rectangle {
 
     // Scroll sidebar to ensure visible selection
     function scrollSidebarToSelection() {
-        if (sidebarFlickable.height <= 0) return;
-        
+        if (sidebarFlickable.height <= 0)
+            return;
+
         const tabHeight = 48;
         const tabSpacing = 0;
         const itemY = root.selectedIndex * (tabHeight + tabSpacing);
-        
+
         // Check bounds and scroll if needed
         if (itemY < sidebarFlickable.contentY) {
             sidebarFlickable.contentY = itemY;
@@ -139,12 +141,12 @@ Rectangle {
         }
     }
 
-
-
     // Fuzzy match: checks if all characters of query appear in order in target
     function fuzzyMatch(query, target) {
-        if (query.length === 0) return true;
-        if (target.length === 0) return false;
+        if (query.length === 0)
+            return true;
+        if (target.length === 0)
+            return false;
         const lowerQuery = query.toLowerCase();
         const lowerTarget = target.toLowerCase();
         let queryIndex = 0;
@@ -158,13 +160,16 @@ Rectangle {
 
     // Score a fuzzy match (higher is better)
     function fuzzyScore(query, target) {
-        if (query.length === 0) return 0;
-        if (target.length === 0) return -1;
+        if (query.length === 0)
+            return 0;
+        if (target.length === 0)
+            return -1;
         const lowerQuery = query.toLowerCase();
         const lowerTarget = target.toLowerCase();
 
         // Exact match gets highest score
-        if (lowerTarget.includes(lowerQuery)) return 1000 + (100 - target.length);
+        if (lowerTarget.includes(lowerQuery))
+            return 1000 + (100 - target.length);
 
         // Fuzzy scoring
         let queryIndex = 0, score = 0, consecutive = 0, maxConsecutive = 0;
@@ -173,7 +178,8 @@ Rectangle {
                 queryIndex++;
                 consecutive++;
                 maxConsecutive = Math.max(maxConsecutive, consecutive);
-                if (i === 0 || " -_".includes(lowerTarget[i - 1])) score += 10;
+                if (i === 0 || " -_".includes(lowerTarget[i - 1]))
+                    score += 10;
             } else {
                 consecutive = 0;
             }
@@ -183,24 +189,70 @@ Rectangle {
 
     // Original sections model
     readonly property var sectionModel: [
-        { icon: Icons.wifiHigh, label: "Network", section: 0, isIcon: true },
-        { icon: Icons.bluetooth, label: "Bluetooth", section: 1, isIcon: true },
-        { icon: Icons.faders, label: "Mixer", section: 2, isIcon: true },
-        { icon: Icons.waveform, label: "Effects", section: 3, isIcon: true },
-        { icon: Icons.paintBrush, label: "Theme", section: 4, isIcon: true },
-        { icon: Icons.keyboard, label: "Binds", section: 5, isIcon: true },
-        { icon: Icons.circuitry, label: "System", section: 6, isIcon: true },
-        { icon: Icons.compositor, label: "Compositor", section: 7, isIcon: true },
-        { icon: Qt.resolvedUrl("../../../../assets/ambxst/ambxst-icon.svg"), label: "Ambxst", section: 8, isIcon: false }
+        {
+            icon: Icons.wifiHigh,
+            label: "Network",
+            section: 0,
+            isIcon: true
+        },
+        {
+            icon: Icons.bluetooth,
+            label: "Bluetooth",
+            section: 1,
+            isIcon: true
+        },
+        {
+            icon: Icons.faders,
+            label: "Mixer",
+            section: 2,
+            isIcon: true
+        },
+        {
+            icon: Icons.waveform,
+            label: "Effects",
+            section: 3,
+            isIcon: true
+        },
+        {
+            icon: Icons.paintBrush,
+            label: "Theme",
+            section: 4,
+            isIcon: true
+        },
+        {
+            icon: Icons.keyboard,
+            label: "Binds",
+            section: 5,
+            isIcon: true
+        },
+        {
+            icon: Icons.circuitry,
+            label: "System",
+            section: 6,
+            isIcon: true
+        },
+        {
+            icon: Icons.compositor,
+            label: "Compositor",
+            section: 7,
+            isIcon: true
+        },
+        {
+            icon: Qt.resolvedUrl("../../../../assets/ambxst/ambxst-icon.svg"),
+            label: "Ambxst",
+            section: 8,
+            isIcon: false
+        }
     ]
 
     // Filtered sections based on search query
     readonly property var filteredSections: {
-        if (searchQuery.length === 0) return sectionModel;
-        
+        if (searchQuery.length === 0)
+            return sectionModel;
+
         const query = searchQuery.toLowerCase();
         return searchIndex.items.filter(item => {
-             return fuzzyMatch(query, item.label) || (item.keywords && item.keywords.includes(query));
+            return fuzzyMatch(query, item.label) || (item.keywords && item.keywords.includes(query));
         }).map(item => {
             // Find section metadata
             const sectionMeta = sectionModel.find(s => s.section === item.section) || {};
@@ -220,7 +272,8 @@ Rectangle {
     // Find the index of current section in filtered list
     function getFilteredIndex(sectionId) {
         for (let i = 0; i < filteredSections.length; i++) {
-            if (filteredSections[i].section === sectionId) return i;
+            if (filteredSections[i].section === sectionId)
+                return i;
         }
         return -1;
     }
@@ -386,7 +439,6 @@ Rectangle {
                                         visible: !sidebarButton.modelData.isIcon && (root.searchQuery.length === 0 || !sidebarButton.modelData.subSection)
 
                                         Image {
-                                            mipmap: true
                                             id: svgIcon
                                             width: 20
                                             height: 20
@@ -409,7 +461,7 @@ Rectangle {
                                     // Text
                                     Column {
                                         anchors.verticalCenter: parent.verticalCenter
-                                        
+
                                         Text {
                                             text: sidebarButton.modelData.label
                                             font.family: Config.theme.font
@@ -425,7 +477,7 @@ Rectangle {
                                                 }
                                             }
                                         }
-                                        
+
                                         Text {
                                             visible: !!sidebarButton.modelData.subLabel
                                             text: sidebarButton.modelData.subLabel || ""
@@ -487,15 +539,42 @@ Rectangle {
 
             // Panel definitions for Loader
             readonly property var panelComponents: [
-                { component: "WifiPanel.qml", section: 0 },
-                { component: "BluetoothPanel.qml", section: 1 },
-                { component: "AudioMixerPanel.qml", section: 2 },
-                { component: "EasyEffectsPanel.qml", section: 3 },
-                { component: "ThemePanel.qml", section: 4 },
-                { component: "BindsPanel.qml", section: 5 },
-                { component: "SystemPanel.qml", section: 6 },
-                { component: "CompositorPanel.qml", section: 7 },
-                { component: "ShellPanel.qml", section: 8 }
+                {
+                    component: "WifiPanel.qml",
+                    section: 0
+                },
+                {
+                    component: "BluetoothPanel.qml",
+                    section: 1
+                },
+                {
+                    component: "AudioMixerPanel.qml",
+                    section: 2
+                },
+                {
+                    component: "EasyEffectsPanel.qml",
+                    section: 3
+                },
+                {
+                    component: "ThemePanel.qml",
+                    section: 4
+                },
+                {
+                    component: "BindsPanel.qml",
+                    section: 5
+                },
+                {
+                    component: "SystemPanel.qml",
+                    section: 6
+                },
+                {
+                    component: "CompositorPanel.qml",
+                    section: 7
+                },
+                {
+                    component: "ShellPanel.qml",
+                    section: 8
+                }
             ]
 
             // Lazy-loaded panel using Loader

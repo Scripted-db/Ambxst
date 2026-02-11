@@ -33,18 +33,32 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     exclusionMode: ExclusionMode.Ignore
 
+    readonly property bool barEnabled: {
+        if (!Config.barReady) return false;
+        const list = Config.bar.screenList;
+        return (!list || list.length === 0 || list.indexOf(targetScreen.name) !== -1);
+    }
+
+    readonly property bool dockEnabled: {
+        if (!Config.dockReady) return false;
+        if (!(Config.dock.enabled ?? false) || (Config.dock.theme ?? "default") === "integrated")
+            return false;
+        const list = Config.dock.screenList;
+        return (!list || list.length === 0 || list.indexOf(targetScreen.name) !== -1);
+    }
+
     readonly property alias barPosition: barContent.barPosition
     readonly property alias barPinned: barContent.pinned
     readonly property alias barHoverActive: barContent.hoverActive
     readonly property alias barFullscreen: barContent.activeWindowFullscreen
-    readonly property alias barReveal: barContent.reveal
+    readonly property bool barReveal: barEnabled && barContent.reveal
     readonly property alias barTargetWidth: barContent.barTargetWidth
     readonly property alias barTargetHeight: barContent.barTargetHeight
     readonly property alias barOuterMargin: barContent.baseOuterMargin
 
     readonly property alias dockPosition: dockContent.position
     readonly property alias dockPinned: dockContent.pinned
-    readonly property alias dockReveal: dockContent.reveal
+    readonly property bool dockReveal: dockEnabled && dockContent.reveal
     readonly property alias dockFullscreen: dockContent.activeWindowFullscreen
     readonly property int dockHeight: dockContent.dockSize + dockContent.totalMargin
 
@@ -54,7 +68,7 @@ PanelWindow {
 
     // Generic names for external compatibility (Visibilities expects these on the panel object)
     readonly property alias pinned: barContent.pinned
-    readonly property alias reveal: barContent.reveal
+    readonly property bool reveal: barEnabled ? barContent.reveal : false
     readonly property alias hoverActive: barContent.hoverActive // Default hoverActive points to bar
     readonly property alias notch_hoverActive: notchContent.hoverActive // Used by bar to check notch
 
@@ -116,7 +130,7 @@ PanelWindow {
     mask: Region {
         regions: [
             Region {
-                item: barContent.barHitbox
+                item: barContent.visible ? barContent.barHitbox : null
             },
             Region {
                 item: notchContent.notchHitbox
@@ -167,6 +181,7 @@ PanelWindow {
             anchors.fill: parent
             screen: unifiedPanel.targetScreen
             z: 2
+            visible: unifiedPanel.barEnabled
         }
 
         DockContent {
@@ -175,15 +190,7 @@ PanelWindow {
             anchors.fill: parent
             screen: unifiedPanel.targetScreen
             z: 3
-            visible: {
-                if (!(Config.dock?.enabled ?? false) || (Config.dock?.theme ?? "default") === "integrated")
-                    return false;
-
-                const list = Config.dock?.screenList ?? [];
-                if (!list || list.length === 0)
-                    return true;
-                return list.includes(screen.name);
-            }
+            visible: unifiedPanel.dockEnabled
         }
 
         NotchContent {

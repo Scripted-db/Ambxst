@@ -87,8 +87,8 @@ ShellRoot {
 
                 // Bar status for reservations
                 barEnabled: {
-                    const list = Config.bar.screenList;
-                    return (!list || list.length === 0 || list.includes(screen.name));
+                    const list = Config.bar?.screenList ?? [];
+                    return (!list || list.length === 0 || list.indexOf(screen.name) !== -1);
                 }
                 barPosition: unifiedPanel.barPosition
                 barPinned: unifiedPanel.pinned
@@ -103,7 +103,7 @@ ShellRoot {
                     const list = Config.dock?.screenList ?? [];
                     if (!list || list.length === 0)
                         return true;
-                    return list.includes(screenShellContainer.modelData.name);
+                    return list.indexOf(screenShellContainer.modelData.name) !== -1;
                 }
                 dockPosition: unifiedPanel.dockPosition
                 dockPinned: unifiedPanel.dockPinned
@@ -120,10 +120,10 @@ ShellRoot {
     Variants {
         model: {
             const screens = Quickshell.screens;
-            const list = Config.bar.screenList;
+            const list = Config.bar?.screenList ?? [];
             if (!list || list.length === 0)
                 return screens;
-            return screens.filter(screen => list.includes(screen.name));
+            return screens.filter(screen => list.indexOf(screen.name) !== -1);
         }
 
         Loader {
@@ -140,10 +140,10 @@ ShellRoot {
     Variants {
         model: {
             const screens = Quickshell.screens;
-            const list = Config.bar.screenList;
+            const list = Config.bar?.screenList ?? [];
             if (!list || list.length === 0)
                 return screens;
-            return screens.filter(screen => list.includes(screen.name));
+            return screens.filter(screen => list.indexOf(screen.name) !== -1);
         }
 
         Loader {
