@@ -203,7 +203,7 @@ StyledRect {
                 accentColor: Colors.primary
                 trackColor: Colors.outline
                 lineWidth: 6
-                wavy: true
+                wavy: Config.performance.wavyLine
                 waveAmplitude: player.isPlaying ? 3 : 0
                 waveFrequency: 24
                 handleSpacing: 20
@@ -262,9 +262,33 @@ StyledRect {
                                 color: Colors.primary
                                 frequency: 2
                                 amplitudeMultiplier: 2
-                                visible: true
+                                visible: Config.performance.wavyLine
                             }
                         }
+                    }
+                }
+
+                property bool shouldRotate: Config.performance.rotateCoverArt
+                onShouldRotateChanged: {
+                    if (shouldRotate) {
+                        if (player.isPlaying && player.visible) {
+                            // Start
+                            springAnim.stop();
+                            let currentRotation = coverDiscContainer.rotation % 360;
+                            if (currentRotation < 0) currentRotation += 360;
+                            coverDiscContainer.rotation = currentRotation;
+                            rotateAnim.from = currentRotation;
+                            rotateAnim.to = currentRotation + 360;
+                            rotateAnim.restart();
+                        }
+                    } else {
+                        // Always reset if disabled, regardless of running state
+                        rotateAnim.stop();
+                        let currentRotation = coverDiscContainer.rotation % 360;
+                        if (currentRotation < 0) currentRotation += 360;
+                        coverDiscContainer.rotation = currentRotation;
+                        springAnim.to = currentRotation > 180 ? 360 : 0;
+                        springAnim.start();
                     }
                 }
 
@@ -291,7 +315,7 @@ StyledRect {
                 Connections {
                     target: player
                     function onIsPlayingChanged() {
-                        if (player.isPlaying && player.visible) {
+                        if (player.isPlaying && player.visible && coverDiscContainer.shouldRotate) {
                             // Stop spring animation immediately and capture current position
                             springAnim.stop();
                             
@@ -322,7 +346,7 @@ StyledRect {
                         if (!player.visible) {
                             rotateAnim.stop();
                             springAnim.stop();
-                        } else if (player.isPlaying) {
+                        } else if (player.isPlaying && coverDiscContainer.shouldRotate) {
                             springAnim.stop();
                             let currentRotation = coverDiscContainer.rotation % 360;
                             if (currentRotation < 0) currentRotation += 360;

@@ -419,6 +419,17 @@ Item {
                                 Config.performance.wavyLine = checked;
                             }
                         }
+
+                        // Rotate Cover Art toggle
+                        ToggleRow {
+                            Layout.fillWidth: true
+                            label: "Disable Cover Art Rotation"
+                            description: "Stop the vinyl disc from spinning"
+                            checked: !Config.performance.rotateCoverArt
+                            onToggled: checked => {
+                                Config.performance.rotateCoverArt = !checked;
+                            }
+                        }
                     }
 
                     // =====================
