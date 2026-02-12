@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 
 QtObject {
     id: root
@@ -9,10 +10,11 @@ QtObject {
         if (!Colors) return
 
         const fmt = (c) => c.toString()
+        const toRgba = (c, a) => `rgba(${Math.round(c.r * 255)}, ${Math.round(c.g * 255)}, ${Math.round(c.b * 255)}, ${a})`
 
         const primary = fmt(Colors.primary)
         const onPrimary = fmt(Colors.overPrimary)
-        const background = fmt(Colors.background)
+        const background = toRgba(Colors.background, Config.theme.srBg.opacity)
         const onBackground = fmt(Colors.overBackground)
         const surface = fmt(Colors.surface)
         const onSurface = fmt(Colors.overSurface)

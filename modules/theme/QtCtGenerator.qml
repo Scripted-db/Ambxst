@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 
 QtObject {
     id: root
@@ -12,7 +13,7 @@ QtObject {
         const fmt = (c) => c.toString()
 
         // Core colors
-        const bg = fmt(Colors.background)
+        const bg = Qt.rgba(Colors.background.r, Colors.background.g, Colors.background.b, Config.theme.srBg.opacity).toString()
         const fg = fmt(Colors.overBackground)
         const surface = fmt(Colors.surface)
         const primary = fmt(Colors.primary)
