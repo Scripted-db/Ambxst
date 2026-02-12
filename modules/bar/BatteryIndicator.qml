@@ -218,7 +218,10 @@ Item {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: 12
+                    anchors.leftMargin: 12
+                    anchors.rightMargin: 12
+                    anchors.topMargin: 8
+                    anchors.bottomMargin: 8
                     spacing: 12
 
                     Text {
@@ -231,10 +234,13 @@ Item {
 
                     ColumnLayout {
                         Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.alignment: Qt.AlignVCenter
                         spacing: 2
 
                         Text {
-                            text: Math.round(Battery.percentage) + "% " + (Battery.isPluggedIn ? (Battery.isCharging ? "Charging" : "Full") : "On battery")
+                            Layout.fillWidth: true
+                            text: Battery.isPluggedIn ? (Battery.isCharging ? "Charging" : "Full") : "On battery"
                             font.family: Styling.defaultFont
                             font.pixelSize: Styling.fontSize(0)
                             font.bold: true
@@ -251,12 +257,24 @@ Item {
                             elide: Text.ElideRight
                         }
                     }
+
+                    // Battery percentage display
+                    Text {
+                        Layout.alignment: Qt.AlignVCenter
+                        text: Math.round(Battery.percentage) + "%"
+                        font.family: Styling.defaultFont
+                        font.pixelSize: Styling.fontSize(2)
+                        font.bold: true
+                        color: root.getBatteryColor()
+                        opacity: 0.8
+                    }
                 }
             }
 
             RowLayout {
                 id: profilesRow
                 Layout.fillWidth: true
+                Layout.fillHeight: true
                 spacing: 4
 
                 Repeater {
@@ -287,25 +305,12 @@ Item {
                         topRightRadius: isSelected ? (isLast ? defaultRadius : selectedRadius) : defaultRadius
                         bottomRightRadius: isSelected ? (isLast ? defaultRadius : selectedRadius) : defaultRadius
 
-                        RowLayout {
+                        Text {
                             anchors.centerIn: parent
-                            spacing: 8
-
-                            Text {
-                                text: PowerProfile.getProfileIcon(profileButton.modelData)
-                                font.family: Icons.font
-                                font.pixelSize: 14
-                                color: profileButton.item
-                            }
-
-                            Text {
-                                id: profileLabel
-                                text: PowerProfile.getProfileDisplayName(profileButton.modelData)
-                                font.family: Styling.defaultFont
-                                font.pixelSize: Styling.fontSize(0)
-                                font.bold: true
-                                color: profileButton.item
-                            }
+                            text: PowerProfile.getProfileIcon(profileButton.modelData)
+                            font.family: Icons.font
+                            font.pixelSize: 18
+                            color: profileButton.item
                         }
 
                         MouseArea {
@@ -319,6 +324,11 @@ Item {
                             onClicked: {
                                 PowerProfile.setProfile(profileButton.modelData);
                             }
+                        }
+
+                        StyledToolTip {
+                            visible: profileButton.buttonHovered
+                            tooltipText: PowerProfile.getProfileDisplayName(profileButton.modelData)
                         }
                     }
                 }
