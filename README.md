@@ -45,101 +45,74 @@ An <i><b>Ax</b>tremely</i> customizable shell.
 
 ```bash
 curl -L get.axeni.de/ambxst | sh
-````
+```
 
-> [!WARNING]
-> Ambxst is currently in early development.
+Ambxst is currently supported on **Arch**, **Fedora**, and **NixOS**. This means both based and derivative distributions.
+
+> [!IMPORTANT]
+> The only pre-requisite is having Hyprland installed.
+
+> [!NOTE]
+> For NixOS users, the screen recording utility `gpu-screen-recorder` will only be able to use the `portal` backend until you add `programs.gpu-screen-recorder.enable = true;` to your `configuration.nix` or **home-manager**.
 
 ---
 
-### What does the installation do?
+## Will this change my config?
 
-> [!IMPORTANT]
-> For now Ambxst is installed via Nix flakes, so **Nix is required** for supporting it on as many distros as possible. But we are looking for contributions to support other package managers (and make this easier for everyone).
+Nope! Ambxst is designed to be non-intrusive. It won't modify any of your existing configurations.
 
-On **non-NixOS** distros, the installation script does the following:
-
-* Installs [Nix](https://en.wikipedia.org/wiki/Nix_%28package_manager%29) if it's not already installed.
-* Installs some necessary system dependencies (only a few that Nix cannot handle by itself).
-* Installs Ambxst as a Nix flake. (*Dependency hell*? No, thanks. 😎)
-* Creates an alias to launch `ambxst` from anywhere
-  (for example: `exec-once = ambxst` in your `hyprland.conf`).
-* Gives you a kiss on the cheek. 😘 (Optional, of course.)
-
-On **NixOS**:
-
-* Installs Ambxst via:
-
-  ```bash
-  nix profile add github:Axenide/Ambxst
-  ```
-
-> [!NOTE]
-> The installation script doesn't do anything else on NixOS, so you can declare it however you like in your system.
+It applies its own settings only when it runs, via IPC communication. This means you can safely switch back to your previous setup by simply exiting Ambxst.
 
 ---
 
 <h2><sub><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Telegram-Animated-Emojis/main/Activity/Sparkles.webp" alt="Sparkles" width="32" height="32" /></sub> Features</h2>
 
-* [x] Customizable components
-* [x] Themes
-* [x] System integration
-* [x] App launcher
-* [x] Clipboard manager
-* [x] Quick notes (and not so quick ones)
-* [x] Wallpaper manager
-* [x] Emoji picker
-* [x] [tmux](https://github.com/tmux/tmux) session manager
-* [x] System monitor
-* [x] Media control
-* [x] Notification system
-* [x] Wi-Fi manager
-* [x] Bluetooth manager
-* [x] Audio mixer
-* [x] [EasyEffects](https://github.com/wwmm/easyeffects) integration
-* [x] Screen capture
-* [x] Screen recording
-* [x] Color picker
-* [x] OCR
-* [x] QR and barcode scanner
-* [x] Webcam mirror
-* [x] Game mode
-* [x] Night mode
-* [x] Power profile manager
-* [x] AI Assistant
-* [x] Weather
-* [x] Calendar
-* [x] Power menu
-* [x] Workspace management
-* [x] Support for different layouts (dwindle, master, scrolling, etc.)
-* [x] Multi-monitor support
-* [x] Customizable keybindings
-* [ ] Plugin and extension system
-* [ ] Polkit
-* [ ] Compatibility with other Wayland compositors
+- [x] Customizable components
+- [x] Themes
+- [x] System integration
+- [x] App launcher
+- [x] Clipboard manager
+- [x] Quick notes (and not so quick ones)
+- [x] Wallpaper manager
+- [x] Emoji picker
+- [x] [tmux](https://github.com/tmux/tmux) session manager
+- [x] System monitor
+- [x] Media control
+- [x] Notification system
+- [x] Wi-Fi manager
+- [x] Bluetooth manager
+- [x] Audio mixer
+- [x] [EasyEffects](https://github.com/wwmm/easyeffects) integration
+- [x] Screen capture
+- [x] Screen recording
+- [x] Color picker
+- [x] OCR
+- [x] QR and barcode scanner
+- [x] "Mirror" (webcam)
+- [x] Game mode
+- [x] Night mode
+- [x] Power profile manager
+- [x] AI Assistant
+- [x] Weather
+- [x] Calendar
+- [x] Power menu
+- [x] Workspace management
+- [x] Support for different layouts (dwindle, master, scrolling, etc.)
+- [x] Multi-monitor support
+- [x] Customizable keybindings
+- [ ] Plugin and extension system
+- [ ] Compatibility with other Wayland compositors
 
 ---
 
-## What about the *docs*?
+## I need help!
 
-I want to release this before the end of the year, so you'll have to wait a bit for the full documentation. u_u
+If you are having trouble or have any questions:
+- You can ask anything on [Discord](https://discord.com/invite/gHG9WHyNvH) or in the [GitHub discussions](https://github.com/Axenide/Ambxst/discussions).
+- You can open an issue on the [GitHub repository](https://github.com/Axenide/Ambxst/issues).
+- The main configuration is located at `~/.config/Ambxst`.
 
-For now, the most important things to know are:
-
-* The main configuration is located at `~/.config/ambxst`
-* Removing Ambxst is as simple as:
-
-  ```bash
-  ambxst goodbye
-  ```
-* You can ask anything on the:
-
-  * [Axenide Discord server](https://discord.com/invite/gHG9WHyNvH)
-  * [GitHub discussions](https://github.com/Axenide/Ambxst/discussions)
-
-> [!CAUTION]
-> Packages installed via Nix will take priority over system ones.
-> Keep this in mind if you run into version conflicts.
+---
 
 ## Credits
 - [end-4](https://github.com/end-4) for his awesome projects. I learned a lot from them! (And *yoinked* a lot of code, too. 😅)
@@ -148,7 +121,8 @@ For now, the most important things to know are:
 - [tr1x_em](https://github.com/tr1x_em) for being a great friend and helping me find great tools. You rock!
 - [Darsh](https://github.com/its-darsh) for not killing me when I left Fabric. u_u (Also for being a great friend and creating Fabric! Without Fabric, Ax-Shell wouldn't exist, so Ambxst wouldn't either. Thank you!)
 - [Mario](https://github.com/mariokhz) for being a great friend and showing me Quickshell!
-- [Samouly](https://github.com/N1xev) for being Samouly. :3
+- [Samouly](https://samouly.is-a.dev/) for being Samouly. :3
+- [Brys](https://github.com/brys0) for being his continuous support and for being a great friend!
 - [Zen](https://github.com/wer-zen) for being a great friend and helping me when I started with Quickshell too!
 - [kh](https://www.youtube.com/watch?v=dQw4w9WgXcQ) for being an awesome human being and listening to my delusions about Ambxst. :D
 - And you, the user, for trying out Ambxst! You're awesome! 💖
