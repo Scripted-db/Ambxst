@@ -31,7 +31,7 @@ import qs.modules.components
     RowLayout {
         id: rowLayout
         visible: !root.vertical
-        anchors.centerIn: parent
+        anchors.fill: parent
         anchors.margins: 8
         spacing: 8
 
@@ -49,7 +49,7 @@ import qs.modules.components
     ColumnLayout {
         id: columnLayout
         visible: root.vertical
-        anchors.centerIn: parent
+        anchors.fill: parent
         anchors.margins: 8
         spacing: 8
 

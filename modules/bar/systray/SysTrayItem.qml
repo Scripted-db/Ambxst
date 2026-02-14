@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import Quickshell
 import Quickshell.Services.SystemTray
 import Quickshell.Widgets
@@ -17,6 +18,7 @@ MouseArea {
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     Layout.fillHeight: bar.orientation === "horizontal"
+    Layout.fillWidth: bar.orientation === "vertical"
     implicitWidth: trayItemSize
     implicitHeight: trayItemSize
     
@@ -27,18 +29,71 @@ MouseArea {
             break;
         case Qt.RightButton:
             if (item.hasMenu) {
-                systrayMenu.open();
+                systrayPopup.toggle();
             }
             break;
         }
         event.accepted = true;
     }
 
-    SystrayMenu {
-        id: systrayMenu
-        item: root.item
-        bar: root.bar
+    BarPopup {
+        id: systrayPopup
         anchorItem: root
+        bar: root.bar
+        
+        // Use a reasonable width for the menu
+        contentWidth: 220
+        // Height adapts to content, with a max limit if needed.
+        // Must include vertical padding (8 top + 8 bottom = 16)
+        contentHeight: Math.min(itemsColumn.implicitHeight + 16, 400)
+        
+        popupPadding: 8
+        visualMargin: 8
+
+        // Using QsMenuOpener to access menu items
+        QsMenuOpener {
+            id: menuOpener
+            menu: root.item.menu
+        }
+
+        ScrollView {
+            anchors.fill: parent
+            contentWidth: availableWidth
+            clip: true
+            
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+            
+            ColumnLayout {
+                id: itemsColumn
+                width: parent.width
+                spacing: 2
+
+                Repeater {
+                    model: menuOpener.children ? menuOpener.children.values : []
+                    
+                    delegate: SystrayMenuItem {
+                        required property var modelData
+                        
+                        Layout.fillWidth: true
+                        
+                        textStr: modelData.text || ""
+                        iconSource: modelData.icon || ""
+                        // Simple heuristic for image icon
+                        isImageIcon: iconSource.indexOf("/") !== -1 || iconSource.indexOf(".") !== -1
+                        isSeparator: modelData.isSeparator || false
+                        
+                        onClicked: {
+                            if (modelData.triggered) {
+                                modelData.triggered();
+                            } else if (modelData.activate) {
+                                modelData.activate();
+                            }
+                            systrayPopup.close();
+                        }
+                    }
+                }
+            }
+        }
     }
 
     IconImage {
