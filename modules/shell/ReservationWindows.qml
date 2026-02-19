@@ -37,7 +37,7 @@ Item {
         id: topWindow
         screen: root.screen
         visible: true
-        height: Math.max(1, exclusiveZone)
+        implicitHeight: Math.max(1, exclusiveZone)
         color: "transparent"
         anchors {
             left: true
@@ -69,7 +69,7 @@ Item {
         id: bottomWindow
         screen: root.screen
         visible: true
-        height: Math.max(1, exclusiveZone)
+        implicitHeight: Math.max(1, exclusiveZone)
         color: "transparent"
         anchors {
             left: true
@@ -101,7 +101,7 @@ Item {
         id: leftWindow
         screen: root.screen
         visible: true
-        width: Math.max(1, exclusiveZone)
+        implicitWidth: Math.max(1, exclusiveZone)
         color: "transparent"
         anchors {
             top: true
@@ -133,7 +133,7 @@ Item {
         id: rightWindow
         screen: root.screen
         visible: true
-        width: Math.max(1, exclusiveZone)
+        implicitWidth: Math.max(1, exclusiveZone)
         color: "transparent"
         anchors {
             top: true
