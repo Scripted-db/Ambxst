@@ -42,6 +42,9 @@ StyledRect {
 
     implicitWidth: isVertical ? 36 : dockLayout.implicitWidth + 8
     implicitHeight: isVertical ? dockLayoutVertical.implicitHeight + 8 : 36
+    
+    Layout.maximumWidth: isVertical ? 36 : -1
+    Layout.maximumHeight: isVertical ? -1 : 36
 
     Flickable {
         id: flickable

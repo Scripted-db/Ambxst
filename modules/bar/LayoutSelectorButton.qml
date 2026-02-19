@@ -25,6 +25,8 @@ Item {
 
     Layout.preferredWidth: 36
     Layout.preferredHeight: 36
+    Layout.maximumWidth: 36
+    Layout.maximumHeight: 36
     Layout.fillWidth: vertical
     Layout.fillHeight: !vertical
 
