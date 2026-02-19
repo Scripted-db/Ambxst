@@ -30,9 +30,15 @@ Item {
     property string orientation: barPosition === "left" || barPosition === "right" ? "vertical" : "horizontal"
 
     // Auto-hide properties
+    onPinnedChanged: {
+        if (Config.bar && Config.bar.pinnedOnStartup !== pinned) {
+            Config.bar.pinnedOnStartup = pinned;
+        }
+    }
+
     property bool pinned: Config.bar?.pinnedOnStartup ?? true
 
-    // Monitor reference and refrence to toplevels on monitor
+    // Monitor reference and reference to toplevels on monitor
     readonly property var hyprlandMonitor: Hyprland.monitorFor(screen)
     readonly property var toplevels: hyprlandMonitor.activeWorkspace.toplevels.values
 
@@ -40,7 +46,7 @@ Item {
     readonly property bool activeWindowFullscreen: {
         if (!hyprlandMonitor || !toplevels) return false;
 
-        // Check all toplevels on active workspcace
+        // Check all toplevels on active workspace
         for (var i = 0; i < toplevels.length; i++) {
             // Checks first if the wayland handle is ready
             if (toplevels[i].wayland && toplevels[i].wayland.fullscreen == true) {
@@ -641,17 +647,17 @@ Item {
                             Loader {
                                 active: Config.bar?.showPinButton ?? true
                                 visible: active
-                                Layout.alignment: Qt.AlignHCenter
-
-                                sourceComponent: Button {
-                                    id: pinButtonV
-                                    implicitWidth: 36
-                                    implicitHeight: 36
-
-                                        background: StyledRect {
-                                        id: pinButtonVBg
-                                        variant: root.pinned ? "primary" : "bg"
-                                        enableShadow: root.shadowsEnabled
+                            Layout.alignment: Qt.AlignHCenter
+                            
+                            sourceComponent: Button {
+                            id: pinButtonV
+                            implicitWidth: 36
+                            implicitHeight: 36
+                            
+                            background: StyledRect {
+                            id: pinButtonVBg
+                            variant: root.pinned ? "primary" : "bg"
+                            enableShadow: root.shadowsEnabled
                                         
                                         property real startRadius: root.innerRadius
                                         // In vertical, dock is always appended to this group if enabled

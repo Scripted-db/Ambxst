@@ -24,106 +24,7 @@ Item {
     property bool frameEnabled: false
     property int frameThickness: 6
 
-    // Force update when any state that affects reservation changes
-    onBarEnabledChanged: updateAllZones()
-    onBarPositionChanged: updateAllZones()
-    onBarPinnedChanged: updateAllZones()
-    onBarSizeChanged: updateAllZones()
-    onBarOuterMarginChanged: updateAllZones()
-    onContainBarChanged: updateAllZones()
-
-    onDockEnabledChanged: updateAllZones()
-    onDockPositionChanged: updateAllZones()
-    onDockPinnedChanged: updateAllZones()
-    onDockHeightChanged: updateAllZones()
-
-    onFrameEnabledChanged: updateAllZones()
-    onFrameThicknessChanged: updateAllZones()
-
-    Connections {
-        target: Config
-        function onBarReadyChanged() {
-            root.updateAllZones();
-        }
-    }
-
     readonly property int actualFrameSize: frameEnabled ? frameThickness : 0
-
-    function getExtraZone(side) {
-        if (!Config.barReady)
-            return 0;
-
-        // Base zone is frame (static area)
-        // This is the area that remains even if panels are hidden, IF frame is enabled.
-        let zone = actualFrameSize;
-
-        // Bar zone - only reserve if pinned (static)
-        if (barEnabled && barPosition === side && barPinned) {
-            zone += barSize + barOuterMargin;
-
-            // Add extra thickness if containing bar (only if frame is actually enabled)
-            if (containBar && frameEnabled) {
-                // When containing the bar, we add another frame thickness unit for the inner side.
-                zone += actualFrameSize;
-            }
-        }
-
-        // Dock zone - only reserve if pinned (static)
-        if (dockEnabled && dockPosition === side && dockPinned) {
-            zone += dockHeight;
-        }
-
-        return zone;
-    }
-
-    function getExclusionMode(side) {
-        return getExtraZone(side) > 0 ? ExclusionMode.Normal : ExclusionMode.Ignore;
-    }
-
-    // Use a timer to debounce updates and avoid rapid toggle desync
-    Timer {
-        id: updateTimer
-        interval: 10
-        repeat: false
-        onTriggered: performUpdate()
-    }
-
-    function updateAllZones() {
-        updateTimer.restart();
-    }
-
-    function performUpdate() {
-        const newTop = getExtraZone("top");
-        const newBottom = getExtraZone("bottom");
-        const newLeft = getExtraZone("left");
-        const newRight = getExtraZone("right");
-
-        const newTopMode = getExclusionMode("top");
-        const newBottomMode = getExclusionMode("bottom");
-        const newLeftMode = getExclusionMode("left");
-        const newRightMode = getExclusionMode("right");
-
-        // Apply changes only if they differ from current state
-        if (topWindow.exclusiveZone !== newTop)
-            topWindow.exclusiveZone = newTop;
-        if (bottomWindow.exclusiveZone !== newBottom)
-            bottomWindow.exclusiveZone = newBottom;
-        if (leftWindow.exclusiveZone !== newLeft)
-            leftWindow.exclusiveZone = newLeft;
-        if (rightWindow.exclusiveZone !== newRight)
-            rightWindow.exclusiveZone = newRight;
-
-        if (topWindow.exclusionMode !== newTopMode)
-            topWindow.exclusionMode = newTopMode;
-        if (bottomWindow.exclusionMode !== newBottomMode)
-            bottomWindow.exclusionMode = newBottomMode;
-        if (leftWindow.exclusionMode !== newLeftMode)
-            leftWindow.exclusionMode = newLeftMode;
-        if (rightWindow.exclusionMode !== newRightMode)
-            rightWindow.exclusionMode = newRightMode;
-
-        console.log(`ReservationWindows [${screen.name}]: Zones updated - T:${newTop} B:${newBottom} L:${newLeft} R:${newRight}`);
-    }
 
     Item {
         id: noInputRegion
@@ -146,8 +47,19 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "ambxst:reservation:top"
-        exclusionMode: root.getExclusionMode("top")
-        exclusiveZone: root.getExtraZone("top")
+        
+        exclusiveZone: {
+            if (!Config.barReady) return 0;
+            let zone = actualFrameSize;
+            if (barEnabled && barPosition === "top" && barPinned) {
+                zone += barSize + barOuterMargin;
+                if (containBar && frameEnabled) zone += actualFrameSize;
+            }
+            if (dockEnabled && dockPosition === "top" && dockPinned) zone += dockHeight;
+            return zone;
+        }
+        exclusionMode: exclusiveZone > 0 ? ExclusionMode.Normal : ExclusionMode.Ignore
+
         mask: Region {
             item: noInputRegion
         }
@@ -167,8 +79,19 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "ambxst:reservation:bottom"
-        exclusionMode: root.getExclusionMode("bottom")
-        exclusiveZone: root.getExtraZone("bottom")
+
+        exclusiveZone: {
+            if (!Config.barReady) return 0;
+            let zone = actualFrameSize;
+            if (barEnabled && barPosition === "bottom" && barPinned) {
+                zone += barSize + barOuterMargin;
+                if (containBar && frameEnabled) zone += actualFrameSize;
+            }
+            if (dockEnabled && dockPosition === "bottom" && dockPinned) zone += dockHeight;
+            return zone;
+        }
+        exclusionMode: exclusiveZone > 0 ? ExclusionMode.Normal : ExclusionMode.Ignore
+
         mask: Region {
             item: noInputRegion
         }
@@ -188,8 +111,19 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "ambxst:reservation:left"
-        exclusionMode: root.getExclusionMode("left")
-        exclusiveZone: root.getExtraZone("left")
+
+        exclusiveZone: {
+            if (!Config.barReady) return 0;
+            let zone = actualFrameSize;
+            if (barEnabled && barPosition === "left" && barPinned) {
+                zone += barSize + barOuterMargin;
+                if (containBar && frameEnabled) zone += actualFrameSize;
+            }
+            if (dockEnabled && dockPosition === "left" && dockPinned) zone += dockHeight;
+            return zone;
+        }
+        exclusionMode: exclusiveZone > 0 ? ExclusionMode.Normal : ExclusionMode.Ignore
+
         mask: Region {
             item: noInputRegion
         }
@@ -209,8 +143,19 @@ Item {
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.namespace: "ambxst:reservation:right"
-        exclusionMode: root.getExclusionMode("right")
-        exclusiveZone: root.getExtraZone("right")
+
+        exclusiveZone: {
+            if (!Config.barReady) return 0;
+            let zone = actualFrameSize;
+            if (barEnabled && barPosition === "right" && barPinned) {
+                zone += barSize + barOuterMargin;
+                if (containBar && frameEnabled) zone += actualFrameSize;
+            }
+            if (dockEnabled && dockPosition === "right" && dockPinned) zone += dockHeight;
+            return zone;
+        }
+        exclusionMode: exclusiveZone > 0 ? ExclusionMode.Normal : ExclusionMode.Ignore
+
         mask: Region {
             item: noInputRegion
         }
