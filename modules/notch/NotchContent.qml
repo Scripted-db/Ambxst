@@ -74,19 +74,7 @@ Item {
         return false;
     }
 
-    // Fullscreen detection - check if active toplevel is fullscreen on this screen
-    readonly property bool activeWindowFullscreen: {
-        if (!hyprlandMonitor || !toplevels) return false;
-
-        // Check all toplevels on active workspcace
-        for (var i = 0; i < toplevels.length; i++) {
-            // Checks first if the wayland handle is ready
-            if (toplevels[i].wayland && toplevels[i].wayland.fullscreen == true) {
-               return true;
-            }
-        }
-        return false;
-    }
+    readonly property bool activeWindowFullscreen: FullscreenState.isFullscreen(hyprlandMonitor, toplevels)
 
     // Should auto-hide logic:
     // 1. If notch and bar are on different sides: hide if keepHidden is ON, OR if windows/fullscreen are present

@@ -36,19 +36,7 @@ Item {
     readonly property var hyprlandMonitor: Hyprland.monitorFor(screen)
     readonly property var toplevels: hyprlandMonitor.activeWorkspace.toplevels.values
 
-    // Fullscreen detection - check if a toplevel is fullscreen on this screen
-    readonly property bool activeWindowFullscreen: {
-        if (!hyprlandMonitor || !toplevels) return false;
-
-        // Check all toplevels on active workspcace
-        for (var i = 0; i < toplevels.length; i++) {
-            // Checks first if the wayland handle is ready
-            if (toplevels[i].wayland && toplevels[i].wayland.fullscreen == true) {
-               return true;
-            }
-        }
-        return false;
-    }
+    readonly property bool activeWindowFullscreen: FullscreenState.isFullscreen(hyprlandMonitor, toplevels)
 
     // Whether auto-hide should be active (not pinned, or fullscreen forces it)
     readonly property bool shouldAutoHide: !pinned || activeWindowFullscreen
