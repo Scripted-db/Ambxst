@@ -165,33 +165,97 @@ Item {
         DefaultView {}
     }
 
-    // Persistent views to avoid creation lag when opening the notch
-    LauncherView {
-        id: persistentLauncherView
-        visible: false
+    // Lazy-loaded views to reduce startup cost.
+    // They instantiate on first open and remain cached afterwards.
+    Loader {
+        id: launcherViewLoader
+        active: false
+        sourceComponent: LauncherView {
+            visible: false
+        }
+        onLoaded: {
+            if (screenVisibilities && screenVisibilities.launcher) {
+                root.pushModuleView(launcherViewLoader);
+            }
+        }
     }
 
-    DashboardView {
-        id: persistentDashboardView
-        visible: false
+    Loader {
+        id: dashboardViewLoader
+        active: false
+        sourceComponent: DashboardView {
+            visible: false
+        }
+        onLoaded: {
+            if (screenVisibilities && screenVisibilities.dashboard) {
+                root.pushModuleView(dashboardViewLoader);
+            }
+        }
     }
 
-    // Persistent power menu view
-    PowerMenuView {
-        id: persistentPowerMenuView
-        visible: false
+    Loader {
+        id: powerMenuViewLoader
+        active: false
+        sourceComponent: PowerMenuView {
+            visible: false
+        }
+        onLoaded: {
+            if (screenVisibilities && screenVisibilities.powermenu) {
+                root.pushModuleView(powerMenuViewLoader);
+            }
+        }
     }
 
-    // Persistent tools menu view
-    ToolsMenuView {
-        id: persistentToolsMenuView
-        visible: false
+    Loader {
+        id: toolsMenuViewLoader
+        active: false
+        sourceComponent: ToolsMenuView {
+            visible: false
+        }
+        onLoaded: {
+            if (screenVisibilities && screenVisibilities.tools) {
+                root.pushModuleView(toolsMenuViewLoader);
+            }
+        }
     }
 
     // Notification view component
     Component {
         id: notificationViewComponent
         NotchNotificationView {}
+    }
+
+    function focusCurrentStackItem() {
+        Qt.callLater(() => {
+            if (notchContainer.stackView.currentItem) {
+                notchContainer.stackView.currentItem.forceActiveFocus();
+            }
+        });
+    }
+
+    function pushModuleView(loader) {
+        if (!loader || !loader.item)
+            return;
+        if (notchContainer.stackView.currentItem === loader.item)
+            return;
+        notchContainer.stackView.push(loader.item);
+        focusCurrentStackItem();
+    }
+
+    function openModuleView(loader) {
+        if (!loader.active) {
+            loader.active = true;
+            return;
+        }
+        pushModuleView(loader);
+    }
+
+    function closeModuleView() {
+        if (notchContainer.stackView.depth > 1) {
+            notchContainer.stackView.pop();
+            notchContainer.isShowingDefault = true;
+            notchContainer.isShowingNotifications = false;
+        }
     }
 
     // Hover region for detecting mouse when notch is hidden (doesn't block clicks)
@@ -422,69 +486,33 @@ Item {
 
         function onLauncherChanged() {
             if (screenVisibilities.launcher) {
-                notchContainer.stackView.push(persistentLauncherView);
-                Qt.callLater(() => {
-                    if (notchContainer.stackView.currentItem) {
-                        notchContainer.stackView.currentItem.forceActiveFocus();
-                    }
-                });
+                root.openModuleView(launcherViewLoader);
             } else {
-                if (notchContainer.stackView.depth > 1) {
-                    notchContainer.stackView.pop();
-                    notchContainer.isShowingDefault = true;
-                    notchContainer.isShowingNotifications = false;
-                }
+                root.closeModuleView();
             }
         }
 
         function onDashboardChanged() {
             if (screenVisibilities.dashboard) {
-                notchContainer.stackView.push(persistentDashboardView);
-                Qt.callLater(() => {
-                    if (notchContainer.stackView.currentItem) {
-                        notchContainer.stackView.currentItem.forceActiveFocus();
-                    }
-                });
+                root.openModuleView(dashboardViewLoader);
             } else {
-                if (notchContainer.stackView.depth > 1) {
-                    notchContainer.stackView.pop();
-                    notchContainer.isShowingDefault = true;
-                    notchContainer.isShowingNotifications = false;
-                }
+                root.closeModuleView();
             }
         }
 
         function onPowermenuChanged() {
             if (screenVisibilities.powermenu) {
-                notchContainer.stackView.push(persistentPowerMenuView);
-                Qt.callLater(() => {
-                    if (notchContainer.stackView.currentItem) {
-                        notchContainer.stackView.currentItem.forceActiveFocus();
-                    }
-                });
+                root.openModuleView(powerMenuViewLoader);
             } else {
-                if (notchContainer.stackView.depth > 1) {
-                    notchContainer.stackView.pop();
-                    notchContainer.isShowingDefault = true;
-                    notchContainer.isShowingNotifications = false;
-                }
+                root.closeModuleView();
             }
         }
 
         function onToolsChanged() {
             if (screenVisibilities.tools) {
-                notchContainer.stackView.push(persistentToolsMenuView);
-                Qt.callLater(() => {
-                    if (notchContainer.stackView.currentItem) {
-                        notchContainer.stackView.currentItem.forceActiveFocus();
-                    }
-                });
+                root.openModuleView(toolsMenuViewLoader);
             } else {
-                if (notchContainer.stackView.depth > 1) {
-                    notchContainer.stackView.pop();
-                    notchContainer.isShowingDefault = true;
-                    notchContainer.isShowingNotifications = false;
-                }
+                root.closeModuleView();
             }
         }
     }

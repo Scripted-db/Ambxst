@@ -111,8 +111,9 @@ PanelWindow {
         var userFile = colorPresetsDir + "/" + activeColorPreset + "/" + mode;
         var dest = Quickshell.cachePath("colors.json");
 
-        // Try official first, then user. Use bash conditional.
-        var cmd = "if [ -f '" + officialFile + "' ]; then cp '" + officialFile + "' '" + dest + "'; else cp '" + userFile + "' '" + dest + "'; fi";
+        // Try official first, then user, but avoid rewriting destination when unchanged.
+        // Rewriting colors.json triggers a full generator chain and slows startup.
+        var cmd = "if [ -f '" + officialFile + "' ]; then src='" + officialFile + "'; else src='" + userFile + "'; fi; if [ -f \"$src\" ]; then if [ ! -f '" + dest + "' ] || ! cmp -s \"$src\" '" + dest + "'; then cp \"$src\" '" + dest + "'; fi; fi";
 
         console.log("Applying color preset:", activeColorPreset);
         applyPresetProcess.command = ["bash", "-c", cmd];
@@ -204,6 +205,12 @@ PanelWindow {
     function generateLockscreenFrame(filePath) {
         if (!filePath) {
             console.warn("generateLockscreenFrame: empty filePath");
+            return;
+        }
+
+        var fileType = getFileType(filePath);
+        // Static images are used directly for lockscreen; no frame generation needed.
+        if (fileType === "image") {
             return;
         }
 
@@ -395,6 +402,13 @@ PanelWindow {
     }
 
     function updateMpvRuntime(enable) {
+        // Skip MPV IPC work when current wallpaper is not rendered via mpvpaper.
+        var fileType = getFileType(currentWallpaper);
+        if (fileType !== "video" && fileType !== "gif") {
+            ipcRetryCount = 0;
+            return;
+        }
+
         var cmdString;
         if (enable) {
             // Since we are using unique filenames, we can just set the new path.
@@ -564,6 +578,19 @@ PanelWindow {
         updateMpvShader();
     }
 
+    // Defer non-critical startup tasks to reduce first paint latency.
+    Timer {
+        id: startupBackgroundInit
+        interval: 3000
+        repeat: false
+        onTriggered: {
+            scanColorPresets();
+            presetsWatcher.reload();
+            officialPresetsWatcher.reload();
+            delayedThumbnailGen.start();
+        }
+    }
+
     Component.onCompleted: {
         // Only the first Wallpaper instance should manage scanning
         // Other instances (for other screens) share the same data via GlobalStates
@@ -578,11 +605,9 @@ PanelWindow {
         // Verificar si existe wallpapers.json, si no, crear con fallback
         checkWallpapersJson.running = true;
 
-        // Initial scans - do these once after config is loaded
-        scanColorPresets();
-        // Start directory monitoring
-        presetsWatcher.reload();
-        officialPresetsWatcher.reload();
+        // Defer expensive auxiliary scans to improve startup responsiveness.
+        startupBackgroundInit.start();
+
         // Load initial wallpaper config - this will trigger onWallPathChanged which does the actual scan
         wallpaperConfig.reload();
 
@@ -680,8 +705,7 @@ PanelWindow {
                         scanWallpapers.running = true;
                         wallpaper.scanSubfolders();
 
-                        // Start thumbnail generation
-                        delayedThumbnailGen.start();
+                        // Start thumbnail generation in deferred startup timer.
                     }
                 }
             }
@@ -789,7 +813,7 @@ PanelWindow {
 
     Timer {
         id: delayedThumbnailGen
-        interval: 2000 // Delay 2 seconds after change to not block
+        interval: 10000 // Delay thumbnail generation to avoid startup contention
         repeat: false
         onTriggered: thumbnailGeneratorScript.running = true
     }

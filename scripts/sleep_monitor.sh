@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
 LOCKFILE="/tmp/ambxst_sleep_monitor.lock"
-if [ -e "$LOCKFILE" ]; then
-	PID=$(cat "$LOCKFILE")
-	if kill -0 "$PID" 2>/dev/null; then
-		exit 0
-	fi
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+	exit 0
 fi
-echo $$ >"$LOCKFILE"
+echo $$ 1>&9
+
+cleanup() {
+	pkill -P $$ >/dev/null 2>&1 || true
+}
+trap cleanup EXIT INT TERM
 
 # Sleep Monitor - Executes commands before and after sleep
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ambxst/config/system.json"
@@ -29,25 +32,24 @@ get_cmd() {
 	fi
 }
 
-# Monitor logind's PrepareForSleep signal
-# We use grep --line-buffered to reliably capture the boolean argument
-# which indicates start (true) or end (false) of sleep
-dbus-monitor --system "type='signal',interface='org.freedesktop.login1.Manager',member='PrepareForSleep'" |
-	grep --line-buffered "boolean" |
-	while read -r line; do
-		if echo "$line" | grep -q "true"; then
-			# Going to sleep
-			echo "SUSPEND"
-			CMD=$(get_cmd "before")
-			if [ -n "$CMD" ]; then
-				eval "$CMD" &
-			fi
-		elif echo "$line" | grep -q "false"; then
-			# Waking up
-			echo "WAKE"
-			CMD=$(get_cmd "after")
-			if [ -n "$CMD" ]; then
-				eval "$CMD" &
-			fi
+# Monitor logind's PrepareForSleep signal and parse boolean state directly.
+while IFS= read -r line; do
+	case "$line" in
+	*"boolean true"*)
+		# Going to sleep
+		echo "SUSPEND"
+		CMD=$(get_cmd "before")
+		if [ -n "$CMD" ]; then
+			eval "$CMD" &
 		fi
-	done
+		;;
+	*"boolean false"*)
+		# Waking up
+		echo "WAKE"
+		CMD=$(get_cmd "after")
+		if [ -n "$CMD" ]; then
+			eval "$CMD" &
+		fi
+		;;
+	esac
+done < <(dbus-monitor --system "type='signal',interface='org.freedesktop.login1.Manager',member='PrepareForSleep'")

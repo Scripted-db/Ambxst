@@ -113,6 +113,75 @@ Item {
         return workspaceGroup * Config.workspaces.shown + index + 1;
     }
 
+    function primaryWindowForWorkspace(workspaceId) {
+        const windowsInThisWorkspace = HyprlandData.workspaceWindowsMap[workspaceId] || [];
+        if (windowsInThisWorkspace.length === 0)
+            return null;
+
+        // Keep a deterministic fallback when focus metadata is missing.
+        let bestWindow = windowsInThisWorkspace[0];
+        let bestFocus = Number.isFinite(bestWindow?.focusHistoryID) ? bestWindow.focusHistoryID : Infinity;
+
+        for (let i = 1; i < windowsInThisWorkspace.length; i++) {
+            const win = windowsInThisWorkspace[i];
+            const winFocus = Number.isFinite(win?.focusHistoryID) ? win.focusHistoryID : Infinity;
+            if (winFocus < bestFocus) {
+                bestWindow = win;
+                bestFocus = winFocus;
+            }
+        }
+
+        return bestWindow;
+    }
+
+    function workspaceIconName(windowData) {
+        if (!windowData)
+            return "image-missing";
+
+        const candidates = [
+            windowData.class,
+            windowData.initialClass,
+            windowData.title,
+            windowData.initialTitle
+        ];
+
+        for (let i = 0; i < candidates.length; i++) {
+            const candidate = candidates[i];
+            if (!candidate || candidate.length === 0)
+                continue;
+            const entry = DesktopEntries.heuristicLookup(candidate);
+            if (entry && entry.icon)
+                return entry.icon;
+        }
+
+        const appClass = (windowData.class || windowData.initialClass || "").toLowerCase();
+        const aliases = {
+            "brave": "brave-browser",
+            "brave-browser": "brave-browser",
+            "cursor": "cursor",
+            "code": "visual-studio-code",
+            "code-oss": "visual-studio-code",
+            "codium": "vscodium"
+        };
+
+        if (aliases[appClass])
+            return aliases[appClass];
+
+        const guessed = AppSearch.guessIcon(windowData.class || windowData.initialClass || windowData.title || windowData.initialTitle || "");
+        return guessed && guessed.length > 0 ? guessed : "image-missing";
+    }
+
+    function workspaceIconSource(windowData) {
+        const iconName = workspaceIconName(windowData);
+        if (!iconName || iconName.length === 0)
+            return "image://icon/image-missing";
+        if (iconName.startsWith("image://"))
+            return iconName;
+        if (iconName.startsWith("/") || iconName.startsWith("file://"))
+            return iconName.startsWith("/") ? "file://" + iconName : iconName;
+        return "image://icon/" + iconName;
+    }
+
     Timer {
         id: updateTimer
         interval: 100
@@ -430,18 +499,8 @@ Item {
                     id: workspaceButtonBackground
                     implicitWidth: workspaceButtonWidth
                     implicitHeight: workspaceButtonWidth
-                    property var focusedWindow: {
-                        const windowsInThisWorkspace = HyprlandData.workspaceWindowsMap[button.workspaceValue] || [];
-                        if (windowsInThisWorkspace.length === 0)
-                            return null;
-                        // Get the window with the lowest focusHistoryID (most recently focused)
-                        return windowsInThisWorkspace.reduce((best, win) => {
-                            const bestFocus = best?.focusHistoryID ?? Infinity;
-                            const winFocus = win?.focusHistoryID ?? Infinity;
-                            return winFocus < bestFocus ? win : best;
-                        }, null);
-                    }
-                    property var mainAppIconSource: Quickshell.iconPath(AppSearch.getCachedIcon(focusedWindow?.class), "image-missing")
+                    property var focusedWindow: primaryWindowForWorkspace(button.workspaceValue)
+                    property var mainAppIconSource: workspaceIconSource(focusedWindow)
 
                     Text {
                         opacity: Config.workspaces.alwaysShowNumbers || ((Config.workspaces.showNumbers && (!Config.workspaces.showAppIcons || !workspaceButtonBackground.focusedWindow || Config.workspaces.alwaysShowNumbers)) || (Config.workspaces.alwaysShowNumbers && !Config.workspaces.showAppIcons)) ? 1 : 0
@@ -561,18 +620,8 @@ Item {
                     id: workspaceButtonBackgroundVert
                     implicitWidth: workspaceButtonWidth
                     implicitHeight: workspaceButtonWidth
-                    property var focusedWindow: {
-                        const windowsInThisWorkspace = HyprlandData.workspaceWindowsMap[buttonVert.workspaceValue] || [];
-                        if (windowsInThisWorkspace.length === 0)
-                            return null;
-                        // Get the window with the lowest focusHistoryID (most recently focused)
-                        return windowsInThisWorkspace.reduce((best, win) => {
-                            const bestFocus = best?.focusHistoryID ?? Infinity;
-                            const winFocus = win?.focusHistoryID ?? Infinity;
-                            return winFocus < bestFocus ? win : best;
-                        }, null);
-                    }
-                    property var mainAppIconSource: Quickshell.iconPath(AppSearch.getCachedIcon(focusedWindow?.class), "image-missing")
+                    property var focusedWindow: primaryWindowForWorkspace(buttonVert.workspaceValue)
+                    property var mainAppIconSource: workspaceIconSource(focusedWindow)
 
                     Text {
                         opacity: Config.workspaces.alwaysShowNumbers || ((Config.workspaces.showNumbers && (!Config.workspaces.showAppIcons || !workspaceButtonBackgroundVert.focusedWindow || Config.workspaces.alwaysShowNumbers)) || (Config.workspaces.alwaysShowNumbers && !Config.workspaces.showAppIcons)) ? 1 : 0

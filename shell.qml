@@ -128,7 +128,7 @@ ShellRoot {
 
         Loader {
             id: overviewLoader
-            active: (Config.overview?.enabled ?? true) && SuspendManager.wakeReady
+            active: (Config.overview?.enabled ?? true) && SuspendManager.wakeReady && GlobalStates.overviewOpen
             required property ShellScreen modelData
             sourceComponent: OverviewPopup {
                 screen: overviewLoader.modelData
@@ -148,7 +148,7 @@ ShellRoot {
 
         Loader {
             id: presetsLoader
-            active: SuspendManager.wakeReady
+            active: SuspendManager.wakeReady && GlobalStates.presetsOpen
             required property ShellScreen modelData
             sourceComponent: PresetsPopup {
                 screen: presetsLoader.modelData
@@ -234,14 +234,14 @@ ShellRoot {
     // Mirror tool
     Loader {
         id: mirrorLoader
-        active: SuspendManager.wakeReady
+        active: SuspendManager.wakeReady && GlobalStates.mirrorWindowVisible
         source: "modules/tools/MirrorWindow.qml"
     }
 
     // Settings
     Loader {
         id: settingsWindowLoader
-        active: SuspendManager.wakeReady
+        active: SuspendManager.wakeReady && GlobalStates.settingsWindowVisible
         source: "modules/widgets/config/SettingsWindow.qml"
     }
 
@@ -267,11 +267,9 @@ ShellRoot {
         id: serviceInitializer
 
         Component.onCompleted: {
-            // Trigger service creation
-            let _ = NightLightService.active;
-            _ = GameModeService.toggled;
-            _ = CaffeineService.inhibit;
-            _ = IdleService.lockCmd; // Force init
+            // Keep only essential startup services eager-loaded.
+            // Other services initialize lazily when their UI/tools are used.
+            let _ = 0;
             _ = GlobalShortcuts.appId; // Force init
         }
     }

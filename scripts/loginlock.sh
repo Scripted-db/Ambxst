@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
 LOCKFILE="/tmp/ambxst_loginlock.lock"
-if [ -e "$LOCKFILE" ]; then
-	PID=$(cat "$LOCKFILE")
-	if kill -0 "$PID" 2>/dev/null; then
-		exit 0
-	fi
+exec 9>"$LOCKFILE"
+if ! flock -n 9; then
+	exit 0
 fi
-echo $$ >"$LOCKFILE"
+echo $$ 1>&9
+
+cleanup() {
+	pkill -P $$ >/dev/null 2>&1 || true
+}
+trap cleanup EXIT INT TERM
 
 CONFIG_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/ambxst/config/system.json"
 
@@ -19,12 +22,13 @@ get_lock_cmd() {
 	fi
 }
 
-dbus-monitor --system "type='signal',interface='org.freedesktop.login1.Session',member='Lock'" |
-	while read -r line; do
-		if echo "$line" | grep -q "member=Lock"; then
-			COMMAND=$(get_lock_cmd)
-			if [ -n "$COMMAND" ]; then
-				eval "$COMMAND" &
-			fi
+while IFS= read -r line; do
+	case "$line" in
+	*"member=Lock"*)
+		COMMAND=$(get_lock_cmd)
+		if [ -n "$COMMAND" ]; then
+			eval "$COMMAND" &
 		fi
-	done
+		;;
+	esac
+done < <(dbus-monitor --system "type='signal',interface='org.freedesktop.login1.Session',member='Lock'")

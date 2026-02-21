@@ -9,22 +9,46 @@ FileView {
     path: Quickshell.cachePath("colors.json")
     preload: true
     watchChanges: true
+    property bool generatorsReady: false
+    property bool generatorsPending: false
+
+    function queueGeneration() {
+        if (!generatorsReady) {
+            generatorsPending = true;
+            return;
+        }
+        generationTimer.restart();
+    }
+
     onFileChanged: {
         reload();
-        generationTimer.restart();
+        queueGeneration();
     }
 
     property Connections oledWatcher: Connections {
         target: Config
         function onOledModeChanged() {
-            generationTimer.restart();
+            colors.queueGeneration();
         }
     }
 
     property Connections themeWatcher: Connections {
         target: Config.loader
         function onFileChanged() {
-            generationTimer.restart();
+            colors.queueGeneration();
+        }
+    }
+
+    property Timer generatorStartupDelay: Timer {
+        interval: 10000
+        running: true
+        repeat: false
+        onTriggered: {
+            colors.generatorsReady = true;
+            if (colors.generatorsPending) {
+                colors.generatorsPending = false;
+                generationTimer.restart();
+            }
         }
     }
 
@@ -54,7 +78,7 @@ FileView {
 
     property Timer generationTimer: Timer {
         id: generationTimer
-        interval: 100
+        interval: 1200
         repeat: false
         onTriggered: {
             qtCtGenerator.generate(colors);

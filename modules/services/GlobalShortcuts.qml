@@ -17,7 +17,7 @@ QtObject {
 
     // High-performance Pipe Listener (Daemon mode)
     property Process pipeListener: Process {
-        command: ["bash", "-c", "rm -f " + root.ipcPipe + "; mkfifo " + root.ipcPipe + "; tail -f " + root.ipcPipe]
+        command: ["bash", "-c", "exec 9>/tmp/ambxst_ipc.lock; flock -n 9 || exit 0; rm -f " + root.ipcPipe + "; mkfifo " + root.ipcPipe + "; exec tail -f " + root.ipcPipe]
         running: true
         
         stdout: SplitParser {
@@ -43,11 +43,11 @@ QtObject {
             // Dashboard
             case "dashboard": toggleDashboardTab(0); break;
             case "wallpapers": toggleDashboardTab(1); break;
-            case "assistant": toggleDashboardTab(3); break;
+            case "assistant": toggleDashboardTab(0); break;
             case "dashboard-widgets": toggleDashboardTab(0); break;
             case "dashboard-wallpapers": toggleDashboardTab(1); break;
             case "dashboard-kanban": toggleDashboardTab(2); break;
-            case "dashboard-assistant": toggleDashboardTab(3); break;
+            case "dashboard-assistant": toggleDashboardTab(0); break;
             case "dashboard-controls": toggleSettings(); break;
 
             // System
@@ -298,8 +298,8 @@ QtObject {
     property GlobalShortcut shortcutAssistant: GlobalShortcut {
         appid: root.appId
         name: "assistant"
-        description: "Open dashboard assistant tab"
-        onPressed: toggleDashboardTab(3)
+        description: "Open dashboard"
+        onPressed: toggleDashboardTab(0)
     }
 
     property GlobalShortcut shortcutDashboardControls: GlobalShortcut {

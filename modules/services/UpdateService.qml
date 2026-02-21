@@ -50,7 +50,7 @@ Singleton {
     Timer {
         id: checkTimer
         interval: 300000 // Every 5 minutes check if it's time
-        running: true
+        running: Config.system.updateServiceEnabled
         repeat: true
         triggeredOnStart: true
         onTriggered: {
